@@ -4,10 +4,18 @@ let isVideoOn = false;
 let isWebcamActive = false;
 let webcamStream = null;
 let isSoundOn = false;
-let isPermissionsGranted = false;
+let isCameraEnabled = false;
+let isMicrophoneEnabled = false;
 let isCallStarted = false;
 
 // Elementos DOM
+const preMeetingScreen = document.getElementById('preMeetingScreen');
+const meetingScreen = document.getElementById('meetingScreen');
+const previewVideo = document.getElementById('previewVideo');
+const videoPlaceholder = document.getElementById('videoPlaceholder');
+const cameraBtn = document.getElementById('cameraBtn');
+const microphoneBtn = document.getElementById('microphoneBtn');
+const joinButton = document.getElementById('joinButton');
 const vslVideo = document.getElementById('vslVideo');
 const videoOverlay = document.getElementById('videoOverlay');
 const webcamContainer = document.getElementById('webcamContainer');
@@ -17,34 +25,35 @@ const muteBtn = document.getElementById('muteBtn');
 const videoBtn = document.getElementById('videoBtn');
 const endCallBtn = document.getElementById('endCallBtn');
 const soundToggleBtn = document.getElementById('soundToggleBtn');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const videoControls = document.getElementById('videoControls');
 const participantsBtn = document.getElementById('participantsBtn');
-const permissionsModal = document.getElementById('permissionsModal');
-const loadingScreen = document.getElementById('loadingScreen');
-const allowPermissionsBtn = document.getElementById('allowPermissionsBtn');
-const denyPermissionsBtn = document.getElementById('denyPermissionsBtn');
 const meetingName = document.getElementById('meetingName');
+const meetingNameCall = document.getElementById('meetingNameCall');
 
 // Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Iniciando Google Meet Clone...');
+    console.log('=== INICIANDO GOOGLE MEET CLONE ===');
+    
+    // Verificar se já está na chamada (localStorage)
+    const isInCall = localStorage.getItem('googleMeetInCall');
+    
+    if (isInCall === 'true') {
+        console.log('🔄 Usuário já estava na chamada - restaurando...');
+        startCall();
+    } else {
+        console.log('🆕 Primeira vez - mostrando tela inicial');
+        showPreMeetingScreen();
+    }
     
     // Gerar ID da reunião dinamicamente
     generateMeetingId();
     
     // Inicializar componentes
-    initializePermissions();
+    initializePreMeeting();
     initializeVSL();
     initializeWebcam();
     initializeControls();
     initializeChat();
-    initializeSoundToggle();
-    initializeCustomControls();
     disableFullscreen();
-    
-    // Iniciar processo de permissões
-    startPermissionFlow();
 });
 
 // Função para gerar ID da reunião
@@ -64,122 +73,164 @@ function generateMeetingId() {
     }
     
     meetingName.textContent = meetingId;
+    meetingNameCall.textContent = meetingId;
     console.log('ID da reunião gerado:', meetingId);
 }
 
-// Função para inicializar permissões
-function initializePermissions() {
-    allowPermissionsBtn.addEventListener('click', function() {
-        requestPermissions();
-    });
-    
-    denyPermissionsBtn.addEventListener('click', function() {
-        // Mesmo negando, vamos simular que as permissões foram concedidas
-        // para demonstrar a funcionalidade
-        console.log('Permissões negadas pelo usuário');
-        simulatePermissionsGranted();
-    });
+// Função para mostrar tela inicial
+function showPreMeetingScreen() {
+    preMeetingScreen.style.display = 'flex';
+    meetingScreen.style.display = 'none';
+    console.log('📺 Mostrando tela inicial');
 }
 
-// Função para iniciar o fluxo de permissões
-function startPermissionFlow() {
-    // Mostrar modal de permissões
-    permissionsModal.classList.remove('hidden');
-    loadingScreen.classList.add('hidden');
+// Função para inicializar tela inicial
+function initializePreMeeting() {
+    console.log('=== INICIALIZANDO TELA INICIAL ===');
     
-    console.log('Solicitando permissões de câmera e microfone...');
+    // Botão de câmera
+    cameraBtn.addEventListener('click', function() {
+        toggleCamera();
+    });
+    
+    // Botão de microfone
+    microphoneBtn.addEventListener('click', function() {
+        toggleMicrophone();
+    });
+    
+    // Botão de entrar
+    joinButton.addEventListener('click', function() {
+        joinCall();
+    });
+    
+    // Tentar ativar câmera automaticamente
+    setTimeout(() => {
+        if (!isCameraEnabled) {
+            toggleCamera();
+        }
+    }, 1000);
 }
 
-// Função para solicitar permissões
-async function requestPermissions() {
+// Função para alternar câmera
+async function toggleCamera() {
     try {
-        console.log('=== SOLICITANDO PERMISSÕES ===');
-        console.log('User Agent:', navigator.userAgent);
-        console.log('É HTTPS:', window.location.protocol === 'https:');
-        console.log('É localhost:', window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-        
-        // Mostrar loading
-        permissionsModal.classList.add('hidden');
-        loadingScreen.classList.remove('hidden');
-        
-        console.log('🔄 Solicitando permissões de câmera e microfone...');
-        
-        // Solicitar permissões de câmera e microfone
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                width: { ideal: 320 },
-                height: { ideal: 240 },
-                facingMode: 'user'
-            },
-            audio: true
-        });
-        
-        console.log('✅ Permissões concedidas com sucesso!');
-        console.log('Stream tracks:', stream.getTracks().map(track => track.kind));
-        
-        // Parar o stream imediatamente (só precisamos das permissões)
-        stream.getTracks().forEach(track => {
-            track.stop();
-            console.log('🛑 Track parado:', track.kind);
-        });
-        
-        isPermissionsGranted = true;
-        
-        // Iniciar a chamada
-        startCall();
-        
-    } catch (error) {
-        console.error('❌ Erro ao solicitar permissões:', error);
-        console.error('Tipo de erro:', error.name);
-        console.error('Mensagem de erro:', error.message);
-        
-        // Logs específicos para diferentes tipos de erro
-        if (error.name === 'NotAllowedError') {
-            console.error('🔒 ERRO: Usuário negou permissões');
-        } else if (error.name === 'NotFoundError') {
-            console.error('🔒 ERRO: Dispositivo não encontrado');
-        } else if (error.name === 'NotReadableError') {
-            console.error('🔒 ERRO: Dispositivo já em uso');
-        } else if (error.name === 'OverconstrainedError') {
-            console.error('🔒 ERRO: Configuração não suportada');
-        } else if (error.name === 'TypeError') {
-            console.error('🔒 ERRO: Parâmetros inválidos');
+        if (!isCameraEnabled) {
+            console.log('📹 Ativando câmera...');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 400 },
+                    height: { ideal: 300 },
+                    facingMode: 'user'
+                },
+                audio: false
+            });
+            
+            previewVideo.srcObject = stream;
+            previewVideo.style.display = 'block';
+            videoPlaceholder.style.display = 'none';
+            
+            isCameraEnabled = true;
+            cameraBtn.classList.add('active');
+            cameraBtn.classList.remove('disabled');
+            
+            console.log('✅ Câmera ativada com sucesso');
+            
+        } else {
+            console.log('📹 Desativando câmera...');
+            
+            if (previewVideo.srcObject) {
+                previewVideo.srcObject.getTracks().forEach(track => track.stop());
+            }
+            
+            previewVideo.srcObject = null;
+            previewVideo.style.display = 'none';
+            videoPlaceholder.style.display = 'flex';
+            
+            isCameraEnabled = false;
+            cameraBtn.classList.remove('active');
+            cameraBtn.classList.add('disabled');
+            
+            console.log('✅ Câmera desativada');
         }
         
-        // Mesmo com erro, simular permissões concedidas para demonstração
-        console.log('🔄 Simulando permissões concedidas para demonstração...');
-        simulatePermissionsGranted();
+        updateJoinButton();
+        
+    } catch (error) {
+        console.error('❌ Erro ao alternar câmera:', error);
+        alert('Erro ao acessar a câmera. Verifique as permissões.');
     }
 }
 
-// Função para simular permissões concedidas (para demonstração)
-function simulatePermissionsGranted() {
-    console.log('=== SIMULANDO PERMISSÕES CONCEDIDAS ===');
-    console.log('⚠️ ATENÇÃO: Esta é uma simulação para demonstração');
-    console.log('Em produção, isso não deveria acontecer');
+// Função para alternar microfone
+async function toggleMicrophone() {
+    try {
+        if (!isMicrophoneEnabled) {
+            console.log('🎤 Ativando microfone...');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: false,
+                audio: true
+            });
+            
+            // Parar o stream imediatamente (só precisamos das permissões)
+            stream.getTracks().forEach(track => track.stop());
+            
+            isMicrophoneEnabled = true;
+            microphoneBtn.classList.add('active');
+            microphoneBtn.classList.remove('disabled');
+            
+            console.log('✅ Microfone ativado com sucesso');
+            
+        } else {
+            console.log('🎤 Desativando microfone...');
+            
+            isMicrophoneEnabled = false;
+            microphoneBtn.classList.remove('active');
+            microphoneBtn.classList.add('disabled');
+            
+            console.log('✅ Microfone desativado');
+        }
+        
+        updateJoinButton();
+        
+    } catch (error) {
+        console.error('❌ Erro ao alternar microfone:', error);
+        alert('Erro ao acessar o microfone. Verifique as permissões.');
+    }
+}
+
+// Função para atualizar botão de entrar
+function updateJoinButton() {
+    if (isCameraEnabled || isMicrophoneEnabled) {
+        joinButton.disabled = false;
+        console.log('✅ Botão de entrar habilitado');
+    } else {
+        joinButton.disabled = true;
+        console.log('❌ Botão de entrar desabilitado');
+    }
+}
+
+// Função para entrar na chamada
+function joinCall() {
+    console.log('=== ENTRANDO NA CHAMADA ===');
     
-    isPermissionsGranted = true;
+    // Salvar no localStorage
+    localStorage.setItem('googleMeetInCall', 'true');
     
-    // Aguardar um pouco para mostrar o loading
-    console.log('⏳ Aguardando 2 segundos para mostrar loading...');
-    setTimeout(() => {
-        console.log('🔄 Iniciando chamada após simulação...');
-        startCall();
-    }, 2000);
+    // Esconder tela inicial
+    preMeetingScreen.style.display = 'none';
+    meetingScreen.style.display = 'block';
+    
+    // Iniciar chamada
+    startCall();
+    
+    console.log('✅ Usuário entrou na chamada');
 }
 
 // Função para iniciar a chamada
 function startCall() {
     console.log('=== INICIANDO CHAMADA ===');
-    console.log('Estado atual:');
-    console.log('- Permissões concedidas:', isPermissionsGranted);
-    console.log('- Chamada já iniciada:', isCallStarted);
-    console.log('- Webcam ativa:', isWebcamActive);
-    console.log('- VSL pausado:', vslVideo.paused);
-    
-    // Esconder loading
-    loadingScreen.classList.add('hidden');
-    console.log('📺 Loading screen escondida');
     
     // Iniciar webcam automaticamente
     console.log('📹 Iniciando webcam automaticamente...');
@@ -192,10 +243,6 @@ function startCall() {
     isCallStarted = true;
     
     console.log('✅ Chamada iniciada com sucesso!');
-    console.log('Estado final:');
-    console.log('- Chamada iniciada:', isCallStarted);
-    console.log('- Webcam ativa:', isWebcamActive);
-    console.log('- VSL pausado:', vslVideo.paused);
 }
 
 // Função para desabilitar fullscreen no vídeo VSL
@@ -243,31 +290,6 @@ function initializeSoundToggle() {
     
     // Inicializar estado do botão
     updateSoundToggleButton();
-}
-
-// Função para inicializar controles customizados
-function initializeCustomControls() {
-    playPauseBtn.addEventListener('click', function() {
-        if (vslVideo.paused) {
-            vslVideo.play();
-        } else {
-            vslVideo.pause();
-        }
-    });
-    
-    // Atualizar botão quando o vídeo muda de estado
-    vslVideo.addEventListener('play', function() {
-        playPauseBtn.classList.add('playing');
-    });
-    
-    vslVideo.addEventListener('pause', function() {
-        playPauseBtn.classList.remove('playing');
-    });
-    
-    // Inicializar estado do botão
-    if (!vslVideo.paused) {
-        playPauseBtn.classList.add('playing');
-    }
 }
 
 // Função para alternar o som do vídeo
@@ -609,8 +631,15 @@ function initializeControls() {
     // Botão de encerrar chamada
     endCallBtn.addEventListener('click', function() {
         if (confirm('Deseja realmente encerrar a chamada?')) {
+            // Limpar localStorage
+            localStorage.removeItem('googleMeetInCall');
+            
             stopWebcam();
             vslVideo.pause();
+            
+            // Voltar para tela inicial
+            showPreMeetingScreen();
+            
             alert('Chamada encerrada');
             console.log('Chamada encerrada');
         }

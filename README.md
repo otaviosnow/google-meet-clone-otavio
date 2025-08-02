@@ -1,40 +1,43 @@
 # Google Meet Clone - Chamada Fake
 
-Um clone do Google Meet que simula uma chamada de vídeo com funcionalidades de permissões de câmera/microfone e reprodução automática de vídeo VSL.
+Um clone do Google Meet que simula uma chamada de vídeo com interface idêntica ao original, incluindo tela inicial de configuração de câmera/microfone e reprodução automática de vídeo VSL.
 
 ## 🚀 Funcionalidades
 
 ### ✅ Implementadas
-- **Solicitação automática de permissões** de câmera e microfone
-- **Interface idêntica ao Google Meet** com header, controles e layout responsivo
-- **Reprodução automática de vídeo VSL** quando as permissões são concedidas
+- **Tela inicial idêntica ao Google Meet** com configuração de câmera/microfone
+- **Interface 100% fiel ao Google Meet** com header, controles e layout responsivo
+- **Reprodução automática de vídeo VSL** quando entra na chamada
+- **Vídeo sem controles** (play, pause, progresso ocultos)
 - **Webcam integrada** que aparece como participante na chamada
-- **Controles de áudio/vídeo** funcionais
-- **Chat simulado** com interface completa
+- **Controles de áudio/vídeo** funcionais com ícones do Google Meet
+- **Chat idêntico ao Google Meet** com interface completa
 - **Geração dinâmica de ID da reunião**
+- **Persistência no localStorage** - volta para a chamada se recarregar
 - **Compatibilidade total com iOS** (incluindo Safari)
 - **Prevenção de fullscreen** no vídeo VSL
-- **Controles customizados** para o vídeo
 - **Responsivo** para mobile e desktop
 
 ### 🎯 Características Técnicas
-- **Permissões automáticas**: Solicita acesso à câmera/microfone ao entrar
+- **Tela inicial**: Configuração de câmera/microfone antes de entrar
 - **Vídeo sem controles**: O VSL não tem pause, play ou controles visíveis
-- **Autoplay inteligente**: Inicia automaticamente após permissões
+- **Autoplay inteligente**: Inicia automaticamente após entrar na chamada
 - **Webcam overlay**: Posicionada sobre o vídeo principal
 - **Interface realista**: Visual e comportamento idênticos ao Google Meet
+- **localStorage**: Salva estado da chamada para persistência
 
 ## 📁 Estrutura do Projeto
 
 ```
 oi/
-├── index.html          # Página principal da chamada
+├── index.html          # Página principal com tela inicial e chamada
 ├── script.js           # Lógica JavaScript principal
-├── style.css           # Estilos CSS
+├── style.css           # Estilos CSS idênticos ao Google Meet
 ├── ios-fix.js          # Correções específicas para iOS
 ├── chat_icon_black_bg.png  # Ícone do chat
 ├── CRIATIVO 6.mp4      # Vídeo de exemplo
-└── README.md           # Documentação
+├── README.md           # Documentação
+└── LOGS_GUIDE.md      # Guia de logs para diagnóstico
 ```
 
 ## 🛠️ Como Usar
@@ -66,14 +69,18 @@ Abra o navegador e acesse: `http://localhost:8000`
 ## 🔧 Funcionamento
 
 ### Fluxo da Aplicação
-1. **Carregamento**: Página carrega com modal de permissões
-2. **Permissões**: Usuário permite acesso à câmera/microfone
-3. **Loading**: Tela de carregamento enquanto inicializa
+1. **Tela Inicial**: Página idêntica ao Google Meet com preview da câmera
+2. **Configuração**: Usuário ativa câmera e/ou microfone
+3. **Botão Entrar**: Fica habilitado quando pelo menos um dispositivo está ativo
 4. **Chamada**: Interface do Google Meet aparece
 5. **Vídeo**: VSL inicia automaticamente
 6. **Webcam**: Câmera do usuário aparece como participante
+7. **Persistência**: Se recarregar, volta direto para a chamada
 
 ### Controles Disponíveis
+- **Câmera**: Liga/desliga câmera na tela inicial
+- **Microfone**: Liga/desliga microfone na tela inicial
+- **Entrar**: Botão para entrar na chamada
 - **M (Mudo)**: Controla o áudio do VSL
 - **V (Vídeo)**: Liga/desliga a webcam
 - **S (Som)**: Liga/desliga o som do VSL
@@ -118,7 +125,7 @@ Edite o arquivo `index.html` na linha 47:
 ### Permissões
 - **Câmera**: Necessária para webcam do usuário
 - **Microfone**: Necessária para áudio da chamada
-- **Armazenamento**: Nenhum dado é salvo localmente
+- **Armazenamento**: localStorage para persistência da chamada
 
 ### Privacidade
 - **Sem gravação**: Nenhum vídeo é gravado
@@ -172,6 +179,12 @@ Edite o arquivo `index.html` na linha 47:
 // Clique no botão de vídeo para ativar manualmente
 ```
 
+#### Tela inicial não aparece
+```javascript
+// Limpe o localStorage: localStorage.removeItem('googleMeetInCall')
+// Recarregue a página
+```
+
 ## 📞 Suporte
 
 Para dúvidas ou problemas:
@@ -179,6 +192,7 @@ Para dúvidas ou problemas:
 2. Teste em diferentes navegadores
 3. Certifique-se de usar HTTPS ou localhost
 4. Verifique as permissões do navegador
+5. Consulte o `LOGS_GUIDE.md` para diagnóstico detalhado
 
 ## 📄 Licença
 
@@ -186,4 +200,4 @@ Este projeto é para fins educacionais e de demonstração.
 
 ---
 
-**Desenvolvido para criar chamadas fake do Google Meet com reprodução automática de vídeos VSL.** 
+**Desenvolvido para criar chamadas fake do Google Meet com interface idêntica ao original e reprodução automática de vídeos VSL.** 

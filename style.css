@@ -13,154 +13,33 @@ body {
     position: relative;
 }
 
-/* Permissions Modal */
-.permissions-modal {
+/* Tela Inicial - Pre Meeting */
+.pre-meeting-screen {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background-color: #202124;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    z-index: 1000;
 }
 
-.permissions-modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.permissions-content {
-    background: #2d2d2d;
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-.permissions-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-.permissions-content h2 {
-    font-size: 24px;
-    margin-bottom: 12px;
-    color: white;
-}
-
-.permissions-content p {
-    font-size: 16px;
-    color: #ccc;
-    margin-bottom: 24px;
-    line-height: 1.5;
-}
-
-.permissions-buttons {
+.pre-meeting-container {
+    width: 100%;
+    max-width: 800px;
+    height: 100%;
     display: flex;
-    gap: 12px;
-    justify-content: center;
+    flex-direction: column;
 }
 
-.permissions-btn {
-    padding: 12px 24px;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.permissions-btn.primary {
-    background: #4285f4;
-    color: white;
-}
-
-.permissions-btn.primary:hover {
-    background: #3367d6;
-}
-
-.permissions-btn.secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.permissions-btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* Loading Screen */
-.loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #202124;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1500;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-
-.loading-screen.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid #4285f4;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 24px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-content h3 {
-    font-size: 20px;
-    margin-bottom: 8px;
-    color: white;
-}
-
-.loading-content p {
-    font-size: 14px;
-    color: #ccc;
-}
-
-/* Meeting Header */
-.meeting-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 64px;
+.pre-meeting-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 24px;
-    z-index: 100;
+    padding: 24px;
     background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
 }
 
@@ -194,20 +73,6 @@ body {
     transform: rotate(90deg);
 }
 
-.meeting-time {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-}
-
-.time {
-    font-size: 14px;
-    font-weight: 500;
-    color: #ffffff;
-    opacity: 0.9;
-}
-
 .header-controls {
     display: flex;
     gap: 8px;
@@ -234,6 +99,182 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.pre-meeting-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 32px;
+}
+
+.video-preview-container {
+    width: 400px;
+    height: 300px;
+    background-color: #2d2d2d;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#previewVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: none;
+}
+
+.video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+}
+
+.camera-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.placeholder-text {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+.device-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.device-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 16px 24px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 120px;
+}
+
+.device-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.device-btn.active {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.device-btn.disabled {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    opacity: 0.7;
+}
+
+.device-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.device-btn span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.join-button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.join-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.join-button:hover:not(:disabled) {
+    background: #3367d6;
+    transform: translateY(-2px);
+}
+
+.join-button:disabled {
+    background: #5f6368;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.join-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Tela da Chamada */
+.meeting-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #202124;
+    z-index: 900;
+}
+
+/* Meeting Header */
+.meeting-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+}
+
+.meeting-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.time {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    opacity: 0.9;
+}
+
 /* Main Content */
 .main-content {
     position: absolute;
@@ -255,9 +296,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Ajuste do tamanho do container da VSL */
-    max-width: 90%; /* Reduz um pouco o tamanho */
-    margin: 0 auto; /* Centraliza o container */
+    max-width: 90%;
+    margin: 0 auto;
 }
 
 #vslVideo {
@@ -265,29 +305,64 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 12px;
-    /* Prevenir fullscreen no iOS */
-    -webkit-playsinline: true;
-    -webkit-presentation-mode: inline;
-    /* Desabilitar fullscreen */
+    /* Ocultar controles do vídeo */
+    &::-webkit-media-controls {
+        display: none !important;
+    }
+    &::-webkit-media-controls-panel {
+        display: none !important;
+    }
+    &::-webkit-media-controls-play-button {
+        display: none !important;
+    }
+    &::-webkit-media-controls-start-playback-button {
+        display: none !important;
+    }
+    &::-webkit-media-controls-timeline {
+        display: none !important;
+    }
+    &::-webkit-media-controls-current-time-display {
+        display: none !important;
+    }
+    &::-webkit-media-controls-time-remaining-display {
+        display: none !important;
+    }
+    &::-webkit-media-controls-mute-button {
+        display: none !important;
+    }
+    &::-webkit-media-controls-volume-slider {
+        display: none !important;
+    }
     &::-webkit-media-controls-fullscreen-button {
         display: none !important;
     }
-    &::--webkit-media-controls-fullscreen-button {
+    &::-webkit-media-controls-rewind-button {
         display: none !important;
     }
-    &::-moz-full-screen-button {
+    &::-webkit-media-controls-return-to-realtime-button {
         display: none !important;
     }
-    &::-ms-fullscreen-button {
+    &::-webkit-media-controls-seek-back-button {
         display: none !important;
     }
-    &::--ms-fullscreen-button {
+    &::-webkit-media-controls-seek-forward-button {
         display: none !important;
     }
-    &::--o-full-screen-button {
+    &::-webkit-media-controls-picture-in-picture-button {
         display: none !important;
     }
-    &::-o-full-screen-button {
+    &::-webkit-media-controls-overlay-play-button {
+        display: none !important;
+    }
+    &::-webkit-media-controls-overlay-enclosure {
+        display: none !important;
+    }
+    /* Firefox */
+    &::-moz-media-controls {
+        display: none !important;
+    }
+    /* Edge */
+    &::-ms-media-controls {
         display: none !important;
     }
 }
@@ -376,7 +451,7 @@ body {
     cursor: pointer;
 }
 
-/* Webcam Container - Agora posicionado sobre o vídeo principal */
+/* Webcam Container - Posicionado sobre o vídeo principal */
 .webcam-container {
     position: absolute;
     bottom: 16px;
@@ -414,11 +489,6 @@ body {
     justify-content: center;
     text-align: center;
     padding: 16px;
-}
-
-.camera-icon {
-    font-size: 24px;
-    margin-bottom: 8px;
 }
 
 .webcam-text {
@@ -536,50 +606,6 @@ body {
 
 .end-call-btn:hover {
     background-color: #d93025;
-}
-
-/* Controles customizados do vídeo */
-.video-controls {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 12px;
-    z-index: 25;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.main-video:hover .video-controls {
-    opacity: 1;
-}
-
-.play-pause-btn {
-    background: rgba(0, 0, 0, 0.7);
-    border: none;
-    color: white;
-    padding: 12px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.play-pause-btn:hover {
-    background: rgba(0, 0, 0, 0.8);
-    transform: scale(1.1);
-}
-
-.play-pause-btn.playing svg {
-    display: none;
-}
-
-.play-pause-btn.playing::before {
-    content: '⏸';
-    font-size: 20px;
-    color: white;
 }
 
 /* Chat Pop-up Styles */
@@ -801,6 +827,30 @@ input:checked + .toggle-label:before {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .pre-meeting-content {
+        padding: 16px;
+        gap: 24px;
+    }
+    
+    .video-preview-container {
+        width: 100%;
+        max-width: 350px;
+        height: 250px;
+    }
+    
+    .device-controls {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .device-btn {
+        min-width: 200px;
+    }
+    
+    .join-button {
+        min-width: 250px;
+    }
+    
     .main-content {
         top: 64px;
         bottom: 100px;
@@ -845,16 +895,6 @@ input:checked + .toggle-label:before {
     .meeting-name {
         font-size: 14px;
     }
-    
-    .permissions-content {
-        padding: 24px;
-        max-width: 350px;
-    }
-    
-    .permissions-btn {
-        padding: 10px 20px;
-        font-size: 14px;
-    }
 }
 
 /* Estilos específicos para iOS */
@@ -865,12 +905,9 @@ input:checked + .toggle-label:before {
     }
     
     .sound-toggle-btn,
-    .play-pause-btn {
+    .device-btn,
+    .join-button {
         -webkit-tap-highlight-color: transparent;
-    }
-    
-    .video-controls {
-        opacity: 1; /* Sempre visível no iOS */
     }
     
     .control-btn {
@@ -936,21 +973,22 @@ input:checked + .toggle-label:before {
         height: 44px;
     }
     
-    .permissions-content {
-        padding: 20px;
-        max-width: 320px;
+    .pre-meeting-header {
+        padding: 16px;
     }
     
-    .permissions-icon {
-        font-size: 40px;
+    .video-preview-container {
+        height: 200px;
     }
     
-    .permissions-content h2 {
-        font-size: 20px;
+    .device-btn {
+        min-width: 150px;
+        padding: 12px 16px;
     }
     
-    .permissions-content p {
-        font-size: 14px;
+    .join-button {
+        min-width: 200px;
+        padding: 12px 24px;
     }
 }
 
