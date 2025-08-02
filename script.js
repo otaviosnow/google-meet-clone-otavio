@@ -302,22 +302,96 @@ function initializeVSL() {
 
 // Função para iniciar VSL automaticamente
 function startVSL() {
-    console.log('Iniciando VSL automaticamente...');
+    console.log('=== INICIANDO VSL AUTOMATICAMENTE ===');
+    console.log('Estado do vídeo antes do autoplay:');
+    console.log('- Pausado:', vslVideo.paused);
+    console.log('- Muted:', vslVideo.muted);
+    console.log('- ReadyState:', vslVideo.readyState);
+    console.log('- NetworkState:', vslVideo.networkState);
+    console.log('- CurrentSrc:', vslVideo.currentSrc);
+    console.log('- Duration:', vslVideo.duration);
+    console.log('- Volume:', vslVideo.volume);
+    
+    // Verificar se o vídeo está carregado
+    if (vslVideo.readyState < 2) {
+        console.log('⚠️ VÍDEO AINDA NÃO CARREGADO - ReadyState:', vslVideo.readyState);
+        console.log('Aguardando carregamento do vídeo...');
+        
+        vslVideo.addEventListener('canplay', function() {
+            console.log('✅ VÍDEO CARREGADO - ReadyState:', vslVideo.readyState);
+            attemptAutoplay();
+        }, { once: true });
+        
+        vslVideo.addEventListener('error', function(e) {
+            console.error('❌ ERRO NO CARREGAMENTO DO VÍDEO:', e);
+            console.error('Error details:', vslVideo.error);
+        });
+        
+        return;
+    }
     
     // Tentar reproduzir automaticamente
     setTimeout(function() {
-        const playPromise = vslVideo.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(function() {
-                console.log('VSL iniciado automaticamente com sucesso');
-            }).catch(function(error) {
-                console.log('Autoplay bloqueado pelo navegador:', error);
-                // Se o autoplay falhar, mostrar o overlay
-                videoOverlay.classList.remove('hidden');
-            });
-        }
+        attemptAutoplay();
     }, 500);
+}
+
+// Função para tentar autoplay com logs detalhados
+function attemptAutoplay() {
+    console.log('=== TENTANDO AUTOPLAY ===');
+    console.log('Estado do vídeo antes do play():');
+    console.log('- Pausado:', vslVideo.paused);
+    console.log('- Muted:', vslVideo.muted);
+    console.log('- ReadyState:', vslVideo.readyState);
+    console.log('- User Agent:', navigator.userAgent);
+    console.log('- É iOS:', /iPad|iPhone|iPod/.test(navigator.userAgent));
+    console.log('- É Safari:', /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
+    
+    const playPromise = vslVideo.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(function() {
+            console.log('✅ AUTOPLAY SUCESSO!');
+            console.log('Estado após play():');
+            console.log('- Pausado:', vslVideo.paused);
+            console.log('- CurrentTime:', vslVideo.currentTime);
+            console.log('- PlaybackRate:', vslVideo.playbackRate);
+        }).catch(function(error) {
+            console.error('❌ AUTOPLAY FALHOU:', error);
+            console.error('Tipo de erro:', error.name);
+            console.error('Mensagem de erro:', error.message);
+            
+            // Logs específicos para diferentes tipos de erro
+            if (error.name === 'NotAllowedError') {
+                console.error('🔒 ERRO: Autoplay bloqueado por política do navegador');
+                console.error('Solução: Usuário precisa interagir com a página primeiro');
+            } else if (error.name === 'NotSupportedError') {
+                console.error('🔒 ERRO: Formato de vídeo não suportado');
+            } else if (error.name === 'NetworkError') {
+                console.error('🔒 ERRO: Problema de rede ao carregar vídeo');
+            } else if (error.name === 'AbortError') {
+                console.error('🔒 ERRO: Reprodução abortada');
+            }
+            
+            // Mostrar overlay para interação manual
+            console.log('📺 Mostrando overlay para interação manual');
+            videoOverlay.classList.remove('hidden');
+            
+            // Adicionar listener para clique no overlay
+            videoOverlay.addEventListener('click', function() {
+                console.log('🖱️ Usuário clicou no overlay - tentando play manual');
+                vslVideo.play().then(function() {
+                    console.log('✅ Play manual bem-sucedido');
+                }).catch(function(manualError) {
+                    console.error('❌ Play manual também falhou:', manualError);
+                });
+            }, { once: true });
+        });
+    } else {
+        console.log('⚠️ play() retornou undefined - navegador não suporta Promise');
+        console.log('Estado após play():');
+        console.log('- Pausado:', vslVideo.paused);
+    }
 }
 
 // Função para inicializar a webcam
