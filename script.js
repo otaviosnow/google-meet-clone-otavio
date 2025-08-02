@@ -93,11 +93,16 @@ function startPermissionFlow() {
 // Função para solicitar permissões
 async function requestPermissions() {
     try {
-        console.log('Solicitando permissões...');
+        console.log('=== SOLICITANDO PERMISSÕES ===');
+        console.log('User Agent:', navigator.userAgent);
+        console.log('É HTTPS:', window.location.protocol === 'https:');
+        console.log('É localhost:', window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
         
         // Mostrar loading
         permissionsModal.classList.add('hidden');
         loadingScreen.classList.remove('hidden');
+        
+        console.log('🔄 Solicitando permissões de câmera e microfone...');
         
         // Solicitar permissões de câmera e microfone
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -109,50 +114,88 @@ async function requestPermissions() {
             audio: true
         });
         
-        // Parar o stream imediatamente (só precisamos das permissões)
-        stream.getTracks().forEach(track => track.stop());
+        console.log('✅ Permissões concedidas com sucesso!');
+        console.log('Stream tracks:', stream.getTracks().map(track => track.kind));
         
-        console.log('Permissões concedidas com sucesso!');
+        // Parar o stream imediatamente (só precisamos das permissões)
+        stream.getTracks().forEach(track => {
+            track.stop();
+            console.log('🛑 Track parado:', track.kind);
+        });
+        
         isPermissionsGranted = true;
         
         // Iniciar a chamada
         startCall();
         
     } catch (error) {
-        console.error('Erro ao solicitar permissões:', error);
+        console.error('❌ Erro ao solicitar permissões:', error);
+        console.error('Tipo de erro:', error.name);
+        console.error('Mensagem de erro:', error.message);
+        
+        // Logs específicos para diferentes tipos de erro
+        if (error.name === 'NotAllowedError') {
+            console.error('🔒 ERRO: Usuário negou permissões');
+        } else if (error.name === 'NotFoundError') {
+            console.error('🔒 ERRO: Dispositivo não encontrado');
+        } else if (error.name === 'NotReadableError') {
+            console.error('🔒 ERRO: Dispositivo já em uso');
+        } else if (error.name === 'OverconstrainedError') {
+            console.error('🔒 ERRO: Configuração não suportada');
+        } else if (error.name === 'TypeError') {
+            console.error('🔒 ERRO: Parâmetros inválidos');
+        }
         
         // Mesmo com erro, simular permissões concedidas para demonstração
+        console.log('🔄 Simulando permissões concedidas para demonstração...');
         simulatePermissionsGranted();
     }
 }
 
 // Função para simular permissões concedidas (para demonstração)
 function simulatePermissionsGranted() {
-    console.log('Simulando permissões concedidas...');
+    console.log('=== SIMULANDO PERMISSÕES CONCEDIDAS ===');
+    console.log('⚠️ ATENÇÃO: Esta é uma simulação para demonstração');
+    console.log('Em produção, isso não deveria acontecer');
+    
     isPermissionsGranted = true;
     
     // Aguardar um pouco para mostrar o loading
+    console.log('⏳ Aguardando 2 segundos para mostrar loading...');
     setTimeout(() => {
+        console.log('🔄 Iniciando chamada após simulação...');
         startCall();
     }, 2000);
 }
 
 // Função para iniciar a chamada
 function startCall() {
-    console.log('Iniciando chamada...');
+    console.log('=== INICIANDO CHAMADA ===');
+    console.log('Estado atual:');
+    console.log('- Permissões concedidas:', isPermissionsGranted);
+    console.log('- Chamada já iniciada:', isCallStarted);
+    console.log('- Webcam ativa:', isWebcamActive);
+    console.log('- VSL pausado:', vslVideo.paused);
     
     // Esconder loading
     loadingScreen.classList.add('hidden');
+    console.log('📺 Loading screen escondida');
     
     // Iniciar webcam automaticamente
+    console.log('📹 Iniciando webcam automaticamente...');
     startWebcam();
     
     // Iniciar VSL automaticamente
+    console.log('🎬 Iniciando VSL automaticamente...');
     startVSL();
     
     isCallStarted = true;
     
-    console.log('Chamada iniciada com sucesso!');
+    console.log('✅ Chamada iniciada com sucesso!');
+    console.log('Estado final:');
+    console.log('- Chamada iniciada:', isCallStarted);
+    console.log('- Webcam ativa:', isWebcamActive);
+    console.log('- VSL pausado:', vslVideo.paused);
 }
 
 // Função para desabilitar fullscreen no vídeo VSL
@@ -262,42 +305,101 @@ function updateSoundToggleButton() {
 
 // Função para inicializar o VSL
 function initializeVSL() {
+    console.log('=== INICIALIZANDO VSL ===');
+    console.log('URL do vídeo:', vslVideo.currentSrc || 'Não definido');
+    console.log('Atributos do vídeo:');
+    console.log('- autoplay:', vslVideo.autoplay);
+    console.log('- muted:', vslVideo.muted);
+    console.log('- playsinline:', vslVideo.getAttribute('playsinline'));
+    console.log('- webkit-playsinline:', vslVideo.getAttribute('webkit-playsinline'));
+    
     // Configurar o vídeo VSL
+    vslVideo.addEventListener('loadstart', function() {
+        console.log('🔄 VSL: Iniciando carregamento');
+    });
+    
+    vslVideo.addEventListener('durationchange', function() {
+        console.log('⏱️ VSL: Duração carregada:', vslVideo.duration);
+    });
+    
+    vslVideo.addEventListener('loadedmetadata', function() {
+        console.log('📊 VSL: Metadados carregados');
+        console.log('- Duração:', vslVideo.duration);
+        console.log('- Largura:', vslVideo.videoWidth);
+        console.log('- Altura:', vslVideo.videoHeight);
+    });
+    
     vslVideo.addEventListener('loadeddata', function() {
-        console.log('VSL carregado e pronto para reprodução');
+        console.log('✅ VSL: Dados carregados e pronto para reprodução');
+        console.log('- ReadyState:', vslVideo.readyState);
+        console.log('- NetworkState:', vslVideo.networkState);
+    });
+
+    vslVideo.addEventListener('canplay', function() {
+        console.log('▶️ VSL: Pode começar a reproduzir');
+    });
+    
+    vslVideo.addEventListener('canplaythrough', function() {
+        console.log('🎬 VSL: Pode reproduzir sem interrupções');
     });
 
     vslVideo.addEventListener('play', function() {
         // Esconder o overlay quando o vídeo começar a tocar
         videoOverlay.classList.add('hidden');
-        console.log('VSL iniciado');
+        console.log('▶️ VSL: Reprodução iniciada');
+        console.log('- CurrentTime:', vslVideo.currentTime);
+        console.log('- PlaybackRate:', vslVideo.playbackRate);
     });
 
     vslVideo.addEventListener('pause', function() {
         // Mostrar o overlay quando o vídeo pausar
         videoOverlay.classList.remove('hidden');
-        console.log('VSL pausado');
+        console.log('⏸️ VSL: Reprodução pausada');
     });
 
     vslVideo.addEventListener('ended', function() {
         // Mostrar o overlay quando o vídeo terminar
         videoOverlay.classList.remove('hidden');
-        console.log('VSL finalizado');
+        console.log('🏁 VSL: Reprodução finalizada');
+    });
+    
+    vslVideo.addEventListener('error', function(e) {
+        console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
+        console.error('Error details:', vslVideo.error);
+        console.error('Error code:', vslVideo.error ? vslVideo.error.code : 'N/A');
+        console.error('Error message:', vslVideo.error ? vslVideo.error.message : 'N/A');
+    });
+    
+    vslVideo.addEventListener('stalled', function() {
+        console.warn('⚠️ VSL: Carregamento parou (stalled)');
+    });
+    
+    vslVideo.addEventListener('waiting', function() {
+        console.warn('⏳ VSL: Aguardando dados (waiting)');
     });
 
     // Permitir clicar no overlay para iniciar o vídeo
     videoOverlay.addEventListener('click', function() {
-        vslVideo.play();
+        console.log('🖱️ Usuário clicou no overlay - iniciando VSL manualmente');
+        vslVideo.play().then(function() {
+            console.log('✅ VSL iniciado manualmente com sucesso');
+        }).catch(function(error) {
+            console.error('❌ Falha ao iniciar VSL manualmente:', error);
+        });
     });
     
     // Prevenir comportamento padrão do vídeo no iOS
     vslVideo.addEventListener('touchstart', function(e) {
         e.preventDefault();
+        console.log('👆 Touch start prevenido no iOS');
     });
     
     vslVideo.addEventListener('touchend', function(e) {
         e.preventDefault();
+        console.log('👆 Touch end prevenido no iOS');
     });
+    
+    console.log('✅ VSL inicializado com todos os event listeners');
 }
 
 // Função para iniciar VSL automaticamente
@@ -408,6 +510,9 @@ function initializeWebcam() {
 // Função para iniciar a webcam
 async function startWebcam() {
     try {
+        console.log('=== INICIANDO WEBCAM ===');
+        console.log('Solicitando stream de vídeo...');
+        
         webcamStream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
                 width: { ideal: 320 },
@@ -416,6 +521,9 @@ async function startWebcam() {
             }, 
             audio: false 
         });
+        
+        console.log('✅ Stream de webcam obtido com sucesso');
+        console.log('Tracks disponíveis:', webcamStream.getTracks().map(track => track.kind));
         
         webcamVideo.srcObject = webcamStream;
         webcamVideo.style.display = 'block';
@@ -427,9 +535,28 @@ async function startWebcam() {
         // Atualizar o botão de vídeo
         updateVideoButton();
         
-        console.log('Webcam ativada');
+        console.log('✅ Webcam ativada com sucesso');
+        console.log('Estado da webcam:');
+        console.log('- Ativa:', isWebcamActive);
+        console.log('- Vídeo ligado:', isVideoOn);
+        console.log('- Stream ativo:', webcamStream.active);
+        
     } catch (error) {
-        console.error('Erro ao acessar a webcam:', error);
+        console.error('❌ Erro ao acessar a webcam:', error);
+        console.error('Tipo de erro:', error.name);
+        console.error('Mensagem de erro:', error.message);
+        
+        // Logs específicos para diferentes tipos de erro
+        if (error.name === 'NotAllowedError') {
+            console.error('🔒 ERRO: Permissão de câmera negada');
+        } else if (error.name === 'NotFoundError') {
+            console.error('🔒 ERRO: Câmera não encontrada');
+        } else if (error.name === 'NotReadableError') {
+            console.error('🔒 ERRO: Câmera já em uso');
+        } else if (error.name === 'OverconstrainedError') {
+            console.error('🔒 ERRO: Configuração de câmera não suportada');
+        }
+        
         alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
     }
 }
