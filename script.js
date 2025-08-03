@@ -319,6 +319,10 @@ function startVSL() {
     console.log('=== INICIANDO VSL ===');
     
     // Configurar o vídeo VSL
+    vslVideo.loop = false; // Não repetir
+    vslVideo.muted = false; // Com som
+    vslVideo.volume = 1.0; // Volume máximo
+    
     vslVideo.addEventListener('loadstart', function() {
         console.log('🔄 VSL: Iniciando carregamento');
     });
@@ -355,13 +359,29 @@ function startVSL() {
 function attemptAutoplay() {
     console.log('=== TENTANDO AUTOPLAY ===');
     
+    // Garantir que o vídeo não está mutado
+    vslVideo.muted = false;
+    vslVideo.volume = 1.0;
+    
     const playPromise = vslVideo.play();
     
     if (playPromise !== undefined) {
         playPromise.then(function() {
             console.log('✅ AUTOPLAY SUCESSO!');
+            console.log('🔊 Volume:', vslVideo.volume);
+            console.log('🔇 Muted:', vslVideo.muted);
         }).catch(function(error) {
             console.error('❌ AUTOPLAY FALHOU:', error);
+            // Se falhar por causa do som, tentar sem som
+            if (error.name === 'NotAllowedError') {
+                console.log('🔄 Tentando reproduzir sem som...');
+                vslVideo.muted = true;
+                vslVideo.play().then(function() {
+                    console.log('✅ AUTOPLAY SEM SOM SUCESSO!');
+                }).catch(function(muteError) {
+                    console.error('❌ AUTOPLAY SEM SOM TAMBÉM FALHOU:', muteError);
+                });
+            }
         });
     }
 }
@@ -420,20 +440,7 @@ function stopWebcam() {
     console.log('Webcam desativada');
 }
 
-// Função para tentar autoplay
-function attemptAutoplay() {
-    console.log('=== TENTANDO AUTOPLAY ===');
-    
-    const playPromise = vslVideo.play();
-    
-    if (playPromise !== undefined) {
-        playPromise.then(function() {
-            console.log('✅ AUTOPLAY SUCESSO!');
-        }).catch(function(error) {
-            console.error('❌ AUTOPLAY FALHOU:', error);
-        });
-    }
-}
+
 
 // Inicializar tela de chamada
 function initializeCallScreen() {
