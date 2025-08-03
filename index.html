@@ -7,241 +7,176 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Tela Inicial - Configuração de Câmera/Microfone -->
-    <div class="pre-meeting-screen" id="preMeetingScreen">
-        <div class="pre-meeting-container">
-            <!-- Header -->
-            <div class="pre-meeting-header">
-                <div class="meeting-info">
-                    <span class="meeting-name" id="meetingName">pcu-ifqj-dvs</span>
-                    <span class="arrow">▶</span>
-                </div>
-                <div class="header-controls">
-                    <button class="header-btn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M19 7H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2"/>
-                            <path d="m9 10 5 3-5 3v-6z" fill="currentColor"/>
-                        </svg>
-                    </button>
-                    <button class="header-btn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M11 5L6 9l5 4v-3h5a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" fill="none"/>
-                        </svg>
-                    </button>
-                    <button class="header-btn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                            <circle cx="19" cy="12" r="1" fill="currentColor"/>
-                            <circle cx="5" cy="12" r="1" fill="currentColor"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="pre-meeting-content">
-                <div class="video-preview-container">
-                    <video id="previewVideo" autoplay muted playsinline></video>
-                    <div class="video-placeholder" id="videoPlaceholder">
-                        <div class="camera-icon">📷</div>
-                        <div class="placeholder-text">Câmera desativada</div>
-                    </div>
-                </div>
-
-                <!-- Controles de Câmera/Microfone -->
-                <div class="device-controls">
-                    <button class="device-btn" id="cameraBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M23 7l-7 5 7 5V7z" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
-                        </svg>
-                        <span>Câmera</span>
-                    </button>
-
-                    <button class="device-btn" id="microphoneBtn">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" stroke-width="2"/>
-                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Microfone</span>
-                    </button>
-                </div>
-
-                <!-- Botão de Entrar -->
-                <div class="join-button-container">
-                    <button class="join-button" id="joinButton" disabled>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        </svg>
-                        Entrar agora
-                    </button>
-                </div>
+    <!-- Tela 1: Nome do Participante -->
+    <div class="screen" id="nameScreen">
+        <div class="meet-logo">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00897B">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>Meet</span>
+        </div>
+        
+        <div class="name-form">
+            <h1>Antes de entrar na reunião</h1>
+            <p>Digite seu nome para continuar</p>
+            
+            <div class="input-group">
+                <input type="text" id="participantName" placeholder="Digite seu nome" maxlength="50">
+                <button id="continueBtn" disabled>Continuar</button>
             </div>
         </div>
     </div>
 
-    <!-- Tela da Chamada (Oculta inicialmente) -->
-    <div class="meeting-screen" id="meetingScreen" style="display: none;">
-        <!-- Meeting Header -->
-        <div class="meeting-header">
-            <div class="meeting-info">
-                <span class="meeting-name" id="meetingNameCall">pcu-ifqj-dvs</span>
-                <span class="arrow">▶</span>
+    <!-- Tela 2: Configuração de Dispositivos -->
+    <div class="screen" id="deviceScreen" style="display: none;">
+        <div class="meet-header">
+            <div class="meet-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#00897B">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <span>Meet</span>
             </div>
-            <div class="meeting-time">
-                <span class="time" id="meetingTime">00:00</span>
+            <div class="meeting-info">
+                <span id="meetingId">abc-def-ghi</span>
+            </div>
+        </div>
+
+        <div class="device-setup">
+            <div class="preview-container">
+                <video id="previewVideo" autoplay muted playsinline></video>
+                <div class="preview-placeholder" id="previewPlaceholder">
+                    <div class="camera-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                        </svg>
+                    </div>
+                    <p>Clique em "Câmera" para ativar</p>
+                </div>
+            </div>
+
+            <div class="device-controls">
+                <button class="device-btn" id="cameraBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                    </svg>
+                    <span>Câmera</span>
+                </button>
+
+                <button class="device-btn" id="microphoneBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    <span>Microfone</span>
+                </button>
+            </div>
+
+            <div class="join-section">
+                <button class="join-btn" id="joinBtn" disabled>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Entrar agora
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela 3: Chamada Ativa -->
+    <div class="screen" id="callScreen" style="display: none;">
+        <!-- Header da Chamada -->
+        <div class="call-header">
+            <div class="meeting-info">
+                <span id="callMeetingId">abc-def-ghi</span>
+                <span class="meeting-time" id="meetingTime">00:00</span>
             </div>
             <div class="header-controls">
-                <button class="header-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 7H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2"/>
-                        <path d="m9 10 5 3-5 3v-6z" fill="currentColor"/>
+                <button class="header-btn" id="fullscreenBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
                     </svg>
                 </button>
-                <button class="header-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M11 5L6 9l5 4v-3h5a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" fill="none"/>
+                <button class="header-btn" id="settingsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
                     </svg>
                 </button>
-                <button class="header-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                        <circle cx="19" cy="12" r="1" fill="currentColor"/>
-                        <circle cx="5" cy="12" r="1" fill="currentColor"/>
+                <button class="header-btn" id="moreBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                     </svg>
                 </button>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Main Video Area -->
-            <div class="main-video">
-                <video id="vslVideo" 
-                       autoplay 
-                       muted 
-                       playsinline 
-                       webkit-playsinline
-                       x5-playsinline
-                       x5-video-player-type="h5"
-                       x5-video-player-fullscreen="false"
-                       x5-video-orientation="portraint"
-                       preload="auto"
-                       loop>
-                    <source src="https://guiaalpha.fun/wp-content/uploads/2025/07/CRIATIVO-10.mp4" type="video/mp4">
-                    Seu navegador não suporta o elemento de vídeo.
-                </video>
-                
-                <!-- Botão de Som sobre o vídeo -->
-                <button class="sound-toggle-btn" id="soundToggleBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m23 9-6 6" stroke="currentColor" stroke-width="2"/>
-                        <path d="m17 9 6 6" stroke="currentColor" stroke-width="2"/>
+        <!-- Área Principal do Vídeo -->
+        <div class="main-video-area">
+            <video id="vslVideo" autoplay muted playsinline loop>
+                <source src="https://guiaalpha.fun/wp-content/uploads/2025/07/CRIATIVO-10.mp4" type="video/mp4">
+            </video>
+            
+            <!-- Webcam do Usuário -->
+            <div class="user-video" id="userVideo">
+                <video id="webcamVideo" autoplay muted playsinline></video>
+                <div class="user-video-placeholder" id="userVideoPlaceholder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
                     </svg>
-                </button>
-                
-                <div class="video-overlay" id="videoOverlay">
-                    <div class="video-text">
-                        <div class="video-title">VSL</div>
-                        <div class="video-subtitle">Clique para iniciar</div>
-                    </div>
-                </div>
-                
-                <button class="mute-indicator">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m23 9-6 6" stroke="currentColor" stroke-width="2"/>
-                        <path d="m17 9 6 6" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                </button>
-                
-                <!-- Webcam Container - Posicionado sobre o vídeo principal -->
-                <div class="participant-video webcam-container" id="webcamContainer">
-                    <video id="webcamVideo" autoplay muted playsinline></video>
-                    <div class="webcam-placeholder" id="webcamPlaceholder">
-                        <div class="camera-icon">📷</div>
-                        <div class="webcam-text">Câmera ativada</div>
-                    </div>
-                    <button class="participant-mute">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                            <path d="m23 9-6 6" stroke="currentColor" stroke-width="2"/>
-                            <path d="m17 9 6 6" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Controls -->
-        <div class="bottom-controls">
+        <!-- Controles da Chamada -->
+        <div class="call-controls">
             <div class="control-buttons">
-                <button class="control-btn mute-btn" id="muteBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m23 9-6 6" stroke="currentColor" stroke-width="2"/>
-                        <path d="m17 9 6 6" stroke="currentColor" stroke-width="2"/>
+                <button class="control-btn" id="muteBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                     </svg>
                 </button>
 
-                <button class="control-btn video-btn" id="videoBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M23 7l-7 5 7 5V7z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m1 1 22 22" stroke="currentColor" stroke-width="2"/>
+                <button class="control-btn" id="videoBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
                     </svg>
                 </button>
 
-                <button class="control-btn participants-btn" id="participantsBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="M20 8v6" stroke="currentColor" stroke-width="2"/>
-                        <path d="M23 11h-6" stroke="currentColor" stroke-width="2"/>
+                <button class="control-btn" id="participantsBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.37-2.01 1l-3.7 4.99c-.56.75-.56 1.76 0 2.51l3.7 4.99c.47.63 1.21 1 2.01 1h1.54c.8 0 1.54-.37 2.01-1L22.5 22H20v6h-2z"/>
+                        <path d="M12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5z"/>
+                        <path d="M5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9V9c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v6.5h1.5V22h2z"/>
                     </svg>
                 </button>
 
-                <button class="control-btn chat-btn" id="chatBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                <button class="control-btn" id="chatBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
                     </svg>
                 </button>
 
-                <button class="control-btn end-call-btn" id="endCallBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="m1 1 22 22" stroke="currentColor" stroke-width="2"/>
+                <button class="control-btn end-call" id="endCallBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
                     </svg>
                 </button>
             </div>
         </div>
 
-        <!-- Chat Pop-up -->
+        <!-- Chat Popup -->
         <div class="chat-popup" id="chatPopup">
             <div class="chat-header">
                 <h3>In-call messages</h3>
-                <button class="chat-close-btn" id="chatCloseBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2"/>
-                        <path d="M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                <button class="chat-close" id="chatCloseBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
                     </svg>
                 </button>
-            </div>
-            
-            <div class="chat-settings">
-                <div class="chat-setting-item">
-                    <span>Let contributors send messages</span>
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="allowMessages" checked>
-                        <label for="allowMessages" class="toggle-label"></label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chat-info">
-                <p>You can pin a message to make it visible for people who join later. When you leave the call, you won't be able to access this chat.</p>
             </div>
             
             <div class="chat-messages" id="chatMessages">
@@ -250,17 +185,15 @@
             
             <div class="chat-input-container">
                 <input type="text" class="chat-input" id="chatInput" placeholder="Send a message">
-                <button class="chat-send-btn" id="chatSendBtn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2"/>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2"/>
+                <button class="chat-send" id="chatSendBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                     </svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <script src="ios-fix.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

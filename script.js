@@ -1,93 +1,157 @@
 // Estado da aplicação
-let isMuted = true;
-let isVideoOn = false;
-let isWebcamActive = false;
-let webcamStream = null;
-let isSoundOn = false;
+let currentScreen = 'name';
+let participantName = '';
 let isCameraEnabled = false;
 let isMicrophoneEnabled = false;
+let isWebcamActive = false;
+let webcamStream = null;
+let isMuted = true;
+let isVideoOn = false;
 let isCallStarted = false;
+let meetingId = '';
 
 // Elementos DOM
-const preMeetingScreen = document.getElementById('preMeetingScreen');
-const meetingScreen = document.getElementById('meetingScreen');
+const nameScreen = document.getElementById('nameScreen');
+const deviceScreen = document.getElementById('deviceScreen');
+const callScreen = document.getElementById('callScreen');
+
+// Tela 1: Nome
+const participantNameInput = document.getElementById('participantName');
+const continueBtn = document.getElementById('continueBtn');
+
+// Tela 2: Dispositivos
 const previewVideo = document.getElementById('previewVideo');
-const videoPlaceholder = document.getElementById('videoPlaceholder');
+const previewPlaceholder = document.getElementById('previewPlaceholder');
 const cameraBtn = document.getElementById('cameraBtn');
 const microphoneBtn = document.getElementById('microphoneBtn');
-const joinButton = document.getElementById('joinButton');
+const joinBtn = document.getElementById('joinBtn');
+const meetingIdElement = document.getElementById('meetingId');
+
+// Tela 3: Chamada
 const vslVideo = document.getElementById('vslVideo');
-const videoOverlay = document.getElementById('videoOverlay');
-const webcamContainer = document.getElementById('webcamContainer');
 const webcamVideo = document.getElementById('webcamVideo');
-const webcamPlaceholder = document.getElementById('webcamPlaceholder');
+const userVideoPlaceholder = document.getElementById('userVideoPlaceholder');
 const muteBtn = document.getElementById('muteBtn');
 const videoBtn = document.getElementById('videoBtn');
-const endCallBtn = document.getElementById('endCallBtn');
-const soundToggleBtn = document.getElementById('soundToggleBtn');
 const participantsBtn = document.getElementById('participantsBtn');
-const meetingName = document.getElementById('meetingName');
-const meetingNameCall = document.getElementById('meetingNameCall');
+const chatBtn = document.getElementById('chatBtn');
+const endCallBtn = document.getElementById('endCallBtn');
+const callMeetingIdElement = document.getElementById('callMeetingId');
+const meetingTimeElement = document.getElementById('meetingTime');
 
-// Inicialização quando a página carrega
+// Chat
+const chatPopup = document.getElementById('chatPopup');
+const chatCloseBtn = document.getElementById('chatCloseBtn');
+const chatInput = document.getElementById('chatInput');
+const chatSendBtn = document.getElementById('chatSendBtn');
+const chatMessages = document.getElementById('chatMessages');
+
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO GOOGLE MEET CLONE ===');
     
-    // Verificar se já está na chamada (localStorage)
+    // Verificar se já está na chamada
     const isInCall = localStorage.getItem('googleMeetInCall');
     
     if (isInCall === 'true') {
         console.log('🔄 Usuário já estava na chamada - restaurando...');
+        showCallScreen();
         startCall();
     } else {
-        console.log('🆕 Primeira vez - mostrando tela inicial');
-        showPreMeetingScreen();
+        console.log('🆕 Primeira vez - mostrando tela de nome');
+        showNameScreen();
     }
     
-    // Gerar ID da reunião dinamicamente
+    // Gerar ID da reunião
     generateMeetingId();
     
     // Inicializar componentes
-    initializePreMeeting();
-    initializeVSL();
-    initializeWebcam();
-    initializeControls();
+    initializeNameScreen();
+    initializeDeviceScreen();
+    initializeCallScreen();
     initializeChat();
-    disableFullscreen();
+    updateTime();
+    
+    // Atualizar horário a cada minuto
+    setInterval(updateTime, 60000);
 });
 
 // Função para gerar ID da reunião
 function generateMeetingId() {
     const chars = 'abcdefghijklmnopqrstuvwxyz';
-    let meetingId = '';
+    let id = '';
     for (let i = 0; i < 3; i++) {
-        meetingId += chars[Math.floor(Math.random() * chars.length)];
+        id += chars[Math.floor(Math.random() * chars.length)];
     }
-    meetingId += '-';
+    id += '-';
     for (let i = 0; i < 3; i++) {
-        meetingId += chars[Math.floor(Math.random() * chars.length)];
+        id += chars[Math.floor(Math.random() * chars.length)];
     }
-    meetingId += '-';
+    id += '-';
     for (let i = 0; i < 3; i++) {
-        meetingId += chars[Math.floor(Math.random() * chars.length)];
+        id += chars[Math.floor(Math.random() * chars.length)];
     }
     
-    meetingName.textContent = meetingId;
-    meetingNameCall.textContent = meetingId;
-    console.log('ID da reunião gerado:', meetingId);
+    meetingId = id;
+    meetingIdElement.textContent = id;
+    callMeetingIdElement.textContent = id;
+    console.log('ID da reunião gerado:', id);
 }
 
-// Função para mostrar tela inicial
-function showPreMeetingScreen() {
-    preMeetingScreen.style.display = 'flex';
-    meetingScreen.style.display = 'none';
-    console.log('📺 Mostrando tela inicial');
+// Função para mostrar tela de nome
+function showNameScreen() {
+    currentScreen = 'name';
+    nameScreen.style.display = 'flex';
+    deviceScreen.style.display = 'none';
+    callScreen.style.display = 'none';
+    console.log('📝 Mostrando tela de nome');
 }
 
-// Função para inicializar tela inicial
-function initializePreMeeting() {
-    console.log('=== INICIALIZANDO TELA INICIAL ===');
+// Função para mostrar tela de dispositivos
+function showDeviceScreen() {
+    currentScreen = 'device';
+    nameScreen.style.display = 'none';
+    deviceScreen.style.display = 'flex';
+    callScreen.style.display = 'none';
+    console.log('📱 Mostrando tela de dispositivos');
+}
+
+// Função para mostrar tela de chamada
+function showCallScreen() {
+    currentScreen = 'call';
+    nameScreen.style.display = 'none';
+    deviceScreen.style.display = 'none';
+    callScreen.style.display = 'flex';
+    console.log('📹 Mostrando tela de chamada');
+}
+
+// Inicializar tela de nome
+function initializeNameScreen() {
+    // Input de nome
+    participantNameInput.addEventListener('input', function() {
+        const name = this.value.trim();
+        continueBtn.disabled = name.length === 0;
+    });
     
+    // Botão continuar
+    continueBtn.addEventListener('click', function() {
+        participantName = participantNameInput.value.trim();
+        if (participantName.length > 0) {
+            console.log('✅ Nome definido:', participantName);
+            showDeviceScreen();
+        }
+    });
+    
+    // Enter para continuar
+    participantNameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !continueBtn.disabled) {
+            continueBtn.click();
+        }
+    });
+}
+
+// Inicializar tela de dispositivos
+function initializeDeviceScreen() {
     // Botão de câmera
     cameraBtn.addEventListener('click', function() {
         toggleCamera();
@@ -99,7 +163,7 @@ function initializePreMeeting() {
     });
     
     // Botão de entrar
-    joinButton.addEventListener('click', function() {
+    joinBtn.addEventListener('click', function() {
         joinCall();
     });
     
@@ -128,7 +192,7 @@ async function toggleCamera() {
             
             previewVideo.srcObject = stream;
             previewVideo.style.display = 'block';
-            videoPlaceholder.style.display = 'none';
+            previewPlaceholder.style.display = 'none';
             
             isCameraEnabled = true;
             cameraBtn.classList.add('active');
@@ -145,7 +209,7 @@ async function toggleCamera() {
             
             previewVideo.srcObject = null;
             previewVideo.style.display = 'none';
-            videoPlaceholder.style.display = 'flex';
+            previewPlaceholder.style.display = 'flex';
             
             isCameraEnabled = false;
             cameraBtn.classList.remove('active');
@@ -203,10 +267,10 @@ async function toggleMicrophone() {
 // Função para atualizar botão de entrar
 function updateJoinButton() {
     if (isCameraEnabled || isMicrophoneEnabled) {
-        joinButton.disabled = false;
+        joinBtn.disabled = false;
         console.log('✅ Botão de entrar habilitado');
     } else {
-        joinButton.disabled = true;
+        joinBtn.disabled = true;
         console.log('❌ Botão de entrar desabilitado');
     }
 }
@@ -218,9 +282,8 @@ function joinCall() {
     // Salvar no localStorage
     localStorage.setItem('googleMeetInCall', 'true');
     
-    // Esconder tela inicial
-    preMeetingScreen.style.display = 'none';
-    meetingScreen.style.display = 'block';
+    // Mostrar tela de chamada
+    showCallScreen();
     
     // Iniciar chamada
     startCall();
@@ -232,9 +295,11 @@ function joinCall() {
 function startCall() {
     console.log('=== INICIANDO CHAMADA ===');
     
-    // Iniciar webcam automaticamente
-    console.log('📹 Iniciando webcam automaticamente...');
-    startWebcam();
+    // Iniciar webcam automaticamente se estava ativa
+    if (isCameraEnabled) {
+        console.log('📹 Iniciando webcam automaticamente...');
+        startWebcam();
+    }
     
     // Iniciar VSL automaticamente
     console.log('🎬 Iniciando VSL automaticamente...');
@@ -245,214 +310,30 @@ function startCall() {
     console.log('✅ Chamada iniciada com sucesso!');
 }
 
-// Função para desabilitar fullscreen no vídeo VSL
-function disableFullscreen() {
-    // Configurações específicas para iOS
-    vslVideo.setAttribute('webkit-playsinline', 'true');
-    vslVideo.setAttribute('playsinline', 'true');
-    vslVideo.setAttribute('x5-playsinline', 'true');
-    vslVideo.setAttribute('x5-video-player-type', 'h5');
-    vslVideo.setAttribute('x5-video-player-fullscreen', 'false');
-    vslVideo.setAttribute('x5-video-orientation', 'portraint');
-    
-    // Desabilitar fullscreen via JavaScript
-    vslVideo.addEventListener('dblclick', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    });
-    
-    // Interceptar tentativas de fullscreen
-    vslVideo.addEventListener('webkitfullscreenchange', function(e) {
-        if (document.webkitFullscreenElement === vslVideo) {
-            document.webkitExitFullscreen();
-        }
-    });
-    
-    vslVideo.addEventListener('fullscreenchange', function(e) {
-        if (document.fullscreenElement === vslVideo) {
-            document.exitFullscreen();
-        }
-    });
-    
-    // Desabilitar controles de fullscreen via atributos
-    vslVideo.setAttribute('controlsList', 'nodownload nofullscreen noremoteplaybook');
-    vslVideo.setAttribute('disablePictureInPicture', 'true');
-    
-    console.log('Fullscreen desabilitado para o vídeo VSL');
-}
-
-// Função para inicializar o botão de som
-function initializeSoundToggle() {
-    soundToggleBtn.addEventListener('click', function() {
-        toggleVideoSound();
-    });
-    
-    // Inicializar estado do botão
-    updateSoundToggleButton();
-}
-
-// Função para alternar o som do vídeo
-function toggleVideoSound() {
-    isSoundOn = !isSoundOn;
-    vslVideo.muted = !isSoundOn;
-    updateSoundToggleButton();
-    console.log('Som do vídeo:', isSoundOn ? 'Ativado' : 'Desativado');
-}
-
-// Função para atualizar o botão de som
-function updateSoundToggleButton() {
-    if (isSoundOn) {
-        soundToggleBtn.classList.add('sound-on');
-        soundToggleBtn.classList.remove('sound-off');
-        soundToggleBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="white" stroke-width="2" fill="none"/>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="white" stroke-width="2"/>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="white" stroke-width="2"/>
-            </svg>
-        `;
-    } else {
-        soundToggleBtn.classList.add('sound-off');
-        soundToggleBtn.classList.remove('sound-on');
-        soundToggleBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="white" stroke-width="2" fill="none"/>
-                <path d="m23 9-6 6" stroke="white" stroke-width="2"/>
-                <path d="m17 9 6 6" stroke="white" stroke-width="2"/>
-            </svg>
-        `;
-    }
-}
-
-// Função para inicializar o VSL
-function initializeVSL() {
-    console.log('=== INICIALIZANDO VSL ===');
-    console.log('URL do vídeo:', vslVideo.currentSrc || 'Não definido');
-    console.log('Atributos do vídeo:');
-    console.log('- autoplay:', vslVideo.autoplay);
-    console.log('- muted:', vslVideo.muted);
-    console.log('- playsinline:', vslVideo.getAttribute('playsinline'));
-    console.log('- webkit-playsinline:', vslVideo.getAttribute('webkit-playsinline'));
+// Função para iniciar VSL
+function startVSL() {
+    console.log('=== INICIANDO VSL ===');
     
     // Configurar o vídeo VSL
     vslVideo.addEventListener('loadstart', function() {
         console.log('🔄 VSL: Iniciando carregamento');
     });
     
-    vslVideo.addEventListener('durationchange', function() {
-        console.log('⏱️ VSL: Duração carregada:', vslVideo.duration);
-    });
-    
     vslVideo.addEventListener('loadedmetadata', function() {
         console.log('📊 VSL: Metadados carregados');
-        console.log('- Duração:', vslVideo.duration);
-        console.log('- Largura:', vslVideo.videoWidth);
-        console.log('- Altura:', vslVideo.videoHeight);
-    });
-    
-    vslVideo.addEventListener('loadeddata', function() {
-        console.log('✅ VSL: Dados carregados e pronto para reprodução');
-        console.log('- ReadyState:', vslVideo.readyState);
-        console.log('- NetworkState:', vslVideo.networkState);
     });
 
     vslVideo.addEventListener('canplay', function() {
         console.log('▶️ VSL: Pode começar a reproduzir');
     });
     
-    vslVideo.addEventListener('canplaythrough', function() {
-        console.log('🎬 VSL: Pode reproduzir sem interrupções');
-    });
-
     vslVideo.addEventListener('play', function() {
-        // Esconder o overlay quando o vídeo começar a tocar
-        videoOverlay.classList.add('hidden');
         console.log('▶️ VSL: Reprodução iniciada');
-        console.log('- CurrentTime:', vslVideo.currentTime);
-        console.log('- PlaybackRate:', vslVideo.playbackRate);
     });
 
-    vslVideo.addEventListener('pause', function() {
-        // Mostrar o overlay quando o vídeo pausar
-        videoOverlay.classList.remove('hidden');
-        console.log('⏸️ VSL: Reprodução pausada');
-    });
-
-    vslVideo.addEventListener('ended', function() {
-        // Mostrar o overlay quando o vídeo terminar
-        videoOverlay.classList.remove('hidden');
-        console.log('🏁 VSL: Reprodução finalizada');
-    });
-    
     vslVideo.addEventListener('error', function(e) {
         console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
-        console.error('Error details:', vslVideo.error);
-        console.error('Error code:', vslVideo.error ? vslVideo.error.code : 'N/A');
-        console.error('Error message:', vslVideo.error ? vslVideo.error.message : 'N/A');
     });
-    
-    vslVideo.addEventListener('stalled', function() {
-        console.warn('⚠️ VSL: Carregamento parou (stalled)');
-    });
-    
-    vslVideo.addEventListener('waiting', function() {
-        console.warn('⏳ VSL: Aguardando dados (waiting)');
-    });
-
-    // Permitir clicar no overlay para iniciar o vídeo
-    videoOverlay.addEventListener('click', function() {
-        console.log('🖱️ Usuário clicou no overlay - iniciando VSL manualmente');
-        vslVideo.play().then(function() {
-            console.log('✅ VSL iniciado manualmente com sucesso');
-        }).catch(function(error) {
-            console.error('❌ Falha ao iniciar VSL manualmente:', error);
-        });
-    });
-    
-    // Prevenir comportamento padrão do vídeo no iOS
-    vslVideo.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        console.log('👆 Touch start prevenido no iOS');
-    });
-    
-    vslVideo.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        console.log('👆 Touch end prevenido no iOS');
-    });
-    
-    console.log('✅ VSL inicializado com todos os event listeners');
-}
-
-// Função para iniciar VSL automaticamente
-function startVSL() {
-    console.log('=== INICIANDO VSL AUTOMATICAMENTE ===');
-    console.log('Estado do vídeo antes do autoplay:');
-    console.log('- Pausado:', vslVideo.paused);
-    console.log('- Muted:', vslVideo.muted);
-    console.log('- ReadyState:', vslVideo.readyState);
-    console.log('- NetworkState:', vslVideo.networkState);
-    console.log('- CurrentSrc:', vslVideo.currentSrc);
-    console.log('- Duration:', vslVideo.duration);
-    console.log('- Volume:', vslVideo.volume);
-    
-    // Verificar se o vídeo está carregado
-    if (vslVideo.readyState < 2) {
-        console.log('⚠️ VÍDEO AINDA NÃO CARREGADO - ReadyState:', vslVideo.readyState);
-        console.log('Aguardando carregamento do vídeo...');
-        
-        vslVideo.addEventListener('canplay', function() {
-            console.log('✅ VÍDEO CARREGADO - ReadyState:', vslVideo.readyState);
-            attemptAutoplay();
-        }, { once: true });
-        
-        vslVideo.addEventListener('error', function(e) {
-            console.error('❌ ERRO NO CARREGAMENTO DO VÍDEO:', e);
-            console.error('Error details:', vslVideo.error);
-        });
-        
-        return;
-    }
     
     // Tentar reproduzir automaticamente
     setTimeout(function() {
@@ -460,80 +341,25 @@ function startVSL() {
     }, 500);
 }
 
-// Função para tentar autoplay com logs detalhados
+// Função para tentar autoplay
 function attemptAutoplay() {
     console.log('=== TENTANDO AUTOPLAY ===');
-    console.log('Estado do vídeo antes do play():');
-    console.log('- Pausado:', vslVideo.paused);
-    console.log('- Muted:', vslVideo.muted);
-    console.log('- ReadyState:', vslVideo.readyState);
-    console.log('- User Agent:', navigator.userAgent);
-    console.log('- É iOS:', /iPad|iPhone|iPod/.test(navigator.userAgent));
-    console.log('- É Safari:', /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent));
     
     const playPromise = vslVideo.play();
     
     if (playPromise !== undefined) {
         playPromise.then(function() {
             console.log('✅ AUTOPLAY SUCESSO!');
-            console.log('Estado após play():');
-            console.log('- Pausado:', vslVideo.paused);
-            console.log('- CurrentTime:', vslVideo.currentTime);
-            console.log('- PlaybackRate:', vslVideo.playbackRate);
         }).catch(function(error) {
             console.error('❌ AUTOPLAY FALHOU:', error);
-            console.error('Tipo de erro:', error.name);
-            console.error('Mensagem de erro:', error.message);
-            
-            // Logs específicos para diferentes tipos de erro
-            if (error.name === 'NotAllowedError') {
-                console.error('🔒 ERRO: Autoplay bloqueado por política do navegador');
-                console.error('Solução: Usuário precisa interagir com a página primeiro');
-            } else if (error.name === 'NotSupportedError') {
-                console.error('🔒 ERRO: Formato de vídeo não suportado');
-            } else if (error.name === 'NetworkError') {
-                console.error('🔒 ERRO: Problema de rede ao carregar vídeo');
-            } else if (error.name === 'AbortError') {
-                console.error('🔒 ERRO: Reprodução abortada');
-            }
-            
-            // Mostrar overlay para interação manual
-            console.log('📺 Mostrando overlay para interação manual');
-            videoOverlay.classList.remove('hidden');
-            
-            // Adicionar listener para clique no overlay
-            videoOverlay.addEventListener('click', function() {
-                console.log('🖱️ Usuário clicou no overlay - tentando play manual');
-                vslVideo.play().then(function() {
-                    console.log('✅ Play manual bem-sucedido');
-                }).catch(function(manualError) {
-                    console.error('❌ Play manual também falhou:', manualError);
-                });
-            }, { once: true });
         });
-    } else {
-        console.log('⚠️ play() retornou undefined - navegador não suporta Promise');
-        console.log('Estado após play():');
-        console.log('- Pausado:', vslVideo.paused);
     }
 }
 
-// Função para inicializar a webcam
-function initializeWebcam() {
-    webcamContainer.addEventListener('click', function() {
-        if (!isWebcamActive) {
-            startWebcam();
-        } else {
-            stopWebcam();
-        }
-    });
-}
-
-// Função para iniciar a webcam
+// Função para iniciar webcam
 async function startWebcam() {
     try {
         console.log('=== INICIANDO WEBCAM ===');
-        console.log('Solicitando stream de vídeo...');
         
         webcamStream = await navigator.mediaDevices.getUserMedia({ 
             video: { 
@@ -545,11 +371,10 @@ async function startWebcam() {
         });
         
         console.log('✅ Stream de webcam obtido com sucesso');
-        console.log('Tracks disponíveis:', webcamStream.getTracks().map(track => track.kind));
         
         webcamVideo.srcObject = webcamStream;
         webcamVideo.style.display = 'block';
-        webcamPlaceholder.style.display = 'none';
+        userVideoPlaceholder.style.display = 'none';
         
         isWebcamActive = true;
         isVideoOn = true;
@@ -558,32 +383,14 @@ async function startWebcam() {
         updateVideoButton();
         
         console.log('✅ Webcam ativada com sucesso');
-        console.log('Estado da webcam:');
-        console.log('- Ativa:', isWebcamActive);
-        console.log('- Vídeo ligado:', isVideoOn);
-        console.log('- Stream ativo:', webcamStream.active);
         
     } catch (error) {
         console.error('❌ Erro ao acessar a webcam:', error);
-        console.error('Tipo de erro:', error.name);
-        console.error('Mensagem de erro:', error.message);
-        
-        // Logs específicos para diferentes tipos de erro
-        if (error.name === 'NotAllowedError') {
-            console.error('🔒 ERRO: Permissão de câmera negada');
-        } else if (error.name === 'NotFoundError') {
-            console.error('🔒 ERRO: Câmera não encontrada');
-        } else if (error.name === 'NotReadableError') {
-            console.error('🔒 ERRO: Câmera já em uso');
-        } else if (error.name === 'OverconstrainedError') {
-            console.error('🔒 ERRO: Configuração de câmera não suportada');
-        }
-        
         alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
     }
 }
 
-// Função para parar a webcam
+// Função para parar webcam
 function stopWebcam() {
     if (webcamStream) {
         webcamStream.getTracks().forEach(track => track.stop());
@@ -592,7 +399,7 @@ function stopWebcam() {
     
     webcamVideo.srcObject = null;
     webcamVideo.style.display = 'none';
-    webcamPlaceholder.style.display = 'flex';
+    userVideoPlaceholder.style.display = 'flex';
     
     isWebcamActive = false;
     isVideoOn = false;
@@ -603,9 +410,55 @@ function stopWebcam() {
     console.log('Webcam desativada');
 }
 
-// Função para inicializar os controles
-function initializeControls() {
-    // Botão de mudo - Controla o áudio do VSL
+// Função para iniciar VSL
+function startVSL() {
+    console.log('=== INICIANDO VSL ===');
+    
+    // Configurar o vídeo VSL
+    vslVideo.addEventListener('loadstart', function() {
+        console.log('🔄 VSL: Iniciando carregamento');
+    });
+    
+    vslVideo.addEventListener('loadedmetadata', function() {
+        console.log('📊 VSL: Metadados carregados');
+    });
+
+    vslVideo.addEventListener('canplay', function() {
+        console.log('▶️ VSL: Pode começar a reproduzir');
+    });
+    
+    vslVideo.addEventListener('play', function() {
+        console.log('▶️ VSL: Reprodução iniciada');
+    });
+
+    vslVideo.addEventListener('error', function(e) {
+        console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
+    });
+    
+    // Tentar reproduzir automaticamente
+    setTimeout(function() {
+        attemptAutoplay();
+    }, 500);
+}
+
+// Função para tentar autoplay
+function attemptAutoplay() {
+    console.log('=== TENTANDO AUTOPLAY ===');
+    
+    const playPromise = vslVideo.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(function() {
+            console.log('✅ AUTOPLAY SUCESSO!');
+        }).catch(function(error) {
+            console.error('❌ AUTOPLAY FALHOU:', error);
+        });
+    }
+}
+
+// Inicializar tela de chamada
+function initializeCallScreen() {
+    // Botão de mudo
     muteBtn.addEventListener('click', function() {
         isMuted = !isMuted;
         vslVideo.muted = isMuted;
@@ -637,8 +490,13 @@ function initializeControls() {
             stopWebcam();
             vslVideo.pause();
             
-            // Voltar para tela inicial
-            showPreMeetingScreen();
+            // Voltar para tela de nome
+            showNameScreen();
+            
+            // Resetar estado
+            isCameraEnabled = false;
+            isMicrophoneEnabled = false;
+            isCallStarted = false;
             
             alert('Chamada encerrada');
             console.log('Chamada encerrada');
@@ -650,318 +508,213 @@ function initializeControls() {
     updateVideoButton();
 }
 
-// Função para atualizar o botão de mudo
+// Função para atualizar botão de mudo
 function updateMuteButton() {
     if (isMuted) {
         muteBtn.classList.add('muted');
         muteBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="white" stroke-width="2" fill="none"/>
-                <path d="m23 9-6 6" stroke="white" stroke-width="2"/>
-                <path d="m17 9 6 6" stroke="white" stroke-width="2"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                <path d="m23 9-6 6" stroke="currentColor" stroke-width="2"/>
+                <path d="m17 9 6 6" stroke="currentColor" stroke-width="2"/>
             </svg>
         `;
     } else {
         muteBtn.classList.remove('muted');
         muteBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="white" stroke-width="2" fill="none"/>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="white" stroke-width="2"/>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="white" stroke-width="2"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
             </svg>
         `;
     }
 }
 
-// Função para atualizar o botão de vídeo
+// Função para atualizar botão de vídeo
 function updateVideoButton() {
     if (isVideoOn && isWebcamActive) {
         // Vídeo ligado
         videoBtn.classList.remove('disabled');
         videoBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M23 7l-7 5 7 5V7z" stroke="white" stroke-width="2" fill="none"/>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="white" stroke-width="2" fill="none"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
             </svg>
         `;
     } else {
         // Vídeo desligado
         videoBtn.classList.add('disabled');
         videoBtn.innerHTML = `
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M23 7l-7 5 7 5V7z" stroke="white" stroke-width="2" fill="none"/>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke="white" stroke-width="2" fill="none"/>
-                <path d="m1 1 22 22" stroke="white" stroke-width="2"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12m-3.2 0a3.2 3.2 0 1 1 6.4 0a3.2 3.2 0 1 1 -6.4 0"/>
+                <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                <path d="m1 1 22 22" stroke="currentColor" stroke-width="2"/>
             </svg>
         `;
     }
 }
 
-// Função para atualizar o horário
+// Função para atualizar horário
 function updateTime() {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
-    const timeElement = document.getElementById('meetingTime');
-    if (timeElement) {
-        timeElement.textContent = `${hours}:${minutes}`;
+    if (meetingTimeElement) {
+        meetingTimeElement.textContent = `${hours}:${minutes}`;
     }
 }
 
-// Atualizar o horário a cada minuto
-setInterval(updateTime, 60000);
-updateTime(); // Atualizar imediatamente
-
-// Função para simular indicadores de rede
-function updateNetworkIndicators() {
-    const indicators = document.querySelectorAll('.indicator');
-    indicators.forEach((indicator, index) => {
-        // Simular atividade de rede aleatória
-        if (Math.random() > 0.3) {
-            indicator.classList.add('active');
-        } else {
-            indicator.classList.remove('active');
-        }
-    });
-}
-
-// Atualizar indicadores de rede a cada 2 segundos
-setInterval(updateNetworkIndicators, 2000);
-
-// Função para lidar com redimensionamento da janela
-window.addEventListener('resize', function() {
-    // Ajustar layout se necessário
-    console.log('Janela redimensionada');
-});
-
-// Função para lidar com visibilidade da página
-document.addEventListener('visibilitychange', function() {
-    if (document.hidden) {
-        // Página não está visível, pausar vídeo se necessário
-        console.log('Página oculta');
-    } else {
-        // Página está visível novamente
-        console.log('Página visível');
-    }
-});
-
-// Adicionar suporte a teclado
-document.addEventListener('keydown', function(event) {
-    switch(event.code) {
-        case 'KeyM':
-            // Tecla M para mudo
-            isMuted = !isMuted;
-            vslVideo.muted = isMuted;
-            updateMuteButton();
-            break;
-        case 'KeyV':
-            // Tecla V para vídeo
-            if (isWebcamActive) {
-                stopWebcam();
-            } else {
-                startWebcam();
-            }
-            break;
-        case 'KeyS':
-            // Tecla S para som do vídeo
-            toggleVideoSound();
-            break;
-        case 'Space':
-            // Barra de espaço para play/pause do VSL
-            event.preventDefault();
-            if (vslVideo.paused) {
-                vslVideo.play();
-            } else {
-                vslVideo.pause();
-            }
-            break;
-        case 'Escape':
-            // ESC para fechar chat
-            if (isChatOpen) {
-                closeChat();
-            }
-            break;
-    }
-});
-
-console.log('Google Meet Clone inicializado com sucesso!');
-
-// Chat functionality
-let isChatOpen = false;
-let chatMessages = [];
-
-// Chat elements
-const chatBtn = document.getElementById('chatBtn');
-const chatPopup = document.getElementById('chatPopup');
-const chatCloseBtn = document.getElementById('chatCloseBtn');
-const chatInput = document.getElementById('chatInput');
-const chatSendBtn = document.getElementById('chatSendBtn');
-const chatMessagesContainer = document.getElementById('chatMessages');
-const allowMessagesToggle = document.getElementById('allowMessages');
-
-// Initialize chat functionality
+// Inicializar chat
 function initializeChat() {
-    // Create overlay element
-    const chatOverlay = document.createElement('div');
-    chatOverlay.className = 'chat-overlay';
-    chatOverlay.id = 'chatOverlay';
-    document.body.appendChild(chatOverlay);
+    let isChatOpen = false;
+    let chatMessages = [];
 
-    // Chat button click
+    // Botão de chat
     chatBtn.addEventListener('click', function() {
         toggleChat();
     });
 
-    // Close button click
+    // Fechar chat
     chatCloseBtn.addEventListener('click', function() {
         closeChat();
     });
 
-    // Overlay click to close
-    chatOverlay.addEventListener('click', function() {
-        closeChat();
-    });
-
-    // Send button click
+    // Enviar mensagem
     chatSendBtn.addEventListener('click', function() {
         sendMessage();
     });
 
-    // Enter key to send message
+    // Enter para enviar
     chatInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
 
-    // Input change to enable/disable send button
-    chatInput.addEventListener('input', function() {
-        chatSendBtn.disabled = chatInput.value.trim() === '';
-    });
+    function toggleChat() {
+        if (isChatOpen) {
+            closeChat();
+        } else {
+            openChat();
+        }
+    }
 
-    // Allow messages toggle
-    allowMessagesToggle.addEventListener('change', function() {
-        updateChatInputState();
-    });
+    function openChat() {
+        isChatOpen = true;
+        chatPopup.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+            chatInput.focus();
+        }, 300);
+        
+        console.log('Chat aberto');
+    }
 
-    // Initialize send button state
-    chatSendBtn.disabled = true;
-    updateChatInputState();
-}
+    function closeChat() {
+        isChatOpen = false;
+        chatPopup.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        console.log('Chat fechado');
+    }
 
-function toggleChat() {
-    if (isChatOpen) {
-        closeChat();
-    } else {
-        openChat();
+    function sendMessage() {
+        const messageText = chatInput.value.trim();
+        
+        if (messageText === '') {
+            return;
+        }
+        
+        // Criar mensagem
+        const message = {
+            id: Date.now(),
+            text: messageText,
+            timestamp: new Date(),
+            own: true
+        };
+        
+        // Adicionar à lista
+        chatMessages.push(message);
+        
+        // Exibir mensagem
+        displayMessage(message);
+        
+        // Limpar input
+        chatInput.value = '';
+        
+        // Simular resposta
+        setTimeout(() => {
+            simulateResponse();
+        }, 1000);
+        
+        console.log('Mensagem enviada:', messageText);
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${message.own ? 'own' : ''}`;
+        messageElement.textContent = message.text;
+        
+        chatMessages.appendChild(messageElement);
+        
+        // Scroll para baixo
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function simulateResponse() {
+        const responses = [
+            'Mensagem recebida!',
+            'Obrigado pela mensagem.',
+            'Entendi.',
+            'Perfeito!',
+            'Certo, vou verificar isso.'
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        const responseMessage = {
+            id: Date.now(),
+            text: randomResponse,
+            timestamp: new Date(),
+            own: false
+        };
+        
+        chatMessages.push(responseMessage);
+        displayMessage(responseMessage);
     }
 }
 
-function openChat() {
-    isChatOpen = true;
-    chatPopup.classList.add('active');
-    document.getElementById('chatOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    
-    // Focus on input after animation
-    setTimeout(() => {
-        chatInput.focus();
-    }, 300);
-    
-    console.log('Chat aberto');
-}
-
-function closeChat() {
-    isChatOpen = false;
-    chatPopup.classList.remove('active');
-    document.getElementById('chatOverlay').classList.remove('active');
-    document.body.style.overflow = ''; // Restore scrolling
-    
-    console.log('Chat fechado');
-}
-
-function sendMessage() {
-    const messageText = chatInput.value.trim();
-    
-    if (messageText === '' || !allowMessagesToggle.checked) {
-        return;
-    }
-    
-    // Create message object
-    const message = {
-        id: Date.now(),
-        text: messageText,
-        timestamp: new Date(),
-        own: true
-    };
-    
-    // Add to messages array
-    chatMessages.push(message);
-    
-    // Display message
-    displayMessage(message);
-    
-    // Clear input
-    chatInput.value = '';
-    chatSendBtn.disabled = true;
-    
-    // Simulate response (optional)
-    setTimeout(() => {
-        simulateResponse();
-    }, 1000);
-    
-    console.log('Mensagem enviada:', messageText);
-}
-
-function displayMessage(message) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${message.own ? 'own' : ''}`;
-    messageElement.textContent = message.text;
-    
-    chatMessagesContainer.appendChild(messageElement);
-    
-    // Scroll to bottom
-    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-}
-
-function simulateResponse() {
-    const responses = [
-        'Mensagem recebida!',
-        'Obrigado pela mensagem.',
-        'Entendi.',
-        'Perfeito!',
-        'Certo, vou verificar isso.'
-    ];
-    
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    
-    const responseMessage = {
-        id: Date.now(),
-        text: randomResponse,
-        timestamp: new Date(),
-        own: false
-    };
-    
-    chatMessages.push(responseMessage);
-    displayMessage(responseMessage);
-}
-
-function updateChatInputState() {
-    const isEnabled = allowMessagesToggle.checked;
-    chatInput.disabled = !isEnabled;
-    chatSendBtn.disabled = !isEnabled || chatInput.value.trim() === '';
-    
-    if (!isEnabled) {
-        chatInput.placeholder = 'Messages are disabled';
-    } else {
-        chatInput.placeholder = 'Send a message';
-    }
-}
-
-// Handle window resize for mobile responsiveness
-window.addEventListener('resize', function() {
-    if (isChatOpen && window.innerWidth <= 480) {
-        // Adjust chat position for mobile
-        chatPopup.style.transform = 'translateY(0) scale(1)';
+// Suporte a teclado
+document.addEventListener('keydown', function(event) {
+    switch(event.code) {
+        case 'KeyM':
+            // Tecla M para mudo
+            if (currentScreen === 'call') {
+                isMuted = !isMuted;
+                vslVideo.muted = isMuted;
+                updateMuteButton();
+            }
+            break;
+        case 'KeyV':
+            // Tecla V para vídeo
+            if (currentScreen === 'call') {
+                if (isWebcamActive) {
+                    stopWebcam();
+                } else {
+                    startWebcam();
+                }
+            }
+            break;
+        case 'Escape':
+            // ESC para fechar chat
+            if (chatPopup.classList.contains('active')) {
+                chatPopup.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            break;
     }
 });
+
+console.log('Google Meet Clone inicializado com sucesso!');
