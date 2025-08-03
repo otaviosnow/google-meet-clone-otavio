@@ -339,6 +339,12 @@ function startVSL() {
         console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
     });
     
+    // Listener para quando o vídeo termina
+    vslVideo.addEventListener('ended', function() {
+        console.log('🎬 VSL: Vídeo terminou - encerrando chamada automaticamente');
+        endCall();
+    });
+    
     // Tentar reproduzir automaticamente
     setTimeout(function() {
         attemptAutoplay();
@@ -412,37 +418,6 @@ function stopWebcam() {
     updateVideoButton();
     
     console.log('Webcam desativada');
-}
-
-// Função para iniciar VSL
-function startVSL() {
-    console.log('=== INICIANDO VSL ===');
-    
-    // Configurar o vídeo VSL
-    vslVideo.addEventListener('loadstart', function() {
-        console.log('🔄 VSL: Iniciando carregamento');
-    });
-    
-    vslVideo.addEventListener('loadedmetadata', function() {
-        console.log('📊 VSL: Metadados carregados');
-    });
-
-    vslVideo.addEventListener('canplay', function() {
-        console.log('▶️ VSL: Pode começar a reproduzir');
-    });
-    
-    vslVideo.addEventListener('play', function() {
-        console.log('▶️ VSL: Reprodução iniciada');
-    });
-
-    vslVideo.addEventListener('error', function(e) {
-        console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
-    });
-    
-    // Tentar reproduzir automaticamente
-    setTimeout(function() {
-        attemptAutoplay();
-    }, 500);
 }
 
 // Função para tentar autoplay
