@@ -7,8 +7,8 @@
 
 body {
     font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-    background-color: #202124;
-    color: #ffffff;
+    background-color: #ffffff;
+    color: #202124;
     height: 100vh;
     overflow: hidden;
 }
@@ -22,7 +22,7 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: #202124;
+    background-color: #ffffff;
 }
 
 /* Logo do Meet */
@@ -32,8 +32,12 @@ body {
     gap: 8px;
     font-size: 24px;
     font-weight: 500;
-    color: #ffffff;
+    color: #202124;
     margin-bottom: 32px;
+}
+
+.meet-logo img {
+    border-radius: 4px;
 }
 
 /* Tela 1: Nome do Participante */
@@ -53,12 +57,12 @@ body {
     font-size: 24px;
     font-weight: 400;
     margin-bottom: 8px;
-    color: #ffffff;
+    color: #202124;
 }
 
 .name-form p {
     font-size: 14px;
-    color: #9aa0a6;
+    color: #5f6368;
     margin-bottom: 32px;
 }
 
@@ -70,23 +74,23 @@ body {
 
 .input-group input {
     padding: 16px;
-    border: 1px solid #5f6368;
+    border: 1px solid #dadce0;
     border-radius: 8px;
-    background-color: #303134;
-    color: #ffffff;
+    background-color: #ffffff;
+    color: #202124;
     font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
 }
 
 .input-group input:focus {
-    border-color: #8ab4f8;
+    border-color: #1a73e8;
 }
 
 .input-group button {
     padding: 12px 24px;
-    background-color: #8ab4f8;
-    color: #202124;
+    background-color: #1a73e8;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     font-size: 14px;
@@ -96,12 +100,13 @@ body {
 }
 
 .input-group button:hover:not(:disabled) {
-    background-color: #aecbfa;
+    background-color: #1557b0;
 }
 
 .input-group button:disabled {
-    background-color: #5f6368;
+    background-color: #dadce0;
     cursor: not-allowed;
+    color: #5f6368;
 }
 
 /* Tela 2: Configuração de Dispositivos */
@@ -115,12 +120,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 16px 24px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, transparent 100%);
 }
 
 .meeting-info {
     font-size: 14px;
-    color: #ffffff;
+    color: #202124;
     opacity: 0.9;
 }
 
@@ -138,14 +143,14 @@ body {
     width: 100%;
     max-width: 400px;
     height: 300px;
-    background-color: #2d2d2d;
+    background-color: #f8f9fa;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid #e8eaed;
 }
 
 #previewVideo {
@@ -163,7 +168,7 @@ body {
     justify-content: center;
     text-align: center;
     padding: 32px;
-    color: #9aa0a6;
+    color: #5f6368;
 }
 
 .camera-icon {
@@ -186,29 +191,31 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f8f9fa;
+    border: 1px solid #dadce0;
     border-radius: 12px;
     padding: 16px 24px;
-    color: #ffffff;
+    color: #202124;
     cursor: pointer;
     transition: all 0.2s;
     min-width: 120px;
 }
 
 .device-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: #f1f3f4;
     transform: translateY(-2px);
 }
 
 .device-btn.active {
-    background: rgba(34, 197, 94, 0.2);
-    border-color: rgba(34, 197, 94, 0.5);
+    background: #e8f5e8;
+    border-color: #34a853;
+    color: #34a853;
 }
 
 .device-btn.disabled {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.5);
+    background: #fce8e6;
+    border-color: #ea4335;
+    color: #ea4335;
     opacity: 0.7;
 }
 
@@ -231,8 +238,8 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #8ab4f8;
-    color: #202124;
+    background: #1a73e8;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     padding: 16px 32px;
@@ -245,14 +252,15 @@ body {
 }
 
 .join-btn:hover:not(:disabled) {
-    background: #aecbfa;
+    background: #1557b0;
     transform: translateY(-2px);
 }
 
 .join-btn:disabled {
-    background: #5f6368;
+    background: #dadce0;
     cursor: not-allowed;
     opacity: 0.6;
+    color: #5f6368;
 }
 
 .join-btn svg {
@@ -392,10 +400,10 @@ body {
     right: 24px;
     width: 150px;
     height: 100px;
-    background-color: #2d2d2d;
+    background-color: #f8f9fa;
     border-radius: 8px;
     overflow: hidden;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid #dadce0;
 }
 
 #webcamVideo {
@@ -410,7 +418,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #9aa0a6;
+    color: #5f6368;
     opacity: 0.7;
 }
 
@@ -428,11 +436,11 @@ body {
     display: flex;
     gap: 16px;
     align-items: center;
-    background-color: rgba(32, 33, 36, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 16px 24px;
     border-radius: 40px;
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .control-btn {
@@ -445,25 +453,28 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #202124;
 }
 
 .control-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.2);
     transform: scale(1.05);
 }
 
 .control-btn.muted {
     background-color: #ea4335;
+    color: #ffffff;
 }
 
 .control-btn.disabled {
     background-color: #ea4335;
+    color: #ffffff;
 }
 
 .control-btn.end-call {
     background-color: #ea4335;
+    color: #ffffff;
     position: relative;
 }
 
@@ -475,7 +486,7 @@ body {
     transform: translateY(-50%);
     width: 1px;
     height: 24px;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .control-btn.end-call:hover {
@@ -565,11 +576,11 @@ body {
 }
 
 .chat-input:focus {
-    border-color: #8ab4f8;
+    border-color: #1a73e8;
 }
 
 .chat-send {
-    background: #8ab4f8;
+    background: #1a73e8;
     border: none;
     border-radius: 50%;
     width: 36px;
@@ -578,12 +589,12 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #202124;
+    color: #ffffff;
     transition: background-color 0.2s;
 }
 
 .chat-send:hover {
-    background: #aecbfa;
+    background: #1557b0;
 }
 
 .chat-send:disabled {
@@ -604,6 +615,62 @@ body {
 .message.own {
     background: #e3f2fd;
     margin-left: 20px;
+}
+
+/* Tela 4: Chamada Encerrada */
+#endedScreen {
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+}
+
+.ended-content {
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    padding: 24px;
+}
+
+.ended-icon {
+    margin-bottom: 24px;
+    color: #34a853;
+}
+
+.ended-content h1 {
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 16px;
+    color: #202124;
+}
+
+.ended-content p {
+    font-size: 16px;
+    color: #5f6368;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #25d366;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.whatsapp-btn:hover {
+    background: #128c7e;
+}
+
+.whatsapp-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
 /* Responsividade */
@@ -712,6 +779,23 @@ body {
     
     .chat-input {
         font-size: 16px;
+    }
+    
+    .ended-content {
+        padding: 16px;
+    }
+    
+    .ended-content h1 {
+        font-size: 24px;
+    }
+    
+    .ended-content p {
+        font-size: 14px;
+    }
+    
+    .whatsapp-btn {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 }
 

@@ -14,6 +14,7 @@ let meetingId = '';
 const nameScreen = document.getElementById('nameScreen');
 const deviceScreen = document.getElementById('deviceScreen');
 const callScreen = document.getElementById('callScreen');
+const endedScreen = document.getElementById('endedScreen');
 
 // Tela 1: Nome
 const participantNameInput = document.getElementById('participantName');
@@ -33,11 +34,8 @@ const webcamVideo = document.getElementById('webcamVideo');
 const userVideoPlaceholder = document.getElementById('userVideoPlaceholder');
 const muteBtn = document.getElementById('muteBtn');
 const videoBtn = document.getElementById('videoBtn');
-const participantsBtn = document.getElementById('participantsBtn');
 const chatBtn = document.getElementById('chatBtn');
 const endCallBtn = document.getElementById('endCallBtn');
-const callMeetingIdElement = document.getElementById('callMeetingId');
-const meetingTimeElement = document.getElementById('meetingTime');
 
 // Chat
 const chatPopup = document.getElementById('chatPopup');
@@ -50,10 +48,14 @@ const chatMessages = document.getElementById('chatMessages');
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO GOOGLE MEET CLONE ===');
     
-    // Verificar se já está na chamada
+    // Verificar se já está na chamada ou encerrada
     const isInCall = localStorage.getItem('googleMeetInCall');
+    const isEnded = localStorage.getItem('googleMeetEnded');
     
-    if (isInCall === 'true') {
+    if (isEnded === 'true') {
+        console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
+        showEndedScreen();
+    } else if (isInCall === 'true') {
         console.log('🔄 Usuário já estava na chamada - restaurando...');
         showCallScreen();
         startCall();
@@ -70,10 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDeviceScreen();
     initializeCallScreen();
     initializeChat();
-    updateTime();
-    
-    // Atualizar horário a cada minuto
-    setInterval(updateTime, 60000);
 });
 
 // Função para gerar ID da reunião
@@ -94,7 +92,6 @@ function generateMeetingId() {
     
     meetingId = id;
     meetingIdElement.textContent = id;
-    callMeetingIdElement.textContent = id;
     console.log('ID da reunião gerado:', id);
 }
 
@@ -104,6 +101,7 @@ function showNameScreen() {
     nameScreen.style.display = 'flex';
     deviceScreen.style.display = 'none';
     callScreen.style.display = 'none';
+    endedScreen.style.display = 'none';
     console.log('📝 Mostrando tela de nome');
 }
 
@@ -113,6 +111,7 @@ function showDeviceScreen() {
     nameScreen.style.display = 'none';
     deviceScreen.style.display = 'flex';
     callScreen.style.display = 'none';
+    endedScreen.style.display = 'none';
     console.log('📱 Mostrando tela de dispositivos');
 }
 
@@ -122,7 +121,18 @@ function showCallScreen() {
     nameScreen.style.display = 'none';
     deviceScreen.style.display = 'none';
     callScreen.style.display = 'flex';
+    endedScreen.style.display = 'none';
     console.log('📹 Mostrando tela de chamada');
+}
+
+// Função para mostrar tela de encerramento
+function showEndedScreen() {
+    currentScreen = 'ended';
+    nameScreen.style.display = 'none';
+    deviceScreen.style.display = 'none';
+    callScreen.style.display = 'none';
+    endedScreen.style.display = 'flex';
+    console.log('🏁 Mostrando tela de encerramento');
 }
 
 // Inicializar tela de nome
@@ -166,13 +176,6 @@ function initializeDeviceScreen() {
     joinBtn.addEventListener('click', function() {
         joinCall();
     });
-    
-    // Tentar ativar câmera automaticamente
-    setTimeout(() => {
-        if (!isCameraEnabled) {
-            toggleCamera();
-        }
-    }, 1000);
 }
 
 // Função para alternar câmera
@@ -281,6 +284,7 @@ function joinCall() {
     
     // Salvar no localStorage
     localStorage.setItem('googleMeetInCall', 'true');
+    localStorage.removeItem('googleMeetEnded');
     
     // Mostrar tela de chamada
     showCallScreen();
@@ -475,37 +479,41 @@ function initializeCallScreen() {
         }
     });
 
-    // Botão de participantes
-    participantsBtn.addEventListener('click', function() {
-        alert('Lista de participantes (funcionalidade em desenvolvimento)');
-        console.log('Botão de participantes clicado');
-    });
-
     // Botão de encerrar chamada
     endCallBtn.addEventListener('click', function() {
         if (confirm('Deseja realmente encerrar a chamada?')) {
-            // Limpar localStorage
-            localStorage.removeItem('googleMeetInCall');
-            
-            stopWebcam();
-            vslVideo.pause();
-            
-            // Voltar para tela de nome
-            showNameScreen();
-            
-            // Resetar estado
-            isCameraEnabled = false;
-            isMicrophoneEnabled = false;
-            isCallStarted = false;
-            
-            alert('Chamada encerrada');
-            console.log('Chamada encerrada');
+            endCall();
         }
     });
 
     // Inicializar estados dos botões
     updateMuteButton();
     updateVideoButton();
+}
+
+// Função para encerrar chamada
+function endCall() {
+    console.log('=== ENCERRANDO CHAMADA ===');
+    
+    // Limpar localStorage e marcar como encerrada
+    localStorage.removeItem('googleMeetInCall');
+    localStorage.setItem('googleMeetEnded', 'true');
+    
+    // Parar webcam
+    stopWebcam();
+    
+    // Pausar VSL
+    vslVideo.pause();
+    
+    // Resetar estado
+    isCameraEnabled = false;
+    isMicrophoneEnabled = false;
+    isCallStarted = false;
+    
+    // Mostrar tela de encerramento
+    showEndedScreen();
+    
+    console.log('✅ Chamada encerrada');
 }
 
 // Função para atualizar botão de mudo
@@ -552,16 +560,6 @@ function updateVideoButton() {
                 <path d="m1 1 22 22" stroke="currentColor" stroke-width="2"/>
             </svg>
         `;
-    }
-}
-
-// Função para atualizar horário
-function updateTime() {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    if (meetingTimeElement) {
-        meetingTimeElement.textContent = `${hours}:${minutes}`;
     }
 }
 
