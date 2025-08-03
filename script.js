@@ -465,9 +465,8 @@ function initializeCallScreen() {
     // Botão de mudo
     muteBtn.addEventListener('click', function() {
         isMuted = !isMuted;
-        vslVideo.muted = isMuted;
         updateMuteButton();
-        console.log('Áudio VSL:', isMuted ? 'Mutado' : 'Ativado');
+        console.log('Microfone:', isMuted ? 'Mutado' : 'Ativado');
     });
 
     // Botão de vídeo
