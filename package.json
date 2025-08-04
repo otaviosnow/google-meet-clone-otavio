@@ -2,36 +2,18 @@
   "name": "google-meet-fake-saas",
   "version": "1.0.0",
   "description": "SaaS para criar chamadas fake do Google Meet",
-  "main": "start.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node start.js",
-    "dev": "nodemon start.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "build": "npm install",
-    "prod": "pm2 start ecosystem.config.js --env production",
-    "stop": "pm2 stop google-meet-fake-saas",
-    "restart": "pm2 restart google-meet-fake-saas",
-    "logs": "pm2 logs google-meet-fake-saas",
-    "monitor": "pm2 monit",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "install-deps": "npm install",
-    "setup": "bash install.sh",
-    "render-start": "node start.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["google-meet", "fake", "saas", "video-call", "nodejs", "express", "mongodb"],
+  "keywords": ["google-meet", "fake", "saas", "video-call", "nodejs", "express"],
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "multer": "^1.4.5-lts.1",
-    "express-rate-limit": "^6.10.0",
-    "helmet": "^7.0.0",
-    "express-validator": "^7.0.1",
-    "uuid": "^9.0.0"
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

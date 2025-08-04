@@ -1,48 +1,23 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
-
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Middleware
-app.use(cors());
+// Middleware para JSON
 app.use(express.json());
+
+// Servir arquivos estáticos
 app.use(express.static('public'));
 
-// Middleware de log para debug
-app.use((req, res, next) => {
-  console.log(`📡 ${req.method} ${req.path} - ${new Date().toISOString()}`);
-  if (req.body && Object.keys(req.body).length > 0) {
-    console.log('📋 Request body:', req.body);
-  }
-  next();
+// Rota principal
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Servidor funcionando!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// Conectar ao MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('✅ Conectado ao MongoDB Atlas');
-  })
-  .catch((error) => {
-    console.error('❌ Erro ao conectar ao MongoDB:', error.message);
-  });
-
-// Carregar rotas
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const videoRoutes = require('./routes/videos');
-const meetingRoutes = require('./routes/meetings');
-
-// Usar rotas
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/videos', videoRoutes);
-app.use('/api/meetings', meetingRoutes);
-
-// Rota de teste
+// Rota de teste da API
 app.get('/api/test', (req, res) => {
   res.json({
     message: 'API funcionando!',
@@ -51,26 +26,21 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Rota para o demo
-app.get('/meet/demo', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+// Rota para o Google Meet fake
+app.get('/meet', (req, res) => {
+  res.sendFile(__dirname + '/public/meet.html');
 });
 
-// Rota principal
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Rota para a página principal
+app.get('/app', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor de Autenticação rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
-  console.log(`🎯 Demo: http://localhost:${PORT}/meet/demo`);
-  
-  if (mongoose.connection.readyState === 1) {
-    console.log('✅ Conectado ao MongoDB Atlas');
-  } else {
-    console.log('❌ Não conectado ao MongoDB');
-  }
+  console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
+  console.log(`📱 App: http://localhost:${PORT}/app`);
 }); 
