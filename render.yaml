@@ -3,17 +3,10 @@ services:
     name: google-meet-saas
     env: node
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: node server-auth.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: MONGODB_URI
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: CORS_ORIGIN
-        sync: false
-    healthCheckPath: /api/test
-    autoDeploy: true 
+    healthCheckPath: /api/test 
