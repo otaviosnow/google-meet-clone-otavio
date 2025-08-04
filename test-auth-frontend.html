@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Autenticação Frontend</h1>
+    
+    <div class="test-section info">
+        <h3>📊 Status Atual</h3>
+        <p><strong>API Base URL:</strong> <span id="apiUrl">Carregando...</span></p>
+        <p><strong>Token Armazenado:</strong> <span id="storedToken">Verificando...</span></p>
+        <p><strong>Usuário Atual:</strong> <span id="currentUser">Nenhum</span></p>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 Teste de Registro</h3>
+        <input type="text" id="registerName" placeholder="Nome" value="Teste Usuário">
+        <input type="email" id="registerEmail" placeholder="Email" value="teste_frontend@exemplo.com">
+        <input type="password" id="registerPassword" placeholder="Senha" value="Senha123">
+        <button onclick="testRegister()">Registrar</button>
+        <div id="registerResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔑 Teste de Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="teste_frontend@exemplo.com">
+        <input type="password" id="loginPassword" placeholder="Senha" value="Senha123">
+        <button onclick="testLogin()">Login</button>
+        <div id="loginResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>👤 Teste de Verificação de Auth</h3>
+        <button onclick="testCheckAuth()">Verificar Auth</button>
+        <div id="checkAuthResult" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧹 Limpar Dados</h3>
+        <button onclick="clearData()">Limpar Token e Dados</button>
+        <button onclick="clearLogs()">Limpar Logs</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin + '/api';
+        let authToken = localStorage.getItem('authToken');
+
+        // Atualizar status inicial
+        document.getElementById('apiUrl').textContent = API_BASE_URL;
+        document.getElementById('storedToken').textContent = authToken ? 'Sim' : 'Não';
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        async function testRegister() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            log('registerResult', `Tentando registrar: ${email}`);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('registerResult', `✅ Registro bem-sucedido!`, 'success');
+                    log('registerResult', `Usuário: ${result.user.name} (${result.user.email})`, 'success');
+                    log('registerResult', `Token: ${result.token.substring(0, 20)}...`, 'success');
+                    
+                    // Armazenar token
+                    authToken = result.token;
+                    localStorage.setItem('authToken', authToken);
+                    document.getElementById('storedToken').textContent = 'Sim';
+                    
+                } else {
+                    log('registerResult', `❌ Erro no registro: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log('registerResult', `❌ Erro de rede: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            log('loginResult', `Tentando login: ${email}`);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('loginResult', `✅ Login bem-sucedido!`, 'success');
+                    log('loginResult', `Usuário: ${result.user.name} (${result.user.email})`, 'success');
+                    log('loginResult', `Token: ${result.token.substring(0, 20)}...`, 'success');
+                    
+                    // Armazenar token
+                    authToken = result.token;
+                    localStorage.setItem('authToken', authToken);
+                    document.getElementById('storedToken').textContent = 'Sim';
+                    
+                } else {
+                    log('loginResult', `❌ Erro no login: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log('loginResult', `❌ Erro de rede: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCheckAuth() {
+            if (!authToken) {
+                log('checkAuthResult', `❌ Nenhum token encontrado`, 'error');
+                return;
+            }
+
+            log('checkAuthResult', `Verificando autenticação com token...`);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('checkAuthResult', `✅ Autenticação válida!`, 'success');
+                    log('checkAuthResult', `Usuário: ${result.user.name} (${result.user.email})`, 'success');
+                    document.getElementById('currentUser').textContent = result.user.name;
+                    
+                } else {
+                    log('checkAuthResult', `❌ Token inválido: ${result.error}`, 'error');
+                    // Limpar token inválido
+                    localStorage.removeItem('authToken');
+                    authToken = null;
+                    document.getElementById('storedToken').textContent = 'Não';
+                    document.getElementById('currentUser').textContent = 'Nenhum';
+                }
+            } catch (error) {
+                log('checkAuthResult', `❌ Erro de rede: ${error.message}`, 'error');
+            }
+        }
+
+        function clearData() {
+            localStorage.removeItem('authToken');
+            authToken = null;
+            document.getElementById('storedToken').textContent = 'Não';
+            document.getElementById('currentUser').textContent = 'Nenhum';
+            log('checkAuthResult', `🧹 Dados limpos!`, 'info');
+        }
+
+        function clearLogs() {
+            document.getElementById('registerResult').innerHTML = '';
+            document.getElementById('loginResult').innerHTML = '';
+            document.getElementById('checkAuthResult').innerHTML = '';
+        }
+
+        // Teste inicial
+        window.addEventListener('load', () => {
+            log('checkAuthResult', `🚀 Página carregada. API: ${API_BASE_URL}`, 'info');
+            if (authToken) {
+                log('checkAuthResult', `🔑 Token encontrado, verificando...`, 'info');
+                testCheckAuth();
+            } else {
+                log('checkAuthResult', `❌ Nenhum token encontrado`, 'info');
+            }
+        });
+    </script>
+</body>
+</html> 
