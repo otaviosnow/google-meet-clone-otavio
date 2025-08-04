@@ -3,7 +3,7 @@ services:
     name: google-meet-saas
     env: node
     buildCommand: npm install
-    startCommand: node server-auth.js
+    startCommand: node start.js
     envVars:
       - key: NODE_ENV
         value: production

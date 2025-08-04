@@ -1,1 +1,1 @@
-web: node server-auth.js 
+web: node start.js 
