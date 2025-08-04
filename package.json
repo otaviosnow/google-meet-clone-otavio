@@ -14,7 +14,8 @@
     "monitor": "pm2 monit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-deps": "npm install",
-    "setup": "bash install.sh"
+    "setup": "bash install.sh",
+    "render-start": "node start.js"
   },
   "keywords": ["google-meet", "fake", "saas", "video-call", "nodejs", "express", "mongodb"],
   "author": "Seu Nome",
@@ -40,10 +41,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/seu-usuario/google-meet-fake-saas.git"
+    "url": "https://github.com/otaviosnow/google-meet.git"
   },
   "bugs": {
-    "url": "https://github.com/seu-usuario/google-meet-fake-saas/issues"
+    "url": "https://github.com/otaviosnow/google-meet/issues"
   },
-  "homepage": "https://github.com/seu-usuario/google-meet-fake-saas#readme"
+  "homepage": "https://github.com/otaviosnow/google-meet#readme"
 } 
