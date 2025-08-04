@@ -3,12 +3,10 @@ services:
     name: google-meet-saas
     env: node
     buildCommand: npm install
-    startCommand: node start.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-    healthCheckPath: /api/test
-    autoDeploy: true
-    plan: free 
+    healthCheckPath: /api/test 
