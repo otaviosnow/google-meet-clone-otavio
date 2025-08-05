@@ -16,39 +16,44 @@ const users = new Map();
 
 // Rota principal
 app.get('/', (req, res) => {
+  console.log('📥 GET / - Página principal acessada');
   res.json({
     message: '🚀 Google Meet Fake SaaS - Servidor funcionando!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: '2.0.0'
+    version: '2.0.0',
+    port: PORT
   });
 });
 
 // Rota de teste da API
 app.get('/api/test', (req, res) => {
+  console.log('📥 GET /api/test - API de teste acessada');
   res.json({
     message: '✅ API funcionando perfeitamente!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    status: 'online'
+    status: 'online',
+    port: PORT
   });
 });
 
 // API Mock para usuários - CRÍTICA
 app.get('/api/users/stats', (req, res) => {
-  console.log('📊 API /api/users/stats chamada');
+  console.log('📊 GET /api/users/stats - API de estatísticas acessada');
   res.json({
     totalUsers: 1250,
     activeUsers: 89,
     totalMeetings: 567,
     success: true,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    port: PORT
   });
 });
 
 // API de registro
 app.post('/api/auth/register', (req, res) => {
-  console.log('📝 Tentativa de registro:', req.body);
+  console.log('📝 POST /api/auth/register - Tentativa de registro:', req.body);
   
   const { name, email, password } = req.body;
   
@@ -105,7 +110,7 @@ app.post('/api/auth/register', (req, res) => {
 
 // API de login
 app.post('/api/auth/login', (req, res) => {
-  console.log('🔑 Tentativa de login:', req.body);
+  console.log('🔑 POST /api/auth/login - Tentativa de login:', req.body);
   
   const { email, password } = req.body;
   
@@ -147,6 +152,7 @@ app.post('/api/auth/login', (req, res) => {
 
 // API para verificar autenticação
 app.get('/api/auth/me', (req, res) => {
+  console.log('🔐 GET /api/auth/me - Verificação de autenticação');
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -192,6 +198,7 @@ app.get('/api/auth/me', (req, res) => {
 
 // API Mock para vídeos
 app.post('/api/videos/upload', (req, res) => {
+  console.log('📹 POST /api/videos/upload - Upload de vídeo');
   res.json({
     success: true,
     message: 'Upload mock funcionando',
@@ -202,6 +209,7 @@ app.post('/api/videos/upload', (req, res) => {
 
 // API Mock para reuniões
 app.post('/api/meetings/create', (req, res) => {
+  console.log('🎯 POST /api/meetings/create - Criação de reunião');
   res.json({
     success: true,
     message: 'Reunião mock criada',
@@ -217,16 +225,19 @@ app.use(express.static('public'));
 
 // Rota para o Google Meet fake
 app.get('/meet', (req, res) => {
+  console.log('🎯 GET /meet - Página do Meet acessada');
   res.sendFile(path.join(__dirname, 'public', 'meet.html'));
 });
 
 // Rota para a página principal
 app.get('/app', (req, res) => {
+  console.log('📱 GET /app - Página do App acessada');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Rota para teste de autenticação
 app.get('/test-auth', (req, res) => {
+  console.log('🔐 GET /test-auth - Página de teste de auth acessada');
   res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
 });
 
@@ -262,7 +273,7 @@ app.use('*', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 Servidor Render otimizado iniciado!');
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
@@ -271,4 +282,23 @@ app.listen(PORT, () => {
   console.log(`🔐 Test Auth: http://localhost:${PORT}/test-auth`);
   console.log(`⚙️  Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Porta: ${PORT}`);
+  console.log(`🔍 Host: 0.0.0.0`);
+  console.log(`✅ Servidor pronto para receber conexões!`);
+});
+
+// Tratamento de erros do servidor
+server.on('error', (err) => {
+  console.error('❌ Erro no servidor:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error('❌ Porta já está em uso:', PORT);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 Recebido SIGTERM, encerrando servidor...');
+  server.close(() => {
+    console.log('✅ Servidor encerrado.');
+    process.exit(0);
+  });
 }); 
