@@ -2,11 +2,13 @@ services:
   - type: web
     name: google-meet-saas
     env: node
-    buildCommand: npm install
-    startCommand: node server-render.js
+    buildCommand: chmod +x render-build.sh && ./render-build.sh
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-    healthCheckPath: /api/test 
+    healthCheckPath: /api/test
+    autoDeploy: true
+    branch: main 
