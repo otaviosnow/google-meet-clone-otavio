@@ -12,32 +12,10 @@ app.use(cors({
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Servir arquivos estáticos
-app.use(express.static('public'));
-app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
+// Sistema de autenticação real
+const users = new Map(); // Simular banco de dados em memória
 
-// Middleware para verificar se arquivos existem
-app.use((req, res, next) => {
-  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path}`);
-  
-  // Se for uma requisição para arquivo estático, verificar se existe
-  if (req.path.includes('.') && !req.path.includes('api')) {
-    const filePath = path.join(__dirname, 'public', req.path);
-    if (!require('fs').existsSync(filePath)) {
-      console.log(`❌ Arquivo não encontrado: ${req.path}`);
-      return res.status(404).json({
-        error: 'Arquivo não encontrado',
-        path: req.path,
-        availableFiles: ['index.html', 'meet.html', 'test-auth.html', 'images/meet-logo.png', 'images/hero-screenshot.png', 'favicon.ico']
-      });
-    }
-  }
-  
-  next();
-});
-
-// Logs detalhados já incluídos no middleware acima
+// ===== ROTAS API (DEVEM VIR ANTES DOS ARQUIVOS ESTÁTICOS) =====
 
 // Rota principal
 app.get('/', (req, res) => {
@@ -59,46 +37,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Rota para o Google Meet fake
-app.get('/meet', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'meet.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo meet.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
-});
-
-// Rota para a página principal
-app.get('/app', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'index.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo index.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
-});
-
-// Rota para teste de autenticação
-app.get('/test-auth', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'test-auth.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo test-auth.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
-});
-
-// API Mock para usuários
+// API Mock para usuários - IMPORTANTE: Esta rota estava faltando
 app.get('/api/users/stats', (req, res) => {
   console.log('📊 API /api/users/stats chamada');
   res.json({
@@ -109,9 +48,6 @@ app.get('/api/users/stats', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-// Sistema de autenticação real
-const users = new Map(); // Simular banco de dados em memória
 
 // API de registro real
 app.post('/api/auth/register', (req, res) => {
@@ -286,6 +222,72 @@ app.post('/api/meetings/create', (req, res) => {
   });
 });
 
+// ===== ARQUIVOS ESTÁTICOS =====
+
+// Servir arquivos estáticos
+app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
+
+// Middleware para verificar se arquivos existem
+app.use((req, res, next) => {
+  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  
+  // Se for uma requisição para arquivo estático, verificar se existe
+  if (req.path.includes('.') && !req.path.includes('api')) {
+    const filePath = path.join(__dirname, 'public', req.path);
+    if (!require('fs').existsSync(filePath)) {
+      console.log(`❌ Arquivo não encontrado: ${req.path}`);
+      return res.status(404).json({
+        error: 'Arquivo não encontrado',
+        path: req.path,
+        availableFiles: ['index.html', 'meet.html', 'test-auth.html', 'images/meet-logo.png', 'images/hero-screenshot.png', 'favicon.ico']
+      });
+    }
+  }
+  
+  next();
+});
+
+// Rota para o Google Meet fake
+app.get('/meet', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'meet.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo meet.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
+});
+
+// Rota para a página principal
+app.get('/app', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'index.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo index.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
+});
+
+// Rota para teste de autenticação
+app.get('/test-auth', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'test-auth.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo test-auth.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
+});
+
 // Tratamento de erros
 app.use((err, req, res, next) => {
   console.error('❌ Erro:', err);
@@ -295,22 +297,24 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Rota 404
+// Rota 404 - DEVE SER A ÚLTIMA
 app.use('*', (req, res) => {
+  console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
   res.status(404).json({
     error: 'Rota não encontrada',
     path: req.originalUrl,
     availableRoutes: [
       'GET /',
       'GET /api/test',
-      'GET /meet',
-      'GET /app',
-      'GET /test-auth',
       'GET /api/users/stats',
       'POST /api/auth/login',
       'POST /api/auth/register',
+      'GET /api/auth/me',
       'POST /api/videos/upload',
-      'POST /api/meetings/create'
+      'POST /api/meetings/create',
+      'GET /meet',
+      'GET /app',
+      'GET /test-auth'
     ]
   });
 });
