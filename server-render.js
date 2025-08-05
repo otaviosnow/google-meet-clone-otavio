@@ -4,6 +4,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+console.log('🚀 Iniciando servidor...');
+console.log(`📊 Porta: ${PORT}`);
+console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
@@ -21,8 +25,9 @@ app.get('/', (req, res) => {
     message: '🚀 Google Meet Fake SaaS - Servidor funcionando!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: '2.0.0',
-    port: PORT
+    version: '2.0.1',
+    port: PORT,
+    host: '0.0.0.0'
   });
 });
 
@@ -34,7 +39,8 @@ app.get('/api/test', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     status: 'online',
-    port: PORT
+    port: PORT,
+    host: '0.0.0.0'
   });
 });
 
@@ -299,6 +305,7 @@ app.use('*', (req, res) => {
 });
 
 // Iniciar servidor
+console.log('🔧 Configurando servidor...');
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 Servidor Render otimizado iniciado!');
   console.log(`📱 URL: http://localhost:${PORT}`);
@@ -310,6 +317,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Porta: ${PORT}`);
   console.log(`🔍 Host: 0.0.0.0`);
   console.log(`✅ Servidor pronto para receber conexões!`);
+  console.log(`🎉 Deploy bem-sucedido!`);
 });
 
 // Tratamento de erros do servidor
