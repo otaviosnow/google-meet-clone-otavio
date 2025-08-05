@@ -17,11 +17,27 @@ app.use(express.static('public'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
-// Logs detalhados
+// Middleware para verificar se arquivos existem
 app.use((req, res, next) => {
   console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  
+  // Se for uma requisição para arquivo estático, verificar se existe
+  if (req.path.includes('.') && !req.path.includes('api')) {
+    const filePath = path.join(__dirname, 'public', req.path);
+    if (!require('fs').existsSync(filePath)) {
+      console.log(`❌ Arquivo não encontrado: ${req.path}`);
+      return res.status(404).json({
+        error: 'Arquivo não encontrado',
+        path: req.path,
+        availableFiles: ['index.html', 'meet.html', 'test-auth.html', 'images/meet-logo.png', 'images/hero-screenshot.png', 'favicon.ico']
+      });
+    }
+  }
+  
   next();
 });
+
+// Logs detalhados já incluídos no middleware acima
 
 // Rota principal
 app.get('/', (req, res) => {
@@ -45,17 +61,41 @@ app.get('/api/test', (req, res) => {
 
 // Rota para o Google Meet fake
 app.get('/meet', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+  const filePath = path.join(__dirname, 'public', 'meet.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo meet.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
 });
 
 // Rota para a página principal
 app.get('/app', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const filePath = path.join(__dirname, 'public', 'index.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo index.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
 });
 
 // Rota para teste de autenticação
 app.get('/test-auth', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
+  const filePath = path.join(__dirname, 'public', 'test-auth.html');
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({
+      error: 'Arquivo test-auth.html não encontrado',
+      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
+    });
+  }
 });
 
 // API Mock para usuários
