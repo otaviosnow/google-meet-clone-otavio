@@ -1,0 +1,9 @@
+FORCE DEPLOY - $(date)
+
+Este arquivo foi criado para forçar um novo deploy no Render.
+
+Problema: O servidor ainda está usando APIs mock antigas.
+Solução: Implementar autenticação real com validação.
+
+Timestamp: $(date)
+Versão: 2.0.1 
