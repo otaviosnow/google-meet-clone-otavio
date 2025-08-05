@@ -218,10 +218,36 @@ app.post('/api/meetings/create', (req, res) => {
   });
 });
 
+// Rota para verificar arquivos estáticos
+app.get('/api/files/check', (req, res) => {
+  console.log('📁 GET /api/files/check - Verificando arquivos estáticos');
+  const fs = require('fs');
+  
+  const files = {
+    'meet-logo.png': fs.existsSync(path.join(__dirname, 'public', 'images', 'meet-logo.png')),
+    'hero-screenshot.png': fs.existsSync(path.join(__dirname, 'public', 'images', 'hero-screenshot.png')),
+    'favicon.ico': fs.existsSync(path.join(__dirname, 'public', 'favicon.ico')),
+    'index.html': fs.existsSync(path.join(__dirname, 'public', 'index.html')),
+    'meet.html': fs.existsSync(path.join(__dirname, 'public', 'meet.html')),
+    'test-auth.html': fs.existsSync(path.join(__dirname, 'public', 'test-auth.html'))
+  };
+  
+  res.json({
+    success: true,
+    files,
+    publicDir: path.join(__dirname, 'public'),
+    imagesDir: path.join(__dirname, 'public', 'images')
+  });
+});
+
 // ===== ARQUIVOS ESTÁTICOS =====
 
 // Servir arquivos estáticos
 app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 
 // Rota para o Google Meet fake
 app.get('/meet', (req, res) => {
