@@ -1,0 +1,7 @@
+FORCE AUTH FIX - $(date)
+
+Problema: O servidor ainda está usando APIs mock que permitem login sem cadastro.
+Solução: Forçar deploy da versão com autenticação real.
+
+Timestamp: $(date)
+Versão: 2.0.2 
