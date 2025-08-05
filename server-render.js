@@ -14,6 +14,8 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // Servir arquivos estáticos
 app.use(express.static('public'));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 // Logs detalhados
 app.use((req, res, next) => {
@@ -58,11 +60,13 @@ app.get('/test-auth', (req, res) => {
 
 // API Mock para usuários
 app.get('/api/users/stats', (req, res) => {
+  console.log('📊 API /api/users/stats chamada');
   res.json({
     totalUsers: 1250,
     activeUsers: 89,
     totalMeetings: 567,
-    success: true
+    success: true,
+    timestamp: new Date().toISOString()
   });
 });
 
