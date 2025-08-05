@@ -5,17 +5,14 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // Sistema de autenticação real
-const users = new Map(); // Simular banco de dados em memória
+const users = new Map();
 
-// ===== ROTAS API (DEVEM VIR ANTES DOS ARQUIVOS ESTÁTICOS) =====
+// ===== ROTAS API =====
 
 // Rota principal
 app.get('/', (req, res) => {
@@ -37,7 +34,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// API Mock para usuários - IMPORTANTE: Esta rota estava faltando
+// API Mock para usuários - CRÍTICA
 app.get('/api/users/stats', (req, res) => {
   console.log('📊 API /api/users/stats chamada');
   res.json({
@@ -49,13 +46,12 @@ app.get('/api/users/stats', (req, res) => {
   });
 });
 
-// API de registro real
+// API de registro
 app.post('/api/auth/register', (req, res) => {
   console.log('📝 Tentativa de registro:', req.body);
   
   const { name, email, password } = req.body;
   
-  // Validações
   if (!name || !email || !password) {
     return res.status(400).json({
       success: false,
@@ -77,7 +73,6 @@ app.post('/api/auth/register', (req, res) => {
     });
   }
   
-  // Verificar se usuário já existe
   if (users.has(email)) {
     return res.status(400).json({
       success: false,
@@ -85,17 +80,15 @@ app.post('/api/auth/register', (req, res) => {
     });
   }
   
-  // Criar usuário
   const user = {
     id: Date.now().toString(),
     name,
     email,
-    password, // Em produção, deve ser hash
+    password,
     createdAt: new Date().toISOString()
   };
   
   users.set(email, user);
-  
   console.log('✅ Usuário registrado:', email);
   
   res.json({
@@ -110,13 +103,12 @@ app.post('/api/auth/register', (req, res) => {
   });
 });
 
-// API de login real
+// API de login
 app.post('/api/auth/login', (req, res) => {
   console.log('🔑 Tentativa de login:', req.body);
   
   const { email, password } = req.body;
   
-  // Validações
   if (!email || !password) {
     return res.status(400).json({
       success: false,
@@ -124,7 +116,6 @@ app.post('/api/auth/login', (req, res) => {
     });
   }
   
-  // Verificar se usuário existe
   const user = users.get(email);
   if (!user) {
     return res.status(401).json({
@@ -133,7 +124,6 @@ app.post('/api/auth/login', (req, res) => {
     });
   }
   
-  // Verificar senha
   if (user.password !== password) {
     return res.status(401).json({
       success: false,
@@ -168,7 +158,6 @@ app.get('/api/auth/me', (req, res) => {
   
   const token = authHeader.substring(7);
   
-  // Verificar token (simplificado)
   if (!token.startsWith('token_')) {
     return res.status(401).json({
       success: false,
@@ -176,7 +165,6 @@ app.get('/api/auth/me', (req, res) => {
     });
   }
   
-  // Encontrar usuário pelo token
   let foundUser = null;
   for (const [email, user] of users.entries()) {
     if (token.includes(user.id)) {
@@ -226,66 +214,20 @@ app.post('/api/meetings/create', (req, res) => {
 
 // Servir arquivos estáticos
 app.use(express.static('public'));
-app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
-
-// Middleware para verificar se arquivos existem
-app.use((req, res, next) => {
-  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path}`);
-  
-  // Se for uma requisição para arquivo estático, verificar se existe
-  if (req.path.includes('.') && !req.path.includes('api')) {
-    const filePath = path.join(__dirname, 'public', req.path);
-    if (!require('fs').existsSync(filePath)) {
-      console.log(`❌ Arquivo não encontrado: ${req.path}`);
-      return res.status(404).json({
-        error: 'Arquivo não encontrado',
-        path: req.path,
-        availableFiles: ['index.html', 'meet.html', 'test-auth.html', 'images/meet-logo.png', 'images/hero-screenshot.png', 'favicon.ico']
-      });
-    }
-  }
-  
-  next();
-});
 
 // Rota para o Google Meet fake
 app.get('/meet', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'meet.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo meet.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
+  res.sendFile(path.join(__dirname, 'public', 'meet.html'));
 });
 
 // Rota para a página principal
 app.get('/app', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'index.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo index.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Rota para teste de autenticação
 app.get('/test-auth', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'test-auth.html');
-  if (require('fs').existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).json({
-      error: 'Arquivo test-auth.html não encontrado',
-      availableFiles: ['index.html', 'meet.html', 'test-auth.html']
-    });
-  }
+  res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
 });
 
 // Tratamento de erros
@@ -297,7 +239,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Rota 404 - DEVE SER A ÚLTIMA
+// Rota 404
 app.use('*', (req, res) => {
   console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
   res.status(404).json({
