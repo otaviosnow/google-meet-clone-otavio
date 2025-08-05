@@ -2,10 +2,10 @@
   "name": "google-meet-fake-saas",
   "version": "1.0.0",
   "description": "SaaS para criar chamadas fake do Google Meet",
-  "main": "server-render.js",
+  "main": "server-simple.js",
   "scripts": {
-    "start": "node server-render.js",
-    "dev": "nodemon server-render.js",
+    "start": "node server-simple.js",
+    "dev": "nodemon server-simple.js",
     "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
