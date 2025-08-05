@@ -1,0 +1,8 @@
+FORCE DEPLOY - $(date)
+
+Este arquivo foi criado para forçar um novo deploy no Render.
+
+O problema é que a rota /api/users/stats não está sendo encontrada.
+
+Versão do servidor: 2.0.0
+Timestamp: $(date) 
