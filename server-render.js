@@ -110,29 +110,158 @@ app.get('/api/users/stats', (req, res) => {
   });
 });
 
-// API Mock para autenticação
-app.post('/api/auth/login', (req, res) => {
+// Sistema de autenticação real
+const users = new Map(); // Simular banco de dados em memória
+
+// API de registro real
+app.post('/api/auth/register', (req, res) => {
+  console.log('📝 Tentativa de registro:', req.body);
+  
+  const { name, email, password } = req.body;
+  
+  // Validações
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Todos os campos são obrigatórios'
+    });
+  }
+  
+  if (password.length < 6) {
+    return res.status(400).json({
+      success: false,
+      error: 'Senha deve ter pelo menos 6 caracteres'
+    });
+  }
+  
+  if (!email.includes('@')) {
+    return res.status(400).json({
+      success: false,
+      error: 'Email inválido'
+    });
+  }
+  
+  // Verificar se usuário já existe
+  if (users.has(email)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Usuário já existe'
+    });
+  }
+  
+  // Criar usuário
+  const user = {
+    id: Date.now().toString(),
+    name,
+    email,
+    password, // Em produção, deve ser hash
+    createdAt: new Date().toISOString()
+  };
+  
+  users.set(email, user);
+  
+  console.log('✅ Usuário registrado:', email);
+  
   res.json({
     success: true,
-    message: 'Login mock funcionando',
-    token: 'mock_jwt_token_123',
+    message: 'Usuário registrado com sucesso',
+    token: `token_${user.id}_${Date.now()}`,
     user: {
-      id: 'mock_user_123',
-      email: req.body.email || 'user@example.com',
-      name: 'Usuário Mock'
+      id: user.id,
+      email: user.email,
+      name: user.name
     }
   });
 });
 
-app.post('/api/auth/register', (req, res) => {
+// API de login real
+app.post('/api/auth/login', (req, res) => {
+  console.log('🔑 Tentativa de login:', req.body);
+  
+  const { email, password } = req.body;
+  
+  // Validações
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Email e senha são obrigatórios'
+    });
+  }
+  
+  // Verificar se usuário existe
+  const user = users.get(email);
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      error: 'Usuário não encontrado'
+    });
+  }
+  
+  // Verificar senha
+  if (user.password !== password) {
+    return res.status(401).json({
+      success: false,
+      error: 'Senha incorreta'
+    });
+  }
+  
+  console.log('✅ Login bem-sucedido:', email);
+  
   res.json({
     success: true,
-    message: 'Registro mock funcionando',
-    token: 'mock_jwt_token_456',
+    message: 'Login realizado com sucesso',
+    token: `token_${user.id}_${Date.now()}`,
     user: {
-      id: 'mock_user_456',
-      email: req.body.email || 'newuser@example.com',
-      name: req.body.name || 'Novo Usuário'
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  });
+});
+
+// API para verificar autenticação
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      error: 'Token não fornecido'
+    });
+  }
+  
+  const token = authHeader.substring(7);
+  
+  // Verificar token (simplificado)
+  if (!token.startsWith('token_')) {
+    return res.status(401).json({
+      success: false,
+      error: 'Token inválido'
+    });
+  }
+  
+  // Encontrar usuário pelo token
+  let foundUser = null;
+  for (const [email, user] of users.entries()) {
+    if (token.includes(user.id)) {
+      foundUser = user;
+      break;
+    }
+  }
+  
+  if (!foundUser) {
+    return res.status(401).json({
+      success: false,
+      error: 'Usuário não encontrado'
+    });
+  }
+  
+  res.json({
+    success: true,
+    user: {
+      id: foundUser.id,
+      email: foundUser.email,
+      name: foundUser.name
     }
   });
 });
