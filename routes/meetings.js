@@ -189,6 +189,8 @@ router.get('/:meetingId', async (req, res) => {
         meetingId: meeting.meetingId,
         title: meeting.title,
         isActive: meeting.isActive,
+        isAccessed: meeting.isAccessed,
+        accessedBy: meeting.accessedBy,
         video: meeting.video ? meeting.video.title : 'N/A',
         videoId: meeting.video,
         videoType: typeof meeting.video
@@ -205,6 +207,22 @@ router.get('/:meetingId', async (req, res) => {
       return res.status(400).json({
         error: 'Reunião não está ativa'
       });
+    }
+
+    // Gerar identificador único para o usuário (IP + User-Agent)
+    const userIdentifier = `${req.ip}-${req.headers['user-agent']}`;
+    
+    // Verificar se a reunião pode ser acessada
+    if (!meeting.canBeAccessed(userIdentifier)) {
+      return res.status(403).json({
+        error: 'Esta reunião já está sendo utilizada por outra pessoa. Não é possível utilizar o mesmo link para mais pessoas.'
+      });
+    }
+
+    // Marcar reunião como acessada se for o primeiro acesso
+    if (!meeting.isAccessed) {
+      await meeting.markAsAccessed(userIdentifier);
+      console.log('✅ Reunião marcada como acessada por:', userIdentifier);
     }
 
     res.json({

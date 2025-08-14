@@ -81,6 +81,14 @@ const meetingSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  isAccessed: {
+    type: Boolean,
+    default: false
+  },
+  accessedBy: {
+    type: String, // IP ou identificador único do primeiro acessante
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -138,6 +146,23 @@ meetingSchema.methods.decrementParticipants = function() {
     return this.save();
   }
   return this.save();
+};
+
+// Método para marcar reunião como acessada
+meetingSchema.methods.markAsAccessed = function(identifier) {
+  this.isAccessed = true;
+  this.accessedBy = identifier;
+  return this.save();
+};
+
+// Método para verificar se reunião pode ser acessada
+meetingSchema.methods.canBeAccessed = function(identifier) {
+  // Se nunca foi acessada, pode ser acessada
+  if (!this.isAccessed) {
+    return true;
+  }
+  // Se já foi acessada, só pode ser acessada pelo mesmo identificador
+  return this.accessedBy === identifier;
 };
 
 // Método para retornar dados públicos da reunião

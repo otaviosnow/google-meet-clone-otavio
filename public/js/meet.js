@@ -120,8 +120,16 @@ async function loadMeetingData() {
             }
             
         } else {
-            console.error('❌ Reunião não encontrada');
-            showErrorScreen('Reunião não encontrada');
+            const errorData = await response.json();
+            console.error('❌ Erro ao acessar reunião:', errorData);
+            
+            if (response.status === 403) {
+                showErrorScreen(errorData.error || 'Esta reunião já está sendo utilizada por outra pessoa. Não é possível utilizar o mesmo link para mais pessoas.');
+            } else if (response.status === 404) {
+                showErrorScreen('Reunião não encontrada');
+            } else {
+                showErrorScreen(errorData.error || 'Erro ao acessar reunião');
+            }
         }
         
     } catch (error) {
@@ -166,56 +174,65 @@ function initializeDemo() {
 
 // Função para mostrar tela de erro
 function showErrorScreen(message) {
+    // Verificar se é erro de acesso negado
+    const isAccessDenied = message.includes('já está sendo utilizada por outra pessoa');
+    
     document.body.innerHTML = `
         <div style="
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
         ">
             <div style="
                 text-align: center;
                 padding: 40px;
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                max-width: 400px;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+                border-radius: 16px;
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                max-width: 500px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             ">
                 <div style="
-                    width: 64px;
-                    height: 64px;
-                    background-color: #ea4335;
+                    width: 80px;
+                    height: 80px;
+                    background: ${isAccessDenied ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #ea4335, #d93025)'};
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin: 0 auto 24px;
                     color: white;
-                    font-size: 24px;
+                    font-size: 32px;
+                    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
                 ">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <i class="fas fa-${isAccessDenied ? 'users-slash' : 'exclamation-triangle'}"></i>
                 </div>
                 <h1 style="
-                    font-size: 24px;
+                    font-size: 28px;
                     font-weight: 600;
                     margin-bottom: 16px;
-                    color: #202124;
-                ">Erro</h1>
+                    color: #e8eaed;
+                ">${isAccessDenied ? 'Acesso Negado' : 'Erro'}</h1>
                 <p style="
-                    color: #5f6368;
+                    color: #9ca3af;
                     margin-bottom: 32px;
-                    line-height: 1.5;
+                    line-height: 1.6;
+                    font-size: 16px;
                 ">${message}</p>
                 <a href="/" style="
                     display: inline-block;
-                    padding: 12px 24px;
-                    background-color: #1a73e8;
+                    padding: 14px 28px;
+                    background: linear-gradient(135deg, #3b82f6, #2563eb);
                     color: white;
                     text-decoration: none;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     font-weight: 500;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
                 ">Voltar ao Início</a>
             </div>
         </div>
