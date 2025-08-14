@@ -230,56 +230,250 @@
                 <!-- Goals Tab -->
                 <div id="goalsTab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Minhas Metas</h2>
+                        <h2><i class="fas fa-chart-line"></i> Sistema de Metas</h2>
                     </div>
                     <div class="goals-content">
-                        <!-- Sistema de Metas Financeiras -->
-                        <div class="financial-goals">
-                            <h3><i class="fas fa-chart-line"></i> Metas Financeiras</h3>
-                            <div class="goals-form">
-                                <div class="form-group">
-                                    <label for="monthlyGoal">Meta Mensal (R$)</label>
-                                    <input type="number" id="monthlyGoal" placeholder="0.00" step="0.01">
+                        <!-- Resumo Geral -->
+                        <div class="goals-overview">
+                            <div class="overview-card">
+                                <div class="overview-icon">
+                                    <i class="fas fa-target"></i>
                                 </div>
-                                <button id="saveGoalBtn" class="btn btn-primary">Salvar Meta</button>
+                                <div class="overview-info">
+                                    <h3>Meta Mensal</h3>
+                                    <p id="monthlyGoalDisplay">R$ 0,00</p>
+                                </div>
                             </div>
+                            <div class="overview-card">
+                                <div class="overview-icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <div class="overview-info">
+                                    <h3>Progresso</h3>
+                                    <p id="goalProgressDisplay">0%</p>
+                                </div>
+                            </div>
+                            <div class="overview-card">
+                                <div class="overview-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="overview-info">
+                                    <h3>Dias Restantes</h3>
+                                    <p id="daysRemaining">0 dias</p>
+                                </div>
+                            </div>
+                            <div class="overview-card">
+                                <div class="overview-icon">
+                                    <i class="fas fa-trending-up"></i>
+                                </div>
+                                <div class="overview-info">
+                                    <h3>Média Diária</h3>
+                                    <p id="dailyAverage">R$ 0,00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuração de Metas -->
+                        <div class="goals-config">
+                            <h3><i class="fas fa-cog"></i> Configurar Metas</h3>
+                            <div class="goals-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="monthlyGoal">Meta Mensal (R$)</label>
+                                        <input type="number" id="monthlyGoal" placeholder="0.00" step="0.01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="goalType">Tipo de Meta</label>
+                                        <select id="goalType">
+                                            <option value="revenue">Faturamento</option>
+                                            <option value="profit">Lucro</option>
+                                            <option value="custom">Personalizada</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="goalDeadline">Data Limite</label>
+                                        <input type="date" id="goalDeadline">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="goalPriority">Prioridade</label>
+                                        <select id="goalPriority">
+                                            <option value="low">Baixa</option>
+                                            <option value="medium">Média</option>
+                                            <option value="high">Alta</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button id="saveGoalBtn" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Salvar Meta
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Financeiro -->
+                        <div class="financial-dashboard">
+                            <h3><i class="fas fa-chart-bar"></i> Dashboard Financeiro</h3>
                             
+                            <!-- Resumo Financeiro -->
                             <div class="financial-summary">
                                 <div class="summary-card">
                                     <h4><i class="fas fa-dollar-sign"></i> Faturamento</h4>
                                     <p id="totalRevenue">R$ 0,00</p>
+                                    <small id="revenueChange">+0% vs mês anterior</small>
                                 </div>
                                 <div class="summary-card">
                                     <h4><i class="fas fa-minus-circle"></i> Gastos</h4>
                                     <p id="totalExpenses">R$ 0,00</p>
+                                    <small id="expensesChange">+0% vs mês anterior</small>
                                 </div>
                                 <div class="summary-card">
                                     <h4><i class="fas fa-plus-circle"></i> Lucro</h4>
                                     <p id="totalProfit">R$ 0,00</p>
+                                    <small id="profitChange">+0% vs mês anterior</small>
                                 </div>
                                 <div class="summary-card">
-                                    <h4><i class="fas fa-target"></i> Meta</h4>
-                                    <p id="goalProgress">0%</p>
+                                    <h4><i class="fas fa-percentage"></i> Margem</h4>
+                                    <p id="profitMargin">0%</p>
+                                    <small id="marginChange">+0% vs mês anterior</small>
                                 </div>
                             </div>
-                            
-                            <div class="daily-entry">
-                                <h4><i class="fas fa-calendar-day"></i> Entrada Diária</h4>
-                                <div class="entry-form">
-                                    <div class="form-group">
-                                        <label for="entryDate">Data</label>
-                                        <input type="date" id="entryDate" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="entryRevenue">Faturamento (R$)</label>
-                                        <input type="number" id="entryRevenue" placeholder="0.00" step="0.01">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="entryExpenses">Gastos (R$)</label>
-                                        <input type="number" id="entryExpenses" placeholder="0.00" step="0.01">
-                                    </div>
-                                    <button id="addEntryBtn" class="btn btn-primary">Adicionar Entrada</button>
+
+                            <!-- Gráfico de Progresso -->
+                            <div class="progress-chart">
+                                <h4><i class="fas fa-chart-line"></i> Progresso da Meta</h4>
+                                <div class="chart-container">
+                                    <canvas id="progressChart"></canvas>
                                 </div>
+                            </div>
+
+                            <!-- Análise de Tendências -->
+                            <div class="trends-analysis">
+                                <h4><i class="fas fa-trending-up"></i> Análise de Tendências</h4>
+                                <div class="trends-grid">
+                                    <div class="trend-card">
+                                        <h5>Melhor Dia</h5>
+                                        <p id="bestDay">N/A</p>
+                                    </div>
+                                    <div class="trend-card">
+                                        <h5>Pior Dia</h5>
+                                        <p id="worstDay">N/A</p>
+                                    </div>
+                                    <div class="trend-card">
+                                        <h5>Média Semanal</h5>
+                                        <p id="weeklyAverage">R$ 0,00</p>
+                                    </div>
+                                    <div class="trend-card">
+                                        <h5>Projeção Mensal</h5>
+                                        <p id="monthlyProjection">R$ 0,00</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entrada de Dados -->
+                        <div class="data-entry">
+                            <h3><i class="fas fa-plus-circle"></i> Adicionar Dados</h3>
+                            
+                            <!-- Entrada Rápida -->
+                            <div class="quick-entry">
+                                <h4><i class="fas fa-bolt"></i> Entrada Rápida (Hoje)</h4>
+                                <div class="entry-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="entryRevenue">Faturamento (R$)</label>
+                                            <input type="number" id="entryRevenue" placeholder="0.00" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="entryExpenses">Gastos (R$)</label>
+                                            <input type="number" id="entryExpenses" placeholder="0.00" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="entryNotes">Observações</label>
+                                        <textarea id="entryNotes" placeholder="Adicione observações sobre o dia..."></textarea>
+                                    </div>
+                                    <button id="addEntryBtn" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i> Adicionar Entrada
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Entrada Manual -->
+                            <div class="manual-entry">
+                                <h4><i class="fas fa-calendar-day"></i> Entrada Manual</h4>
+                                <div class="entry-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="entryDate">Data</label>
+                                            <input type="date" id="entryDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="entryRevenueManual">Faturamento (R$)</label>
+                                            <input type="number" id="entryRevenueManual" placeholder="0.00" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="entryExpensesManual">Gastos (R$)</label>
+                                            <input type="number" id="entryExpensesManual" placeholder="0.00" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="entryNotesManual">Observações</label>
+                                        <textarea id="entryNotesManual" placeholder="Adicione observações..."></textarea>
+                                    </div>
+                                    <button id="addManualEntryBtn" class="btn btn-outline">
+                                        <i class="fas fa-plus"></i> Adicionar Manual
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Histórico e Relatórios -->
+                        <div class="history-reports">
+                            <h3><i class="fas fa-history"></i> Histórico e Relatórios</h3>
+                            
+                            <!-- Filtros -->
+                            <div class="filters">
+                                <div class="filter-group">
+                                    <label for="periodFilter">Período</label>
+                                    <select id="periodFilter">
+                                        <option value="7">Últimos 7 dias</option>
+                                        <option value="30" selected>Últimos 30 dias</option>
+                                        <option value="90">Últimos 90 dias</option>
+                                        <option value="custom">Personalizado</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="categoryFilter">Categoria</label>
+                                    <select id="categoryFilter">
+                                        <option value="all">Todas</option>
+                                        <option value="revenue">Faturamento</option>
+                                        <option value="expenses">Gastos</option>
+                                        <option value="profit">Lucro</option>
+                                    </select>
+                                </div>
+                                <button id="exportBtn" class="btn btn-outline">
+                                    <i class="fas fa-download"></i> Exportar
+                                </button>
+                            </div>
+
+                            <!-- Tabela de Histórico -->
+                            <div class="history-table">
+                                <table id="entriesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Faturamento</th>
+                                            <th>Gastos</th>
+                                            <th>Lucro</th>
+                                            <th>Observações</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="entriesTableBody">
+                                        <!-- Dados serão carregados dinamicamente -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
