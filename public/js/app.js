@@ -492,20 +492,24 @@ async function handleAddVideo(e) {
     e.preventDefault();
     
     const formData = new FormData(addVideoForm);
-    const data = {
-        title: formData.get('title') || document.getElementById('videoTitle').value,
-        description: formData.get('description') || document.getElementById('videoDescription').value,
-        type: formData.get('type') || document.getElementById('videoType').value
-    };
+    const type = formData.get('type') || document.getElementById('videoType').value;
     
     // Adicionar arquivo se for upload
-    if (data.type === 'upload') {
+    if (type === 'upload') {
         const fileInput = document.getElementById('videoFile');
         if (fileInput.files.length > 0) {
             formData.append('video', fileInput.files[0]);
+        } else {
+            showNotification('Arquivo de vídeo é obrigatório para upload', 'error');
+            return;
         }
-    } else if (data.type === 'drive' || data.type === 'url') {
-        data.url = formData.get('url') || document.getElementById('videoUrl').value;
+    } else if (type === 'drive' || type === 'url') {
+        const url = formData.get('url') || document.getElementById('videoUrl').value;
+        if (!url) {
+            showNotification('URL é obrigatória para este tipo', 'error');
+            return;
+        }
+        formData.append('url', url);
     }
     
     try {
