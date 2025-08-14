@@ -516,7 +516,7 @@ function startVSL() {
     // Listener para quando o vídeo termina
     vslVideo.addEventListener('ended', function() {
         console.log('🎬 VSL: Vídeo terminou - encerrando chamada automaticamente');
-        endCall();
+        endCallAndDeleteMeeting();
     });
     
     // Tentar reproduzir automaticamente
@@ -863,6 +863,58 @@ document.addEventListener('keydown', function(event) {
             break;
     }
 });
+
+// Função para encerrar chamada e deletar reunião
+async function endCallAndDeleteMeeting() {
+    console.log('=== ENCERRANDO CHAMADA E DELETANDO REUNIÃO ===');
+    
+    // Salvar no localStorage
+    localStorage.setItem('googleMeetEnded', 'true');
+    localStorage.removeItem('googleMeetInCall');
+    
+    // Parar webcam se estiver ativa
+    if (isWebcamActive) {
+        stopWebcam();
+    }
+    
+    // Parar vídeo VSL
+    if (vslVideo) {
+        vslVideo.pause();
+        vslVideo.src = '';
+    }
+    
+    // Parar iframe se estiver ativo
+    if (vslIframe) {
+        vslIframe.src = '';
+    }
+    
+    // Deletar reunião do banco de dados
+    if (meetingId && meetingId !== 'demo') {
+        try {
+            console.log('🗑️ Deletando reunião:', meetingId);
+            
+            const response = await fetch(`/api/meetings/${meetingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                console.log('✅ Reunião deletada com sucesso');
+            } else {
+                console.error('❌ Erro ao deletar reunião:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao deletar reunião:', error);
+        }
+    }
+    
+    // Mostrar tela de encerramento
+    showEndedScreen();
+    
+    console.log('✅ Chamada encerrada e reunião deletada');
+}
 
 // Função para extrair ID do YouTube
 function extractYouTubeId(url) {
