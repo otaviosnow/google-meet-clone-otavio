@@ -147,6 +147,8 @@ router.post('/', authenticateToken, upload.single('video'), handleMulterError, a
   console.log('📋 Body:', req.body);
   console.log('📁 File:', req.file);
   console.log('🔑 User:', req.user._id);
+  console.log('📋 Headers:', req.headers);
+  console.log('🔍 Content-Type:', req.headers['content-type']);
   
   try {
     const { title, description, type, url } = req.body;
