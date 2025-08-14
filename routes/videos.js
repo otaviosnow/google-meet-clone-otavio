@@ -159,12 +159,12 @@ router.post('/', authenticateToken, upload.single('video'), handleMulterError, a
       });
     }
 
-    const { title, description, type, url } = req.body;
+    const { title, type, url } = req.body;
 
     let videoData = {
       user: req.user._id,
       title: title || '',
-      description: description || '',
+      description: '', // Sempre vazio agora
       type: type || 'upload'
     };
 
