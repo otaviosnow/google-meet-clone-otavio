@@ -461,6 +461,14 @@ function startVSL() {
         videoUrl = window.location.origin + videoUrl;
     }
     
+    // Se é um vídeo do YouTube, converter para formato embed
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        const videoId = extractYouTubeId(videoUrl);
+        if (videoId) {
+            videoUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
+        }
+    }
+    
     console.log('🎬 URL original:', meetingData.video.url);
     console.log('🎬 URL completa:', videoUrl);
     
@@ -840,5 +848,12 @@ document.addEventListener('keydown', function(event) {
             break;
     }
 });
+
+// Função para extrair ID do YouTube
+function extractYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
 
 console.log('Google Meet Clone inicializado com sucesso!'); 
