@@ -150,9 +150,10 @@ router.post('/', (req, res, next) => {
       type: type || 'upload'
     };
 
-    if (type === 'upload' && req.file) {
-      // Vídeo enviado via upload
+    // Se tem arquivo, é upload
+    if (req.file) {
       console.log('✅ Arquivo recebido:', req.file.filename);
+      videoData.type = 'upload';
       videoData.url = `/uploads/${req.file.filename}`;
       videoData.filename = req.file.filename;
       videoData.size = req.file.size;
