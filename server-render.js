@@ -41,6 +41,9 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 // ===== MODELOS =====
 const User = require('./models/User');
 
+// ===== ROTAS =====
+const videoRoutes = require('./routes/videos');
+
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
@@ -215,6 +218,9 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     }
 });
 
+// ===== ROTAS DE API =====
+app.use('/api/videos', videoRoutes);
+
 // ===== ROTAS DE PÁGINAS =====
 
 // Rota principal - página de login
@@ -241,6 +247,7 @@ app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ===== ROTA DE TESTE DA API =====
 app.get('/api/test', (req, res) => {
