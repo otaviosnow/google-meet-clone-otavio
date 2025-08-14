@@ -29,12 +29,18 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
+  console.log('🔍 Verificando arquivo:', file.originalname);
+  console.log('📋 MIME Type:', file.mimetype);
+  console.log('📁 Field Name:', file.fieldname);
+  
   // Verificar se é um arquivo de vídeo
   const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov'];
   
   if (allowedTypes.includes(file.mimetype)) {
+    console.log('✅ Arquivo aceito:', file.originalname);
     cb(null, true);
   } else {
+    console.log('❌ Arquivo rejeitado:', file.originalname, '- MIME Type:', file.mimetype);
     cb(new Error('Tipo de arquivo não suportado. Use apenas arquivos de vídeo.'), false);
   }
 };
