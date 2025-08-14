@@ -1,5 +1,4 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { body, validationResult } = require('express-validator');
@@ -8,36 +7,8 @@ const Video = require('../models/Video');
 
 const router = express.Router();
 
-// Configuração SIMPLIFICADA do Multer para upload de arquivos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = process.env.UPLOAD_PATH || './uploads';
-    
-    // Criar pasta se não existir
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // Gerar nome único para o arquivo
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, `video-${uniqueSuffix}${ext}`);
-  }
-});
-
-// CONFIGURAÇÃO MÍNIMA DO MULTER - SEM FILTROS - VERSÃO FINAL
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB
-  }
-});
-
 // LOG PARA CONFIRMAR QUE ESTA VERSÃO ESTÁ SENDO USADA
-console.log('🚨🚨🚨 MULTER CONFIGURADO SEM FILTROS - VERSÃO FINAL 🚨🚨🚨');
+console.log('🚨🚨🚨 SEM MULTER - VERSÃO SIMPLES 🚨🚨🚨');
 
 // Validações para criação/edição de vídeo
 const videoValidation = [
@@ -114,8 +85,8 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/videos - Criar novo vídeo (upload) - VERSÃO ULTRA SIMPLES
-router.post('/', upload.single('video'), async (req, res) => {
+// POST /api/videos - Criar novo vídeo (upload) - SEM MULTER
+router.post('/', async (req, res) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Headers:', req.headers);
   console.log('🔑 Auth Header:', req.headers.authorization);
@@ -141,9 +112,7 @@ router.post('/', upload.single('video'), async (req, res) => {
   }
   try {
     console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
-    console.log('🎬 POST /api/videos - Tentativa de criar vídeo');
     console.log('📋 Body:', req.body);
-    console.log('📁 File:', req.file);
     console.log('🔑 User:', req.user._id);
     
     const { title, description, type, url } = req.body;
@@ -155,23 +124,14 @@ router.post('/', upload.single('video'), async (req, res) => {
       type: type || 'upload'
     };
 
-    // Se tem arquivo, é upload
-    if (req.file) {
-      console.log('✅ Arquivo recebido:', req.file.filename);
-      videoData.type = 'upload';
-      videoData.url = `/uploads/${req.file.filename}`;
-      videoData.filename = req.file.filename;
-      videoData.size = req.file.size;
-    } else if (type === 'drive' || type === 'url') {
-      // Vídeo do Google Drive ou URL externa
+    // Por enquanto, vamos aceitar apenas URLs
+    if (type === 'drive' || type === 'url') {
       console.log('🔗 URL recebida:', url);
       videoData.url = url;
     } else {
-      console.log('❌ Erro: Arquivo não encontrado para upload');
-      console.log('📊 Tipo:', type);
-      console.log('📁 Arquivo:', req.file);
+      console.log('❌ Erro: Por enquanto, apenas URLs são aceitas');
       return res.status(400).json({
-        error: 'Arquivo de vídeo é obrigatório para upload'
+        error: 'Por enquanto, apenas URLs são aceitas. Use o tipo "url" ou "drive".'
       });
     }
 
