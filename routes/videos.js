@@ -125,6 +125,11 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/videos - Criar novo vídeo (upload)
 router.post('/', authenticateToken, upload.single('video'), async (req, res) => {
   try {
+    console.log('🎬 POST /api/videos - Tentativa de criar vídeo');
+    console.log('📋 Body:', req.body);
+    console.log('📁 File:', req.file);
+    console.log('🔑 User:', req.user._id);
+    
     const { title, description, type, url } = req.body;
 
     let videoData = {
@@ -136,13 +141,18 @@ router.post('/', authenticateToken, upload.single('video'), async (req, res) => 
 
     if (type === 'upload' && req.file) {
       // Vídeo enviado via upload
+      console.log('✅ Arquivo recebido:', req.file.filename);
       videoData.url = `/uploads/${req.file.filename}`;
       videoData.filename = req.file.filename;
       videoData.size = req.file.size;
     } else if (type === 'drive' || type === 'url') {
       // Vídeo do Google Drive ou URL externa
+      console.log('🔗 URL recebida:', url);
       videoData.url = url;
     } else {
+      console.log('❌ Erro: Arquivo não encontrado para upload');
+      console.log('📊 Tipo:', type);
+      console.log('📁 Arquivo:', req.file);
       return res.status(400).json({
         error: 'Arquivo de vídeo é obrigatório para upload'
       });
