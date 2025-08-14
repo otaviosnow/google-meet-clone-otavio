@@ -80,6 +80,11 @@ async function loadMeetingData() {
     try {
         console.log('🔄 Carregando dados da reunião:', meetingId);
         
+        // Limpar localStorage para nova reunião
+        localStorage.removeItem('googleMeetInCall');
+        localStorage.removeItem('googleMeetEnded');
+        console.log('🧹 LocalStorage limpo para nova reunião');
+        
         const response = await fetch(`/api/meetings/${meetingId}`);
         
         if (response.ok) {
