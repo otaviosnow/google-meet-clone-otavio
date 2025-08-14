@@ -184,16 +184,15 @@
                             Perfil
                         </button>
                     </nav>
-                    <div class="token-section">
-                        <div class="token-display">
-                            <i class="fas fa-key"></i>
-                            <span id="tokenCount">0</span>
-                            <span class="token-label">VISION KEY</span>
+                                            <div class="token-section">
+                            <div class="token-display">
+                                <i class="fas fa-key"></i>
+                                <span id="tokenCount">0</span>
+                            </div>
+                            <button class="btn btn-token" id="buyTokenBtn">
+                                <i class="fas fa-shopping-cart"></i> TOKEN
+                            </button>
                         </div>
-                        <button class="btn btn-token" id="buyTokenBtn">
-                            <i class="fas fa-shopping-cart"></i> COMPRAR TOKEN
-                        </button>
-                    </div>
                     <div class="user-menu">
                         <span id="userName">Usuário</span>
                         <button id="logoutBtn" class="btn btn-outline btn-small">Sair</button>
@@ -292,15 +291,16 @@
                             <div class="overview-card cosmic-card">
                                 <div class="card-glow"></div>
                                 <div class="overview-icon cosmic-icon">
-                                    <i class="fas fa-chart-bar"></i>
+                                    <i class="fas fa-chart-line"></i>
                                     <div class="icon-rings"></div>
                                 </div>
                                 <div class="overview-info">
-                                    <h3>Média Diária</h3>
-                                    <p id="dailyAverage" class="cosmic-text">R$ 0,00</p>
-                                    <div class="data-flow"></div>
+                                    <h3>PROJEÇÃO MENSAL</h3>
+                                    <p id="monthlyProjection" class="cosmic-text">R$ 0,00</p>
+                                    <small class="projection-note">*Considera diminuição nos últimos 10 dias</small>
                                 </div>
                             </div>
+
                         </div>
 
                         <!-- Configuração de Metas -->

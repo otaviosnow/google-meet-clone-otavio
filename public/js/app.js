@@ -1080,10 +1080,71 @@ async function loadFinancialData() {
         if (response.ok) {
             const data = await response.json();
             updateFinancialDisplay(data);
+            calculateMonthlyProjection(data);
         }
     } catch (error) {
         console.error('Erro ao carregar dados financeiros:', error);
     }
+}
+
+// Função para calcular projeção mensal considerando diminuição nos últimos 10 dias
+function calculateMonthlyProjection(data) {
+    const today = new Date();
+    const currentDay = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const daysRemaining = daysInMonth - currentDay;
+    
+    // Calcular média diária atual
+    const currentRevenue = data.totalRevenue || 0;
+    const currentDays = Math.max(currentDay, 1); // Evitar divisão por zero
+    const currentDailyAverage = currentRevenue / currentDays;
+    
+    // Calcular projeção considerando diminuição nos últimos 10 dias
+    let projectedRevenue = currentRevenue;
+    
+    if (daysRemaining > 0) {
+        const last10DaysStart = daysInMonth - 9; // Últimos 10 dias do mês
+        
+        if (currentDay < last10DaysStart) {
+            // Ainda não chegou nos últimos 10 dias
+            const normalDays = last10DaysStart - currentDay;
+            const last10Days = Math.min(daysRemaining, 10);
+            
+            // Projeção normal + projeção com diminuição
+            projectedRevenue += (currentDailyAverage * normalDays);
+            projectedRevenue += (currentDailyAverage * last10Days * 0.75); // 25% de diminuição média
+        } else {
+            // Já está nos últimos 10 dias
+            const remainingLast10Days = Math.min(daysRemaining, daysInMonth - currentDay + 1);
+            projectedRevenue += (currentDailyAverage * remainingLast10Days * 0.75);
+        }
+    }
+    
+    // Atualizar display da projeção
+    const projectionElement = document.getElementById('monthlyProjection');
+    if (projectionElement) {
+        projectionElement.textContent = `R$ ${projectedRevenue.toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Calcular e atualizar dias restantes
+    const daysRemainingElement = document.getElementById('daysRemaining');
+    if (daysRemainingElement) {
+        daysRemainingElement.textContent = `${daysRemaining} dias`;
+    }
+    
+    // Atualizar média diária necessária para atingir a meta
+    const monthlyGoal = parseFloat(document.getElementById('monthlyGoal')?.value || 0);
+    if (monthlyGoal > 0) {
+        const remainingToGoal = monthlyGoal - currentRevenue;
+        const dailyNeeded = remainingToGoal / daysRemaining;
+        
+        const dailyNeededElement = document.getElementById('dailyNeeded');
+        if (dailyNeededElement) {
+            dailyNeededElement.textContent = `R$ ${dailyNeeded.toFixed(2).replace('.', ',')}`;
+        }
+    }
+    
+    return projectedRevenue;
 }
 
 // Atualizar display financeiro

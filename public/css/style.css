@@ -1044,6 +1044,15 @@ body {
     background-clip: text;
 }
 
+.projection-note {
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 400;
+    margin-top: 8px;
+    display: block;
+    font-style: italic;
+}
+
 /* Configuração de Metas - Glassmorphism */
 .goals-config {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));

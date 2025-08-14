@@ -6,7 +6,7 @@
 }
 
 .tokens-header {
-    padding: 24px 32px;
+    padding: 16px 32px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -41,8 +41,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 100px);
-    padding: 40px 20px;
+    height: calc(100vh - 80px);
+    padding: 20px;
 }
 
 .tokens-card {
