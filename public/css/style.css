@@ -432,6 +432,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
 .dashboard-menu {
@@ -1680,4 +1687,190 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 130, 246, 0.5);
+}
+
+/* Zoom-Friendly Responsive Design */
+@media (min-width: 769px) {
+    /* Garantir que elementos se adaptem ao zoom */
+    .container {
+        max-width: 90vw;
+        margin: 0 auto;
+    }
+    
+    .dashboard-nav {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .dashboard-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .goals-overview {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: clamp(16px, 2vw, 32px);
+    }
+    
+    .financial-summary {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: clamp(16px, 2vw, 24px);
+    }
+    
+    .trends-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: clamp(12px, 1.5vw, 20px);
+    }
+    
+    .form-row {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: clamp(16px, 2vw, 20px);
+    }
+    
+    .entry-form .form-row {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: clamp(12px, 1.5vw, 16px);
+    }
+}
+
+/* High DPI and Zoom Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .overview-icon,
+    .cosmic-icon {
+        transform: scale(1.1);
+    }
+    
+    .btn,
+    .menu-item {
+        transform: scale(1.05);
+    }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    .goals-overview {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .financial-summary {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Small screens with zoom */
+@media (max-width: 1200px) and (min-resolution: 120dpi) {
+    .goals-overview {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    
+    .financial-summary {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+/* Ensure text remains readable at all zoom levels */
+@media (max-width: 1000px) {
+    body {
+        font-size: clamp(14px, 2vw, 16px);
+    }
+    
+    h1, h2, h3 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+    }
+    
+    h4, h5, h6 {
+        font-size: clamp(1.1rem, 3vw, 1.5rem);
+    }
+    
+    .btn {
+        font-size: clamp(12px, 2vw, 14px);
+        padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
+    }
+}
+
+/* Maintain aspect ratios and prevent layout breaking */
+.goals-overview,
+.financial-summary,
+.trends-grid,
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: clamp(16px, 2vw, 32px);
+    align-items: start;
+}
+
+.overview-card,
+.summary-card,
+.trend-card {
+    aspect-ratio: auto;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Ensure modals and overlays work at all zoom levels */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    margin: auto;
+}
+
+/* Prevent horizontal scrolling */
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 clamp(16px, 3vw, 32px);
+    box-sizing: border-box;
+}
+
+/* Ensure all elements scale proportionally */
+* {
+    box-sizing: border-box;
+}
+
+img, svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Maintain button and input sizes at different zoom levels */
+input, select, textarea, button {
+    font-size: clamp(14px, 2vw, 16px);
+    padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+}
+
+/* Ensure tables remain readable */
+table {
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(12px, 1.8vw, 14px);
+}
+
+th, td {
+    padding: clamp(8px, 1.5vw, 12px);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 } 
