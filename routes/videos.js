@@ -28,13 +28,16 @@ const storage = multer.diskStorage({
   }
 });
 
-// CONFIGURAÇÃO MÍNIMA DO MULTER - SEM FILTROS
+// CONFIGURAÇÃO MÍNIMA DO MULTER - SEM FILTROS - VERSÃO FINAL
 const upload = multer({
   storage: storage,
   limits: {
     fileSize: 100 * 1024 * 1024 // 100MB
   }
 });
+
+// LOG PARA CONFIRMAR QUE ESTA VERSÃO ESTÁ SENDO USADA
+console.log('🚨🚨🚨 MULTER CONFIGURADO SEM FILTROS - VERSÃO FINAL 🚨🚨🚨');
 
 // Validações para criação/edição de vídeo
 const videoValidation = [
