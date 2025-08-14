@@ -45,6 +45,7 @@ const User = require('./models/User');
 const videoRoutes = require('./routes/videos');
 const meetingRoutes = require('./routes/meetings');
 const userRoutes = require('./routes/users');
+const financialRoutes = require('./routes/financial');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -224,6 +225,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 app.use('/api/videos', videoRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/financial', financialRoutes);
 
 // ===== ROTAS DE PÁGINAS =====
 

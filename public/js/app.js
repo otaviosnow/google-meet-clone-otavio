@@ -58,6 +58,23 @@ const totalVideos = document.getElementById('totalVideos');
 const totalMeetings = document.getElementById('totalMeetings');
 const totalViews = document.getElementById('totalViews');
 
+// Financial System
+const monthlyGoal = document.getElementById('monthlyGoal');
+const saveGoalBtn = document.getElementById('saveGoalBtn');
+const totalRevenue = document.getElementById('totalRevenue');
+const totalExpenses = document.getElementById('totalExpenses');
+const totalProfit = document.getElementById('totalProfit');
+const goalProgress = document.getElementById('goalProgress');
+const entryDate = document.getElementById('entryDate');
+const entryRevenue = document.getElementById('entryRevenue');
+const entryExpenses = document.getElementById('entryExpenses');
+const addEntryBtn = document.getElementById('addEntryBtn');
+
+// Avatar
+const avatarPreview = document.getElementById('avatarPreview');
+const avatarInput = document.getElementById('avatarInput');
+const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Google Meet Fake SaaS');
@@ -160,6 +177,13 @@ function initializeEventListeners() {
     
     // Profile
     profileForm.addEventListener('submit', handleUpdateProfile);
+    
+    // Financial System
+    if (saveGoalBtn) saveGoalBtn.addEventListener('click', saveMonthlyGoal);
+    if (addEntryBtn) addEntryBtn.addEventListener('click', addDailyEntry);
+    
+    // Avatar System
+    initializeAvatar();
     
     // Click outside modal to close
     window.addEventListener('click', (e) => {
@@ -494,19 +518,16 @@ function renderVideos(videos) {
         videoCard.className = 'video-card';
         videoCard.innerHTML = `
             <div class="video-thumbnail">
-                <video src="${videoUrl}" preload="metadata" style="width: 100%; height: 100%; object-fit: cover;">
+                <video src="${videoUrl}" preload="metadata" muted style="width: 100%; height: 100%; object-fit: cover;">
                     <i class="fas fa-play" style="font-size: 32px;"></i>
                 </video>
-                <div class="play-overlay">
-                    <i class="fas fa-play" style="font-size: 32px;"></i>
-                </div>
             </div>
             <div class="video-info">
                 <h3 class="video-title">${video.title}</h3>
                 <p class="video-description">${video.description || 'Sem descrição'}</p>
                 <div class="video-meta">
-                    <span>${video.type}</span>
-                    <span>${video.views} visualizações</span>
+                    <span><i class="fas fa-tag"></i> ${video.type}</span>
+                    <span><i class="fas fa-eye"></i> ${video.views} visualizações</span>
                 </div>
                 <div class="video-actions">
                     <button class="btn btn-outline btn-small" onclick="copyVideoUrl('${videoUrl}')">
@@ -520,6 +541,45 @@ function renderVideos(videos) {
                 </div>
             </div>
         `;
+        
+        // Adicionar funcionalidade de preview automático
+        const videoElement = videoCard.querySelector('video');
+        const thumbnail = videoCard.querySelector('.video-thumbnail');
+        
+        let previewTimeout;
+        let isPlaying = false;
+        
+        thumbnail.addEventListener('mouseenter', () => {
+            if (!isPlaying) {
+                previewTimeout = setTimeout(() => {
+                    videoElement.currentTime = 0;
+                    videoElement.play().then(() => {
+                        isPlaying = true;
+                    }).catch(err => {
+                        console.log('Erro ao reproduzir preview:', err);
+                    });
+                }, 300); // Pequeno delay para evitar reprodução acidental
+            }
+        });
+        
+        thumbnail.addEventListener('mouseleave', () => {
+            clearTimeout(previewTimeout);
+            if (isPlaying) {
+                videoElement.pause();
+                videoElement.currentTime = 0;
+                isPlaying = false;
+            }
+        });
+        
+        // Parar preview após 5 segundos
+        videoElement.addEventListener('timeupdate', () => {
+            if (videoElement.currentTime >= 5) {
+                videoElement.pause();
+                videoElement.currentTime = 0;
+                isPlaying = false;
+            }
+        });
+        
         videosList.appendChild(videoCard);
     });
 }
@@ -839,6 +899,9 @@ async function loadUserData() {
     userName.textContent = currentUser.name;
     profileName.value = currentUser.name;
     profileEmail.value = currentUser.email;
+    
+    // Carregar dados financeiros
+    loadFinancialData();
 }
 
 async function loadProfileStats() {
@@ -984,4 +1047,152 @@ style.textContent = `
         }
     }
 `;
-document.head.appendChild(style); 
+document.head.appendChild(style);
+
+// ===== SISTEMA FINANCEIRO =====
+
+// Carregar dados financeiros
+async function loadFinancialData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/summary`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            updateFinancialDisplay(data);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados financeiros:', error);
+    }
+}
+
+// Atualizar display financeiro
+function updateFinancialDisplay(data) {
+    if (monthlyGoal) monthlyGoal.value = data.monthlyGoal || 0;
+    if (totalRevenue) totalRevenue.textContent = `R$ ${data.totalRevenue.toFixed(2)}`;
+    if (totalExpenses) totalExpenses.textContent = `R$ ${data.totalExpenses.toFixed(2)}`;
+    if (totalProfit) totalProfit.textContent = `R$ ${data.totalProfit.toFixed(2)}`;
+    if (goalProgress) goalProgress.textContent = `${data.goalProgress}%`;
+    
+    // Definir data atual como padrão
+    if (entryDate) {
+        const today = new Date().toISOString().split('T')[0];
+        entryDate.value = today;
+    }
+}
+
+// Salvar meta mensal
+async function saveMonthlyGoal() {
+    const goal = parseFloat(monthlyGoal.value);
+    
+    if (isNaN(goal) || goal < 0) {
+        showNotification('Meta deve ser um número positivo', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/goal`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ monthlyGoal: goal })
+        });
+        
+        if (response.ok) {
+            showNotification('Meta salva com sucesso!', 'success');
+            loadFinancialData();
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar meta:', error);
+        showNotification('Erro ao salvar meta', 'error');
+    }
+}
+
+// Adicionar entrada diária
+async function addDailyEntry() {
+    const date = entryDate.value;
+    const revenue = parseFloat(entryRevenue.value) || 0;
+    const expenses = parseFloat(entryExpenses.value) || 0;
+    
+    if (!date) {
+        showNotification('Data é obrigatória', 'error');
+        return;
+    }
+    
+    if (revenue < 0 || expenses < 0) {
+        showNotification('Valores não podem ser negativos', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ date, revenue, expenses })
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada adicionada com sucesso!', 'success');
+            entryRevenue.value = '';
+            entryExpenses.value = '';
+            loadFinancialData();
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar entrada:', error);
+        showNotification('Erro ao adicionar entrada', 'error');
+    }
+}
+
+// ===== SISTEMA DE AVATAR =====
+
+// Inicializar sistema de avatar
+function initializeAvatar() {
+    if (changeAvatarBtn) {
+        changeAvatarBtn.addEventListener('click', () => {
+            avatarInput.click();
+        });
+    }
+    
+    if (avatarInput) {
+        avatarInput.addEventListener('change', handleAvatarChange);
+    }
+    
+    if (avatarPreview) {
+        avatarPreview.addEventListener('click', () => {
+            avatarInput.click();
+        });
+    }
+}
+
+// Manipular mudança de avatar
+function handleAvatarChange(event) {
+    const file = event.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+            showNotification('Arquivo muito grande. Máximo 5MB.', 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            avatarPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        showNotification('Foto de perfil atualizada!', 'success');
+    }
+} 

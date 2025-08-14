@@ -230,31 +230,98 @@
                         <h2>Meu Perfil</h2>
                     </div>
                     <div class="profile-content">
+                        <!-- Sistema de Metas Financeiras -->
+                        <div class="financial-goals">
+                            <h3><i class="fas fa-chart-line"></i> Metas Financeiras</h3>
+                            <div class="goals-form">
+                                <div class="form-group">
+                                    <label for="monthlyGoal">Meta Mensal (R$)</label>
+                                    <input type="number" id="monthlyGoal" placeholder="0.00" step="0.01">
+                                </div>
+                                <button id="saveGoalBtn" class="btn btn-primary">Salvar Meta</button>
+                            </div>
+                            
+                            <div class="financial-summary">
+                                <div class="summary-card">
+                                    <h4><i class="fas fa-dollar-sign"></i> Faturamento</h4>
+                                    <p id="totalRevenue">R$ 0,00</p>
+                                </div>
+                                <div class="summary-card">
+                                    <h4><i class="fas fa-minus-circle"></i> Gastos</h4>
+                                    <p id="totalExpenses">R$ 0,00</p>
+                                </div>
+                                <div class="summary-card">
+                                    <h4><i class="fas fa-plus-circle"></i> Lucro</h4>
+                                    <p id="totalProfit">R$ 0,00</p>
+                                </div>
+                                <div class="summary-card">
+                                    <h4><i class="fas fa-target"></i> Meta</h4>
+                                    <p id="goalProgress">0%</p>
+                                </div>
+                            </div>
+                            
+                            <div class="daily-entry">
+                                <h4><i class="fas fa-calendar-day"></i> Entrada Diária</h4>
+                                <div class="entry-form">
+                                    <div class="form-group">
+                                        <label for="entryDate">Data</label>
+                                        <input type="date" id="entryDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="entryRevenue">Faturamento (R$)</label>
+                                        <input type="number" id="entryRevenue" placeholder="0.00" step="0.01">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="entryExpenses">Gastos (R$)</label>
+                                        <input type="number" id="entryExpenses" placeholder="0.00" step="0.01">
+                                    </div>
+                                    <button id="addEntryBtn" class="btn btn-primary">Adicionar Entrada</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estatísticas do Perfil -->
                         <div class="profile-stats">
                             <div class="stat-card">
-                                <h3>Vídeos</h3>
+                                <h3><i class="fas fa-video"></i> Vídeos</h3>
                                 <p id="totalVideos">0</p>
                             </div>
                             <div class="stat-card">
-                                <h3>Reuniões</h3>
+                                <h3><i class="fas fa-users"></i> Reuniões</h3>
                                 <p id="totalMeetings">0</p>
                             </div>
                             <div class="stat-card">
-                                <h3>Visualizações</h3>
+                                <h3><i class="fas fa-eye"></i> Visualizações</h3>
                                 <p id="totalViews">0</p>
                             </div>
                         </div>
-                        <form id="profileForm" class="profile-form">
-                            <div class="form-group">
-                                <label for="profileName">Nome</label>
-                                <input type="text" id="profileName" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="profileEmail">Email</label>
-                                <input type="email" id="profileEmail" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Atualizar Perfil</button>
-                        </form>
+
+                        <!-- Formulário do Perfil -->
+                        <div class="profile-form-section">
+                            <h3><i class="fas fa-user-edit"></i> Informações do Perfil</h3>
+                            <form id="profileForm" class="profile-form">
+                                <div class="profile-avatar">
+                                    <div class="avatar-preview">
+                                        <img id="avatarPreview" src="images/default-avatar.png" alt="Avatar">
+                                        <div class="avatar-overlay">
+                                            <i class="fas fa-camera"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                                    <button type="button" id="changeAvatarBtn" class="btn btn-outline">Alterar Foto</button>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileName"><i class="fas fa-user"></i> Nome</label>
+                                    <input type="text" id="profileName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileEmail"><i class="fas fa-envelope"></i> Email</label>
+                                    <input type="email" id="profileEmail" readonly>
+                                    <small>O email não pode ser alterado</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Atualizar Perfil</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
