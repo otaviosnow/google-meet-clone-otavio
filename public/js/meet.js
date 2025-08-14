@@ -31,6 +31,7 @@ const meetingIdElement = document.getElementById('meetingId');
 
 // Tela 3: Chamada
 const vslVideo = document.getElementById('vslVideo');
+const vslIframe = document.getElementById('vslIframe');
 const webcamVideo = document.getElementById('webcamVideo');
 const userVideoPlaceholder = document.getElementById('userVideoPlaceholder');
 const muteBtn = document.getElementById('muteBtn');
@@ -461,16 +462,30 @@ function startVSL() {
         videoUrl = window.location.origin + videoUrl;
     }
     
-    // Se é um vídeo do YouTube, converter para formato embed
+    console.log('🎬 URL original:', meetingData.video.url);
+    console.log('🎬 URL completa:', videoUrl);
+    
+    // Verificar se é YouTube
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
         const videoId = extractYouTubeId(videoUrl);
         if (videoId) {
-            videoUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
+            console.log('🎬 Usando iframe para YouTube:', embedUrl);
+            
+            // Esconder vídeo e mostrar iframe
+            vslVideo.style.display = 'none';
+            vslIframe.style.display = 'block';
+            vslIframe.src = embedUrl;
+            
+            // Não tentar autoplay no vídeo
+            return;
         }
     }
     
-    console.log('🎬 URL original:', meetingData.video.url);
-    console.log('🎬 URL completa:', videoUrl);
+    // Para vídeos normais, usar elemento video
+    console.log('🎬 Usando elemento video para arquivo local');
+    vslVideo.style.display = 'block';
+    vslIframe.style.display = 'none';
     
     // Configurar o vídeo VSL
     vslVideo.src = videoUrl;
