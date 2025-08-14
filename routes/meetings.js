@@ -90,17 +90,28 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, meetingValidation, handleValidationErrors, async (req, res) => {
   try {
     const { title, description, videoId, maxParticipants = 1, isPublic = false, meetLink } = req.body;
+    
+    console.log('🚀 Criando nova reunião:', {
+      title,
+      videoId,
+      meetLink,
+      user: req.user._id
+    });
 
     // Verificar se o vídeo existe e pertence ao usuário
     const video = await Video.findOne({ _id: videoId, user: req.user._id });
     if (!video) {
+      console.log('❌ Vídeo não encontrado:', videoId);
       return res.status(404).json({
         error: 'Vídeo não encontrado'
       });
     }
 
+    console.log('✅ Vídeo encontrado:', video.title);
+
     // Verificar se o vídeo está ativo
     if (!video.isActive) {
+      console.log('❌ Vídeo não está ativo');
       return res.status(400).json({
         error: 'Vídeo não está ativo'
       });
@@ -117,6 +128,12 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
     });
 
     await meeting.save();
+    
+    console.log('✅ Reunião criada com sucesso:', {
+      id: meeting._id,
+      meetingId: meeting.meetingId,
+      title: meeting.title
+    });
 
     // Popular dados do vídeo para retorno
     await meeting.populate('video', 'title url type');
@@ -138,10 +155,24 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
 router.get('/:meetingId', async (req, res) => {
   try {
     const { meetingId } = req.params;
+    
+    console.log('🔍 Buscando reunião com ID:', meetingId);
 
     const meeting = await Meeting.findOne({ meetingId })
       .populate('user', 'name')
       .populate('video', 'title url type');
+
+    console.log('📋 Resultado da busca:', meeting ? 'Encontrada' : 'Não encontrada');
+    
+    if (meeting) {
+      console.log('📊 Dados da reunião:', {
+        id: meeting._id,
+        meetingId: meeting.meetingId,
+        title: meeting.title,
+        isActive: meeting.isActive,
+        video: meeting.video ? meeting.video.title : 'N/A'
+      });
+    }
 
     if (!meeting) {
       return res.status(404).json({
