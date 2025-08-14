@@ -117,6 +117,12 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
       });
     }
 
+    // Extrair o meetingId do meetLink
+    const urlParts = meetLink.split('/');
+    const meetingIdFromLink = urlParts[urlParts.length - 1].split('?')[0];
+    
+    console.log('🔗 MeetingId extraído do link:', meetingIdFromLink);
+
     const meeting = new Meeting({
       user: req.user._id,
       video: videoId,
@@ -124,7 +130,8 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
       description,
       maxParticipants,
       isPublic,
-      meetLink
+      meetLink,
+      meetingId: meetingIdFromLink // Usar o ID gerado pelo JavaScript
     });
 
     await meeting.save();
