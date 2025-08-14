@@ -31,11 +31,41 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Importar rotas
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const videoRoutes = require('./routes/videos');
-const meetingRoutes = require('./routes/meetings');
+// Importar rotas com tratamento de erro
+console.log('📁 Carregando rotas...');
+let authRoutes, userRoutes, videoRoutes, meetingRoutes;
+
+try {
+    authRoutes = require('./routes/auth');
+    console.log('✅ Rota auth carregada');
+} catch (error) {
+    console.error('❌ Erro ao carregar rota auth:', error.message);
+    authRoutes = express.Router();
+}
+
+try {
+    userRoutes = require('./routes/users');
+    console.log('✅ Rota users carregada');
+} catch (error) {
+    console.error('❌ Erro ao carregar rota users:', error.message);
+    userRoutes = express.Router();
+}
+
+try {
+    videoRoutes = require('./routes/videos');
+    console.log('✅ Rota videos carregada');
+} catch (error) {
+    console.error('❌ Erro ao carregar rota videos:', error.message);
+    videoRoutes = express.Router();
+}
+
+try {
+    meetingRoutes = require('./routes/meetings');
+    console.log('✅ Rota meetings carregada');
+} catch (error) {
+    console.error('❌ Erro ao carregar rota meetings:', error.message);
+    meetingRoutes = express.Router();
+}
 
 // ===== ROTAS API =====
 
@@ -68,6 +98,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // Usar rotas de autenticação reais
+console.log('🔗 Configurando rotas da API...');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/videos', videoRoutes);
