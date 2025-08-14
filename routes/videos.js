@@ -247,7 +247,7 @@ router.delete('/:id', authenticateToken, checkOwnership('Video'), async (req, re
       }
     }
 
-    await video.remove();
+    await video.deleteOne();
 
     res.json({
       message: 'Vídeo deletado com sucesso'
