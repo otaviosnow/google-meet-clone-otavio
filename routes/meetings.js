@@ -1,416 +1,171 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const { authenticateToken, checkOwnership } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const Meeting = require('../models/Meeting');
 const Video = require('../models/Video');
+const User = require('../models/User');
 
 const router = express.Router();
 
-// Validações para criação/edição de reunião
-const meetingValidation = [
-  body('title')
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Título deve ter entre 1 e 100 caracteres'),
-  body('description')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('Descrição não pode ter mais de 500 caracteres'),
-  body('videoId')
-    .isMongoId()
-    .withMessage('ID do vídeo inválido'),
-  body('maxParticipants')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('Máximo de participantes deve ser entre 1 e 100'),
-  body('isPublic')
-    .optional()
-    .isBoolean()
-    .withMessage('isPublic deve ser true ou false')
-];
+// Criar nova reunião
+router.post('/', authenticateToken, async (req, res) => {
+    try {
+        const { title, videoId } = req.body;
+        
+        if (!title || !videoId) {
+            return res.status(400).json({ error: 'Título e vídeo são obrigatórios' });
+        }
 
-// Middleware para verificar erros de validação
-const handleValidationErrors = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      error: 'Dados inválidos',
-      details: errors.array().map(err => ({
-        field: err.path,
-        message: err.msg
-      }))
-    });
-  }
-  next();
-};
+        // Verificar se o vídeo existe e pertence ao usuário
+        const video = await Video.findOne({ _id: videoId, user: req.user.id });
+        if (!video) {
+            return res.status(404).json({ error: 'Vídeo não encontrado' });
+        }
 
-// GET /api/meetings - Listar reuniões do usuário
-router.get('/', authenticateToken, async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status = 'all' } = req.query;
-    
-    const query = { user: req.user._id };
-    
-    // Filtrar por status
-    if (status === 'active') {
-      query.isActive = true;
-    } else if (status === 'inactive') {
-      query.isActive = false;
+        // Gerar ID da reunião
+        const meetingId = 'meet-' + Math.random().toString(36).substr(2, 9);
+        const meetLink = `${req.protocol}://${req.get('host')}/meet/${meetingId}`;
+        
+        // Obter IP do criador
+        const creatorIP = req.ip || req.connection.remoteAddress;
+
+        const meeting = new Meeting({
+            meetingId: meetingId,
+            title,
+            description: '',
+            video: videoId,
+            creator: req.user.id,
+            meetLink: meetLink,
+            creatorIP: creatorIP,
+            status: 'active'
+        });
+
+        await meeting.save();
+
+        // Descontar 2 tokens do usuário
+        const user = await User.findById(req.user.id);
+        if (user.visionTokens < 2) {
+            return res.status(400).json({ error: 'Tokens insuficientes. Você precisa de 2 tokens para criar uma reunião.' });
+        }
+        
+        user.visionTokens -= 2;
+        await user.save();
+
+        console.log(`✅ Reunião criada: ${meetingId} - Tokens descontados: ${user.visionTokens + 2} → ${user.visionTokens}`);
+
+        // Popular dados do vídeo para retorno
+        await meeting.populate('video', 'title url type');
+
+        res.status(201).json({
+            message: 'Reunião criada com sucesso',
+            meeting: meeting,
+            tokensRemaining: user.visionTokens
+        });
+
+    } catch (error) {
+        console.error('Erro ao criar reunião:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
-
-    const meetings = await Meeting.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate('user', 'name email')
-      .populate('video', 'title url type');
-
-    const total = await Meeting.countDocuments(query);
-
-    res.json({
-      meetings: meetings.map(meeting => meeting.toPublicJSON()),
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-
-  } catch (error) {
-    console.error('Erro ao listar reuniões:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
 });
 
-// POST /api/meetings - Criar nova reunião
-router.post('/', authenticateToken, meetingValidation, handleValidationErrors, async (req, res) => {
-  try {
-    const { title, description, videoId, maxParticipants = 1, isPublic = false, meetLink } = req.body;
-    
-    console.log('🚀 Criando nova reunião:', {
-      title,
-      videoId,
-      meetLink,
-      user: req.user._id
-    });
-
-    // Verificar se o vídeo existe e pertence ao usuário
-    const video = await Video.findOne({ _id: videoId, user: req.user._id });
-    if (!video) {
-      console.log('❌ Vídeo não encontrado:', videoId);
-      return res.status(404).json({
-        error: 'Vídeo não encontrado'
-      });
-    }
-
-    console.log('✅ Vídeo encontrado:', video.title);
-
-    // Verificar se o vídeo está ativo
-    if (!video.isActive) {
-      console.log('❌ Vídeo não está ativo');
-      return res.status(400).json({
-        error: 'Vídeo não está ativo'
-      });
-    }
-
-    // Extrair o meetingId do meetLink
-    const urlParts = meetLink.split('/');
-    const meetingIdFromLink = urlParts[urlParts.length - 1].split('?')[0];
-    
-    console.log('🔗 MeetingId extraído do link:', meetingIdFromLink);
-
-    // Garantir que videoId seja um ObjectId válido
-    const mongoose = require('mongoose');
-    const videoObjectId = new mongoose.Types.ObjectId(videoId);
-    
-    const meeting = new Meeting({
-      user: req.user._id,
-      video: videoObjectId, // Converter para ObjectId
-      title,
-      description,
-      maxParticipants,
-      isPublic,
-      meetLink,
-      meetingId: meetingIdFromLink // Usar o ID gerado pelo JavaScript
-    });
-    
-    console.log('📋 Dados da reunião antes de salvar:', {
-      user: req.user._id,
-      video: videoObjectId,
-      videoType: typeof videoObjectId,
-      title,
-      meetingId: meetingIdFromLink
-    });
-
-    await meeting.save();
-    
-    console.log('✅ Reunião criada com sucesso:', {
-      id: meeting._id,
-      meetingId: meeting.meetingId,
-      title: meeting.title
-    });
-
-    // Popular dados do vídeo para retorno
-    await meeting.populate('video', 'title url type');
-
-    res.status(201).json({
-      message: 'Reunião criada com sucesso',
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao criar reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-// GET /api/meetings/:meetingId - Obter reunião por ID público
+// Obter reunião por ID
 router.get('/:meetingId', async (req, res) => {
-  try {
-    const { meetingId } = req.params;
-    
-    console.log('🔍 Buscando reunião com ID:', meetingId);
+    try {
+        const { meetingId } = req.params;
+        const userIP = req.ip || req.connection.remoteAddress;
 
-    const meeting = await Meeting.findOne({ meetingId })
-      .populate('user', 'name')
-      .populate('video', 'title url type');
+        console.log(`🔍 Buscando reunião: ${meetingId} - IP: ${userIP}`);
 
-    console.log('📋 Resultado da busca:', meeting ? 'Encontrada' : 'Não encontrada');
-    
-    if (meeting) {
-      console.log('📊 Dados da reunião:', {
-        id: meeting._id,
-        meetingId: meeting.meetingId,
-        title: meeting.title,
-        isActive: meeting.isActive,
-        isAccessed: meeting.isAccessed,
-        accessedBy: meeting.accessedBy,
-        video: meeting.video ? meeting.video.title : 'N/A',
-        videoId: meeting.video,
-        videoType: typeof meeting.video
-      });
+        const meeting = await Meeting.findOne({ meetingId }).populate('video', 'title url type');
+        
+        if (!meeting) {
+            return res.status(404).json({ error: 'Reunião não encontrada' });
+        }
+
+        // Verificar se o IP pode acessar a reunião
+        if (!meeting.canAccess(userIP)) {
+            console.log(`❌ Acesso negado para IP: ${userIP} - Reunião: ${meetingId}`);
+            return res.status(403).json({ 
+                error: 'Acesso negado. Esta reunião já está sendo utilizada por outra pessoa ou foi encerrada.' 
+            });
+        }
+
+        // Autorizar acesso
+        const accessResult = meeting.authorizeAccess(userIP);
+        
+        if (!accessResult.authorized) {
+            console.log(`❌ Acesso não autorizado: ${accessResult.reason}`);
+            return res.status(403).json({ error: accessResult.reason });
+        }
+
+        await meeting.save();
+
+        console.log(`✅ Reunião acessada: ${meetingId} - IP: ${userIP} - Criador: ${accessResult.isCreator}`);
+
+        res.json({
+            meeting: meeting,
+            accessInfo: {
+                isCreator: accessResult.isCreator,
+                isFirstAdditional: accessResult.isFirstAdditional || false
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar reunião:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
-
-    if (!meeting) {
-      return res.status(404).json({
-        error: 'Reunião não encontrada'
-      });
-    }
-
-    if (!meeting.isActive) {
-      return res.status(400).json({
-        error: 'Reunião não está ativa'
-      });
-    }
-
-    // Gerar identificador único para o usuário (IP + User-Agent)
-    const userIdentifier = `${req.ip}-${req.headers['user-agent']}`;
-    
-    // Verificar se a reunião pode ser acessada
-    if (!meeting.canBeAccessed(userIdentifier)) {
-      return res.status(403).json({
-        error: 'Acesso negado. Esta reunião só pode ser acessada pelo criador e uma pessoa autorizada.'
-      });
-    }
-
-    // Marcar reunião como acessada se for o primeiro acesso
-    if (!meeting.isAccessed) {
-      await meeting.markAsAccessed(userIdentifier);
-      console.log('✅ Reunião marcada como acessada por:', userIdentifier);
-    }
-    
-    // Se for o criador e quiser autorizar alguém, pode fazer isso aqui
-    // (implementação futura para autorização via interface)
-
-    res.json({
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao obter reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
 });
 
-// GET /api/meetings/:id/details - Obter detalhes da reunião (para o dono)
-router.get('/:id/details', authenticateToken, checkOwnership('Meeting'), async (req, res) => {
-  try {
-    const meeting = req.resource;
-    
-    await meeting.populate('video', 'title url type');
+// Listar reuniões do usuário
+router.get('/', authenticateToken, async (req, res) => {
+    try {
+        const meetings = await Meeting.find({ creator: req.user.id })
+            .populate('video', 'title url type')
+            .sort({ createdAt: -1 });
 
-    res.json({
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao obter detalhes da reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
+        res.json(meetings);
+    } catch (error) {
+        console.error('Erro ao listar reuniões:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
 });
 
-// PUT /api/meetings/:id - Atualizar reunião
-router.put('/:id', authenticateToken, checkOwnership('Meeting'), meetingValidation, handleValidationErrors, async (req, res) => {
-  try {
-    const { title, description, maxParticipants, isPublic } = req.body;
+// Encerrar reunião
+router.post('/:meetingId/end', authenticateToken, async (req, res) => {
+    try {
+        const { meetingId } = req.params;
+        
+        const meeting = await Meeting.findOne({ meetingId, creator: req.user.id });
+        
+        if (!meeting) {
+            return res.status(404).json({ error: 'Reunião não encontrada' });
+        }
 
-    const meeting = req.resource;
-    
-    // Só permitir edição se a reunião não foi iniciada
-    if (meeting.startedAt) {
-      return res.status(400).json({
-        error: 'Não é possível editar uma reunião que já foi iniciada'
-      });
+        await meeting.endMeeting();
+        
+        console.log(`🔚 Reunião encerrada: ${meetingId}`);
+        
+        res.json({ message: 'Reunião encerrada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao encerrar reunião:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
-
-    meeting.title = title;
-    meeting.description = description;
-    meeting.maxParticipants = maxParticipants;
-    meeting.isPublic = isPublic;
-
-    await meeting.save();
-
-    res.json({
-      message: 'Reunião atualizada com sucesso',
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao atualizar reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
 });
 
-// DELETE /api/meetings/:id - Deletar reunião
-router.delete('/:id', authenticateToken, checkOwnership('Meeting'), async (req, res) => {
-  try {
-    const meeting = req.resource;
+// Deletar reunião
+router.delete('/:id', authenticateToken, async (req, res) => {
+    try {
+        const meeting = await Meeting.findOne({ _id: req.params.id, creator: req.user.id });
+        
+        if (!meeting) {
+            return res.status(404).json({ error: 'Reunião não encontrada' });
+        }
 
-    // Só permitir deletar se a reunião não foi iniciada
-    if (meeting.startedAt) {
-      return res.status(400).json({
-        error: 'Não é possível deletar uma reunião que já foi iniciada'
-      });
+        await meeting.deleteOne();
+        res.json({ message: 'Reunião deletada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao deletar reunião:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
-
-    await meeting.remove();
-
-    res.json({
-      message: 'Reunião deletada com sucesso'
-    });
-
-  } catch (error) {
-    console.error('Erro ao deletar reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-// POST /api/meetings/:meetingId/join - Entrar na reunião
-router.post('/:meetingId/join', async (req, res) => {
-  try {
-    const { meetingId } = req.params;
-
-    const meeting = await Meeting.findOne({ meetingId })
-      .populate('video', 'title url type');
-
-    if (!meeting) {
-      return res.status(404).json({
-        error: 'Reunião não encontrada'
-      });
-    }
-
-    if (!meeting.isActive) {
-      return res.status(400).json({
-        error: 'Reunião não está ativa'
-      });
-    }
-
-    // Incrementar visualizações
-    await meeting.incrementViews();
-
-    res.json({
-      message: 'Entrou na reunião com sucesso',
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao entrar na reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-// POST /api/meetings/:id/start - Iniciar reunião
-router.post('/:id/start', authenticateToken, checkOwnership('Meeting'), async (req, res) => {
-  try {
-    const meeting = req.resource;
-
-    if (meeting.startedAt) {
-      return res.status(400).json({
-        error: 'Reunião já foi iniciada'
-      });
-    }
-
-    await meeting.startMeeting();
-
-    res.json({
-      message: 'Reunião iniciada com sucesso',
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao iniciar reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-// POST /api/meetings/:id/end - Encerrar reunião
-router.post('/:id/end', authenticateToken, checkOwnership('Meeting'), async (req, res) => {
-  try {
-    const meeting = req.resource;
-
-    if (!meeting.startedAt) {
-      return res.status(400).json({
-        error: 'Reunião não foi iniciada'
-      });
-    }
-
-    if (meeting.endedAt) {
-      return res.status(400).json({
-        error: 'Reunião já foi encerrada'
-      });
-    }
-
-    await meeting.endMeeting();
-
-    res.json({
-      message: 'Reunião encerrada com sucesso',
-      meeting: meeting.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao encerrar reunião:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
 });
 
 module.exports = router; 

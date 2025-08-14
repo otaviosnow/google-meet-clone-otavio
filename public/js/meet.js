@@ -89,47 +89,30 @@ async function loadMeetingData() {
         const response = await fetch(`/api/meetings/${meetingId}`);
         
         if (response.ok) {
-            const data = await response.json();
-            meetingData = data.meeting;
+            const result = await response.json();
+            meetingData = result.meeting;
+            accessInfo = result.accessInfo;
             
-            console.log('📊 Dados completos da reunião:', meetingData);
-            console.log('🎬 Dados do vídeo:', meetingData.video);
+            console.log('✅ Reunião carregada:', meetingData);
+            console.log('📊 Informações de acesso:', accessInfo);
             
-            // Atualizar ID da reunião na interface
-            meetingIdElement.textContent = meetingData.meetingId;
-            
-            // Registrar entrada na reunião
-            await registerMeetingJoin();
-            
-            console.log('✅ Dados da reunião carregados:', meetingData);
-            
-            // Verificar se já está na chamada ou encerrada
-            const isInCall = localStorage.getItem('googleMeetInCall');
-            const isEnded = localStorage.getItem('googleMeetEnded');
-            
-            if (isEnded === 'true') {
-                console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
-                showEndedScreen();
-            } else if (isInCall === 'true') {
-                console.log('🔄 Usuário já estava na chamada - restaurando...');
-                showCallScreen();
-                startCall();
+            // Verificar se é o criador ou primeira pessoa adicional
+            if (accessInfo.isCreator) {
+                console.log('👑 Usuário é o criador da reunião');
+            } else if (accessInfo.isFirstAdditional) {
+                console.log('🎯 Usuário é a primeira pessoa adicional a acessar');
             } else {
-                console.log('🆕 Primeira vez - mostrando tela de nome');
-                showNameScreen();
+                console.log('👤 Usuário é pessoa adicional já autorizada');
             }
             
-        } else {
+            startVSL();
+        } else if (response.status === 403) {
             const errorData = await response.json();
-            console.error('❌ Erro ao acessar reunião:', errorData);
-            
-            if (response.status === 403) {
-                showErrorScreen(errorData.error || 'Esta reunião já está sendo utilizada por outra pessoa. Não é possível utilizar o mesmo link para mais pessoas.');
-            } else if (response.status === 404) {
-                showErrorScreen('Reunião não encontrada');
-            } else {
-                showErrorScreen(errorData.error || 'Erro ao acessar reunião');
-            }
+            showErrorScreen('Acesso Negado', errorData.error, 'fa-users-slash');
+        } else if (response.status === 404) {
+            showErrorScreen('Reunião Não Encontrada', 'A reunião solicitada não existe ou foi removida.', 'fa-exclamation-triangle');
+        } else {
+            showErrorScreen('Erro', 'Ocorreu um erro ao carregar a reunião.', 'fa-exclamation-circle');
         }
         
     } catch (error) {
@@ -173,70 +156,25 @@ function initializeDemo() {
 }
 
 // Função para mostrar tela de erro
-function showErrorScreen(message) {
-    // Verificar se é erro de acesso negado
-    const isAccessDenied = message.includes('já está sendo utilizada por outra pessoa');
+function showErrorScreen(title = 'Erro', message = 'Ocorreu um erro inesperado.', icon = 'fa-exclamation-circle') {
+    console.log('❌ Mostrando tela de erro:', title, message);
     
-    document.body.innerHTML = `
-        <div style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-        ">
-            <div style="
-                text-align: center;
-                padding: 40px;
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-                border-radius: 16px;
-                backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                max-width: 500px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            ">
-                <div style="
-                    width: 80px;
-                    height: 80px;
-                    background: ${isAccessDenied ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #ea4335, #d93025)'};
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 0 auto 24px;
-                    color: white;
-                    font-size: 32px;
-                    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-                ">
-                    <i class="fas fa-${isAccessDenied ? 'users-slash' : 'exclamation-triangle'}"></i>
-                </div>
-                <h1 style="
-                    font-size: 28px;
-                    font-weight: 600;
-                    margin-bottom: 16px;
-                    color: #e8eaed;
-                ">${isAccessDenied ? 'Acesso Negado' : 'Erro'}</h1>
-                <p style="
-                    color: #9ca3af;
-                    margin-bottom: 32px;
-                    line-height: 1.6;
-                    font-size: 16px;
-                ">${message}</p>
-                <a href="/" style="
-                    display: inline-block;
-                    padding: 14px 28px;
-                    background: linear-gradient(135deg, #3b82f6, #2563eb);
-                    color: white;
-                    text-decoration: none;
-                    border-radius: 12px;
-                    font-weight: 500;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-                ">Voltar ao Início</a>
-            </div>
-        </div>
-    `;
+    // Esconder todas as telas
+    hideAllScreens();
+    
+    // Mostrar tela de erro
+    endedScreen.style.display = 'flex'; // Assuming endedScreen is the error screen
+    
+    // Atualizar conteúdo da tela de erro
+    const errorTitle = endedScreen.querySelector('.error-title');
+    const errorMessage = endedScreen.querySelector('.error-message');
+    const errorIcon = endedScreen.querySelector('.error-icon i');
+    
+    if (errorTitle) errorTitle.textContent = title;
+    if (errorMessage) errorMessage.textContent = message;
+    if (errorIcon) {
+        errorIcon.className = `fas ${icon}`;
+    }
 }
 
 // Função para mostrar tela de nome

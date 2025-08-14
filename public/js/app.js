@@ -87,7 +87,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar event listeners
     initializeEventListeners();
+    updateTokenButtonState();
 });
+
+function updateTokenButtonState() {
+    const createMeetingBtn = document.querySelector('#createMeetingForm button[type="submit"]');
+    if (createMeetingBtn && currentUser) {
+        if (currentUser.visionTokens < 2) {
+            createMeetingBtn.disabled = true;
+            createMeetingBtn.textContent = 'Tokens insuficientes';
+            createMeetingBtn.style.opacity = '0.5';
+            createMeetingBtn.style.cursor = 'not-allowed';
+        } else {
+            createMeetingBtn.disabled = false;
+            createMeetingBtn.textContent = 'Criar Reunião';
+            createMeetingBtn.style.opacity = '1';
+            createMeetingBtn.style.cursor = 'pointer';
+        }
+    }
+}
 
 // Função para verificar autenticação
 async function checkAuth() {
@@ -983,20 +1001,26 @@ async function handleCreateMeeting(e) {
         const result = await response.json();
         
         if (response.ok) {
-            hideModal(createMeetingModal);
+            const result = await response.json();
+            
+            // Atualizar o contador de tokens
+            if (result.tokensRemaining !== undefined) {
+                tokenCount.textContent = result.tokensRemaining;
+                currentUser.visionTokens = result.tokensRemaining;
+            }
+            
+            showNotification(result.message, 'success');
+            createMeetingModal.style.display = 'none';
             createMeetingForm.reset();
-            loadMeetings();
             
-            // Mostrar o link da reunião
-            showNotification('Reunião criada com sucesso! Link copiado para área de transferência.', 'success');
+            // Copiar link para clipboard
+            copyToClipboard(meetLink);
             
-            // Copiar link para área de transferência
-            navigator.clipboard.writeText(meetLink).then(() => {
-                console.log('Link da reunião copiado:', meetLink);
-            });
-            
-            // Abrir link em nova aba
+            // Abrir reunião em nova aba
             window.open(meetLink, '_blank');
+            
+            // Recarregar reuniões
+            loadMeetings();
         } else {
             showNotification(result.error, 'error');
         }
@@ -1072,11 +1096,17 @@ async function loadUserData() {
     // Atualizar contador de tokens
     const tokenCount = document.getElementById('tokenCount');
     if (tokenCount) {
-        tokenCount.textContent = currentUser.visionTokens || 0;
+        tokenCount.textContent = currentUser.visionTokens;
     }
     
     // Carregar dados financeiros
     loadFinancialData();
+    
+    // Atualizar estado do botão de criar reunião
+    updateTokenButtonState();
+    
+    // Mostrar dashboard
+    showDashboard();
 }
 
 async function loadProfileStats() {

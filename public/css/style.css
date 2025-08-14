@@ -123,7 +123,17 @@ body {
 
 .btn-full {
     width: 100%;
-    justify-content: center;
+    margin-top: 20px;
+}
+
+.token-cost {
+    display: block;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ff6b6b;
+    font-weight: 500;
+    opacity: 0.9;
 }
 
 /* Hero Section */
