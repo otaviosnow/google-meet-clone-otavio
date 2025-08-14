@@ -111,12 +111,12 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/videos - Criar novo vídeo (upload)
-router.post('/', (req, res, next) => {
+// POST /api/videos - Criar novo vídeo (upload) - VERSÃO SIMPLIFICADA
+router.post('/', authenticateToken, (req, res, next) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Headers:', req.headers);
   next();
-}, authenticateToken, upload.single('video'), async (req, res) => {
+}, upload.single('video'), async (req, res) => {
   try {
     console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
     console.log('🎬 POST /api/videos - Tentativa de criar vídeo');
