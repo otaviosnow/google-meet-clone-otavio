@@ -611,18 +611,23 @@ function renderMeetings(meetings) {
         meetingCard.className = 'meeting-card';
         meetingCard.innerHTML = `
             <h3 class="meeting-title">${meeting.title}</h3>
-            <p class="meeting-description">${meeting.description || 'Sem descrição'}</p>
             <div class="meeting-meta">
-                <span>${meeting.isActive ? 'Ativa' : 'Inativa'}</span>
-                <span>${meeting.views} visualizações</span>
+                <span>Criada em: ${new Date(meeting.createdAt).toLocaleDateString('pt-BR')}</span>
             </div>
             <div class="meeting-link">
-                ${window.location.origin}/meet/${meeting.meetingId}
+                <strong>Link do Google Meet:</strong><br>
+                <a href="${meeting.googleMeetLink || '#'}" target="_blank" class="meet-link">
+                    ${meeting.googleMeetLink || 'Link não disponível'}
+                </a>
             </div>
             <div class="meeting-actions">
-                <button class="btn btn-primary btn-small" onclick="copyMeetingLink('${meeting.meetingId}')">
+                <button class="btn btn-primary btn-small" onclick="copyMeetingLink('${meeting.googleMeetLink || ''}')">
                     <i class="fas fa-link"></i>
                     Copiar Link
+                </button>
+                <button class="btn btn-success btn-small" onclick="window.open('${meeting.googleMeetLink || ''}', '_blank')">
+                    <i class="fas fa-video"></i>
+                    Entrar na Reunião
                 </button>
                 <button class="btn btn-outline btn-small" onclick="deleteMeeting('${meeting._id}')">
                     <i class="fas fa-trash"></i>
@@ -646,15 +651,22 @@ async function loadVideoOptions() {
             const data = await response.json();
             meetingVideo.innerHTML = '<option value="">Selecione um vídeo</option>';
             
+            if (data.videos.length === 0) {
+                meetingVideo.innerHTML = '<option value="">Nenhum vídeo encontrado</option>';
+                return;
+            }
+            
             data.videos.forEach(video => {
                 const option = document.createElement('option');
                 option.value = video._id;
                 option.textContent = video.title;
+                option.dataset.videoUrl = video.url;
                 meetingVideo.appendChild(option);
             });
         }
     } catch (error) {
         console.error('Erro ao carregar opções de vídeo:', error);
+        meetingVideo.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
     }
 }
 
@@ -662,15 +674,32 @@ async function handleCreateMeeting(e) {
     e.preventDefault();
     
     const formData = new FormData(createMeetingForm);
-    const data = {
-        title: formData.get('title') || document.getElementById('meetingTitle').value,
-        description: formData.get('description') || document.getElementById('meetingDescription').value,
-        videoId: formData.get('videoId') || document.getElementById('meetingVideo').value,
-        maxParticipants: formData.get('maxParticipants') || document.getElementById('meetingMaxParticipants').value,
-        isPublic: formData.get('isPublic') || document.getElementById('meetingPublic').checked
-    };
+    const title = formData.get('title') || document.getElementById('meetingTitle').value;
+    const videoId = formData.get('video') || document.getElementById('meetingVideo').value;
+    
+    if (!videoId) {
+        showNotification('Selecione um vídeo para a reunião', 'error');
+        return;
+    }
+    
+    // Gerar link do Google Meet com o vídeo selecionado
+    const selectedOption = meetingVideo.options[meetingVideo.selectedIndex];
+    const videoUrl = selectedOption.dataset.videoUrl;
+    
+    // Criar link do Google Meet com parâmetros
+    const meetingId = generateMeetingId();
+    const googleMeetLink = `https://meet.google.com/${meetingId}?video=${encodeURIComponent(videoUrl)}`;
     
     try {
+        // Salvar reunião no banco de dados
+        const data = {
+            title: title,
+            videoId: videoId,
+            meetingId: meetingId,
+            googleMeetLink: googleMeetLink,
+            createdBy: currentUser._id
+        };
+        
         const response = await fetch(`${API_BASE_URL}/meetings`, {
             method: 'POST',
             headers: {
@@ -686,7 +715,17 @@ async function handleCreateMeeting(e) {
             hideModal(createMeetingModal);
             createMeetingForm.reset();
             loadMeetings();
-            showNotification('Reunião criada com sucesso!', 'success');
+            
+            // Mostrar o link do Google Meet
+            showNotification('Reunião criada com sucesso! Link copiado para área de transferência.', 'success');
+            
+            // Copiar link para área de transferência
+            navigator.clipboard.writeText(googleMeetLink).then(() => {
+                console.log('Link do Google Meet copiado:', googleMeetLink);
+            });
+            
+            // Abrir link em nova aba
+            window.open(googleMeetLink, '_blank');
         } else {
             showNotification(result.error, 'error');
         }
@@ -694,6 +733,24 @@ async function handleCreateMeeting(e) {
         console.error('Erro ao criar reunião:', error);
         showNotification('Erro ao criar reunião', 'error');
     }
+}
+
+// Função para gerar ID único da reunião
+function generateMeetingId() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let result = '';
+    for (let i = 0; i < 3; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    result += '-';
+    for (let i = 0; i < 4; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    result += '-';
+    for (let i = 0; i < 3; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }
 
 async function deleteMeeting(meetingId) {
@@ -722,10 +779,14 @@ async function deleteMeeting(meetingId) {
     }
 }
 
-function copyMeetingLink(meetingId) {
-    const link = `${window.location.origin}/meet/${meetingId}`;
-    navigator.clipboard.writeText(link).then(() => {
-        showNotification('Link copiado para a área de transferência!', 'success');
+function copyMeetingLink(googleMeetLink) {
+    if (!googleMeetLink) {
+        showNotification('Link não disponível', 'error');
+        return;
+    }
+    
+    navigator.clipboard.writeText(googleMeetLink).then(() => {
+        showNotification('Link do Google Meet copiado para a área de transferência!', 'success');
     });
 }
 
