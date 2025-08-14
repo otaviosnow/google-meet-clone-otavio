@@ -259,6 +259,15 @@ app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Middleware para verificar se arquivo existe
+app.use('/uploads/*', (req, res, next) => {
+    const fs = require('fs');
+    const filePath = path.join(__dirname, 'uploads', req.params[0]);
+    console.log('📁 Verificando arquivo:', filePath);
+    console.log('📁 Arquivo existe:', fs.existsSync(filePath));
+    next();
+});
+
 // ===== ROTA DE TESTE DA API =====
 app.get('/api/test', (req, res) => {
     console.log('📥 GET /api/test - API de teste acessada');
