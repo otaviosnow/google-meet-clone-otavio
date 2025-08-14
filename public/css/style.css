@@ -200,14 +200,14 @@ body {
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
 }
 
 .feature-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    padding: 40px;
-    border-radius: 24px;
+    padding: 24px;
+    border-radius: 20px;
     text-align: center;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
