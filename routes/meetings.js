@@ -123,9 +123,13 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
     
     console.log('🔗 MeetingId extraído do link:', meetingIdFromLink);
 
+    // Garantir que videoId seja um ObjectId válido
+    const mongoose = require('mongoose');
+    const videoObjectId = new mongoose.Types.ObjectId(videoId);
+    
     const meeting = new Meeting({
       user: req.user._id,
-      video: videoId, // Este é o ObjectId do vídeo
+      video: videoObjectId, // Converter para ObjectId
       title,
       description,
       maxParticipants,
@@ -136,7 +140,8 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
     
     console.log('📋 Dados da reunião antes de salvar:', {
       user: req.user._id,
-      video: videoId,
+      video: videoObjectId,
+      videoType: typeof videoObjectId,
       title,
       meetingId: meetingIdFromLink
     });
