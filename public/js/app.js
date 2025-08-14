@@ -29,8 +29,12 @@ const heroRegisterBtn = document.getElementById('heroRegisterBtn');
 const heroDemoBtn = document.getElementById('heroDemoBtn');
 
 // Dashboard elements
-const menuItems = document.querySelectorAll('.menu-item');
+const navItems = document.querySelectorAll('.nav-item');
 const tabContents = document.querySelectorAll('.tab-content');
+const pageTitle = document.getElementById('pageTitle');
+const sidebarUserName = document.getElementById('sidebarUserName');
+const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+const sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
 
 // Videos
 const addVideoBtn = document.getElementById('addVideoBtn');
@@ -138,12 +142,16 @@ function initializeEventListeners() {
     
     // Dashboard
     logoutBtn.addEventListener('click', handleLogout);
+    sidebarLogoutBtn.addEventListener('click', handleLogout);
     
-    // Menu tabs
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
+    // Navigation tabs
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
             const tab = item.dataset.tab;
-            switchTab(tab);
+            if (tab) {
+                switchTab(tab);
+            }
         });
     });
     
@@ -403,14 +411,14 @@ function showDashboard() {
     document.querySelector('.features').style.display = 'none';
     
     // Carregar dados iniciais
+    loadDashboardData();
     loadVideos();
     loadMeetings();
-    loadProfileStats();
 }
 
 function switchTab(tabName) {
-    // Atualizar menu
-    menuItems.forEach(item => {
+    // Atualizar navegação
+    navItems.forEach(item => {
         item.classList.remove('active');
         if (item.dataset.tab === tabName) {
             item.classList.add('active');
@@ -424,6 +432,38 @@ function switchTab(tabName) {
             content.classList.add('active');
         }
     });
+    
+    // Atualizar título da página
+    const titles = {
+        'dashboard': 'Dashboard',
+        'videos': 'Vídeos',
+        'meetings': 'Reuniões',
+        'tokens': 'Comprar Tokens'
+    };
+    
+    if (pageTitle) {
+        pageTitle.textContent = titles[tabName] || 'Dashboard';
+    }
+    
+    // Mostrar/ocultar botões de ação
+    const addVideoBtn = document.getElementById('addVideoBtn');
+    const createMeetingBtn = document.getElementById('createMeetingBtn');
+    
+    if (addVideoBtn) addVideoBtn.style.display = tabName === 'videos' ? 'block' : 'none';
+    if (createMeetingBtn) createMeetingBtn.style.display = tabName === 'meetings' ? 'block' : 'none';
+    
+    // Carregar dados específicos da aba
+    switch(tabName) {
+        case 'dashboard':
+            loadDashboardData();
+            break;
+        case 'videos':
+            loadVideos();
+            break;
+        case 'meetings':
+            loadMeetings();
+            break;
+    }
 }
 
 // Funções de vídeos
@@ -805,9 +845,46 @@ function copyMeetingLink(meetLink) {
 async function loadUserData() {
     if (!currentUser) return;
     
-    userName.textContent = currentUser.name;
-    profileName.value = currentUser.name;
-    profileEmail.value = currentUser.email;
+    // Atualizar sidebar
+    if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
+    if (sidebarUserEmail) sidebarUserEmail.textContent = currentUser.email;
+    
+    // Atualizar header (se existir)
+    if (userName) userName.textContent = currentUser.name;
+    if (profileName) profileName.value = currentUser.name;
+    if (profileEmail) profileEmail.value = currentUser.email;
+}
+
+async function loadDashboardData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/stats`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Atualizar estatísticas do dashboard
+            const dashboardTotalVideos = document.getElementById('dashboardTotalVideos');
+            const dashboardTotalMeetings = document.getElementById('dashboardTotalMeetings');
+            const dashboardTotalViews = document.getElementById('dashboardTotalViews');
+            const dashboardTokens = document.getElementById('dashboardTokens');
+            
+            if (dashboardTotalVideos) dashboardTotalVideos.textContent = data.stats.videos.total || 0;
+            if (dashboardTotalMeetings) dashboardTotalMeetings.textContent = data.stats.meetings.total || 0;
+            if (dashboardTotalViews) dashboardTotalViews.textContent = data.stats.views.total || 0;
+            if (dashboardTokens) dashboardTokens.textContent = currentUser.tokens || 0;
+            
+            // Atualizar estatísticas do perfil (se existir)
+            if (totalVideos) totalVideos.textContent = data.stats.videos.total || 0;
+            if (totalMeetings) totalMeetings.textContent = data.stats.meetings.total || 0;
+            if (totalViews) totalViews.textContent = data.stats.views.total || 0;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+    }
 }
 
 async function loadProfileStats() {
