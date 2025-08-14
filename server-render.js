@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -8,13 +11,31 @@ console.log('🚀 Iniciando servidor...');
 console.log(`📊 Porta: ${PORT}`);
 console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
 
+// Conectar ao MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('✅ Conectado ao MongoDB com sucesso!');
+    console.log('📊 Database:', mongoose.connection.db.databaseName);
+    console.log('🔗 Host:', mongoose.connection.host);
+})
+.catch((error) => {
+    console.error('❌ Erro ao conectar ao MongoDB:', error.message);
+    process.exit(1);
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Sistema de autenticação real
-const users = new Map();
+// Importar rotas
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const videoRoutes = require('./routes/videos');
+const meetingRoutes = require('./routes/meetings');
 
 // ===== ROTAS API =====
 
@@ -27,7 +48,8 @@ app.get('/', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: '2.0.1',
     port: PORT,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    database: 'MongoDB Connected'
   });
 });
 
@@ -40,11 +62,18 @@ app.get('/api/test', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     status: 'online',
     port: PORT,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
-// API Mock para usuários - CRÍTICA
+// Usar rotas de autenticação reais
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/videos', videoRoutes);
+app.use('/api/meetings', meetingRoutes);
+
+// API Mock para estatísticas (mantida para compatibilidade)
 app.get('/api/users/stats', (req, res) => {
   console.log('📊 GET /api/users/stats - API de estatísticas acessada');
   res.json({
@@ -54,173 +83,6 @@ app.get('/api/users/stats', (req, res) => {
     success: true,
     timestamp: new Date().toISOString(),
     port: PORT
-  });
-});
-
-// API de registro
-app.post('/api/auth/register', (req, res) => {
-  console.log('📝 POST /api/auth/register - Tentativa de registro:', req.body);
-  
-  const { name, email, password } = req.body;
-  
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      error: 'Todos os campos são obrigatórios'
-    });
-  }
-  
-  if (password.length < 6) {
-    return res.status(400).json({
-      success: false,
-      error: 'Senha deve ter pelo menos 6 caracteres'
-    });
-  }
-  
-  if (!email.includes('@')) {
-    return res.status(400).json({
-      success: false,
-      error: 'Email inválido'
-    });
-  }
-  
-  if (users.has(email)) {
-    return res.status(400).json({
-      success: false,
-      error: 'Usuário já existe'
-    });
-  }
-  
-  const user = {
-    id: Date.now().toString(),
-    name,
-    email,
-    password,
-    createdAt: new Date().toISOString()
-  };
-  
-  users.set(email, user);
-  console.log('✅ Usuário registrado:', email);
-  
-  res.json({
-    success: true,
-    message: 'Usuário registrado com sucesso',
-    token: `token_${user.id}_${Date.now()}`,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name
-    }
-  });
-});
-
-// API de login
-app.post('/api/auth/login', (req, res) => {
-  console.log('🔑 POST /api/auth/login - Tentativa de login:', req.body);
-  
-  const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      error: 'Email e senha são obrigatórios'
-    });
-  }
-  
-  const user = users.get(email);
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      error: 'Usuário não encontrado'
-    });
-  }
-  
-  if (user.password !== password) {
-    return res.status(401).json({
-      success: false,
-      error: 'Senha incorreta'
-    });
-  }
-  
-  console.log('✅ Login bem-sucedido:', email);
-  
-  res.json({
-    success: true,
-    message: 'Login realizado com sucesso',
-    token: `token_${user.id}_${Date.now()}`,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name
-    }
-  });
-});
-
-// API para verificar autenticação
-app.get('/api/auth/me', (req, res) => {
-  console.log('🔐 GET /api/auth/me - Verificação de autenticação');
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      success: false,
-      error: 'Token não fornecido'
-    });
-  }
-  
-  const token = authHeader.substring(7);
-  
-  if (!token.startsWith('token_')) {
-    return res.status(401).json({
-      success: false,
-      error: 'Token inválido'
-    });
-  }
-  
-  let foundUser = null;
-  for (const [email, user] of users.entries()) {
-    if (token.includes(user.id)) {
-      foundUser = user;
-      break;
-    }
-  }
-  
-  if (!foundUser) {
-    return res.status(401).json({
-      success: false,
-      error: 'Usuário não encontrado'
-    });
-  }
-  
-  res.json({
-    success: true,
-    user: {
-      id: foundUser.id,
-      email: foundUser.email,
-      name: foundUser.name
-    }
-  });
-});
-
-// API Mock para vídeos
-app.post('/api/videos/upload', (req, res) => {
-  console.log('📹 POST /api/videos/upload - Upload de vídeo');
-  res.json({
-    success: true,
-    message: 'Upload mock funcionando',
-    videoId: 'mock_video_123',
-    url: 'https://example.com/video.mp4'
-  });
-});
-
-// API Mock para reuniões
-app.post('/api/meetings/create', (req, res) => {
-  console.log('🎯 POST /api/meetings/create - Criação de reunião');
-  res.json({
-    success: true,
-    message: 'Reunião mock criada',
-    meetingId: 'mock_meeting_123',
-    joinUrl: 'https://meet.google.com/mock-123'
   });
 });
 
@@ -318,6 +180,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔍 Host: 0.0.0.0`);
   console.log(`✅ Servidor pronto para receber conexões!`);
   console.log(`🎉 Deploy bem-sucedido!`);
+  console.log(`🗄️  Banco de dados: MongoDB`);
 });
 
 // Tratamento de erros do servidor
@@ -333,6 +196,9 @@ process.on('SIGTERM', () => {
   console.log('🛑 Recebido SIGTERM, encerrando servidor...');
   server.close(() => {
     console.log('✅ Servidor encerrado.');
-    process.exit(0);
+    mongoose.connection.close(() => {
+      console.log('✅ Conexão com MongoDB fechada.');
+      process.exit(0);
+    });
   });
 }); 
