@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const formidable = require('formidable');
 const { body, validationResult } = require('express-validator');
 const { authenticateToken, checkOwnership } = require('../middleware/auth');
 const Video = require('../models/Video');
@@ -8,7 +9,7 @@ const Video = require('../models/Video');
 const router = express.Router();
 
 // LOG PARA CONFIRMAR QUE ESTA VERSÃO ESTÁ SENDO USADA
-console.log('🚨🚨🚨 SEM MULTER - VERSÃO SIMPLES 🚨🚨🚨');
+console.log('🚨🚨🚨 COM FORMIDABLE - UPLOAD DE ARQUIVOS 🚨🚨🚨');
 
 // Validações para criação/edição de vídeo
 const videoValidation = [
@@ -85,7 +86,7 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/videos - Criar novo vídeo (upload) - SEM MULTER
+// POST /api/videos - Criar novo vídeo (upload) - COM FORMIDABLE
 router.post('/', async (req, res) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Headers:', req.headers);
@@ -110,52 +111,73 @@ router.post('/', async (req, res) => {
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido' });
   }
-  try {
-    console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
-    console.log('📋 Body:', req.body);
-    console.log('🔑 User:', req.user._id);
+  
+  // Configurar formidable para upload
+  const form = formidable({
+    uploadDir: './uploads',
+    keepExtensions: true,
+    maxFileSize: 100 * 1024 * 1024, // 100MB
+    filter: function ({name, originalFilename, mimetype}) {
+      // Aceitar apenas vídeos
+      return mimetype && mimetype.includes('video');
+    }
+  });
+  
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('❌ Erro no parse do formulário:', err);
+      return res.status(400).json({ error: 'Erro ao processar upload' });
+    }
     
-    const { title, description, type, url } = req.body;
+    try {
+      console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
+      console.log('📋 Fields:', fields);
+      console.log('📁 Files:', files);
+      console.log('🔑 User:', req.user._id);
+      
+      const { title, description, type, url } = fields;
 
-    let videoData = {
-      user: req.user._id,
-      title,
-      description,
-      type: type || 'upload'
-    };
+      let videoData = {
+        user: req.user._id,
+        title: title || '',
+        description: description || '',
+        type: type || 'upload'
+      };
 
-    // Por enquanto, vamos aceitar apenas URLs
-    if (type === 'drive' || type === 'url') {
-      console.log('🔗 URL recebida:', url);
-      videoData.url = url;
-    } else {
-      console.log('❌ Erro: Por enquanto, apenas URLs são aceitas');
-      return res.status(400).json({
-        error: 'Por enquanto, apenas URLs são aceitas. Use o tipo "url" ou "drive".'
+      // Se tem arquivo, é upload
+      if (files.video && files.video[0]) {
+        const videoFile = files.video[0];
+        console.log('✅ Arquivo recebido:', videoFile.originalFilename);
+        videoData.type = 'upload';
+        videoData.url = `/uploads/${videoFile.newFilename}`;
+        videoData.filename = videoFile.newFilename;
+        videoData.size = videoFile.size;
+      } else if (type === 'drive' || type === 'url') {
+        // Vídeo do Google Drive ou URL externa
+        console.log('🔗 URL recebida:', url);
+        videoData.url = url;
+      } else {
+        console.log('❌ Erro: Arquivo ou URL não encontrado');
+        return res.status(400).json({
+          error: 'Arquivo de vídeo ou URL é obrigatório'
+        });
+      }
+
+      const video = new Video(videoData);
+      await video.save();
+
+      res.status(201).json({
+        message: 'Vídeo criado com sucesso',
+        video: video.toPublicJSON()
+      });
+
+    } catch (error) {
+      console.error('Erro ao criar vídeo:', error);
+      res.status(500).json({
+        error: 'Erro interno do servidor'
       });
     }
-
-    const video = new Video(videoData);
-    await video.save();
-
-    res.status(201).json({
-      message: 'Vídeo criado com sucesso',
-      video: video.toPublicJSON()
-    });
-
-  } catch (error) {
-    console.error('Erro ao criar vídeo:', error);
-    
-    if (error.message.includes('Tipo de arquivo não suportado')) {
-      return res.status(400).json({
-        error: error.message
-      });
-    }
-
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
+  });
 });
 
 // GET /api/videos/:id - Obter vídeo específico
