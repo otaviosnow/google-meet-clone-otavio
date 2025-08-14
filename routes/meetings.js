@@ -89,7 +89,7 @@ router.get('/', authenticateToken, async (req, res) => {
 // POST /api/meetings - Criar nova reunião
 router.post('/', authenticateToken, meetingValidation, handleValidationErrors, async (req, res) => {
   try {
-    const { title, description, videoId, maxParticipants = 1, isPublic = false } = req.body;
+    const { title, description, videoId, maxParticipants = 1, isPublic = false, meetLink } = req.body;
 
     // Verificar se o vídeo existe e pertence ao usuário
     const video = await Video.findOne({ _id: videoId, user: req.user._id });
@@ -112,7 +112,8 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
       title,
       description,
       maxParticipants,
-      isPublic
+      isPublic,
+      meetLink
     });
 
     await meeting.save();
