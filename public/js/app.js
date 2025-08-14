@@ -608,7 +608,7 @@ function renderMeetings(meetings) {
     
     if (meetings.length === 0) {
         meetingsList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #5f6368;">
+            <div style="text-align: center; padding: 40px; color: #9ca3af;">
                 <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p>Nenhuma reunião encontrada</p>
                 <p>Crie sua primeira reunião para começar</p>
@@ -621,28 +621,30 @@ function renderMeetings(meetings) {
         const meetingCard = document.createElement('div');
         meetingCard.className = 'meeting-card';
         meetingCard.innerHTML = `
-            <h3 class="meeting-title">${meeting.title}</h3>
-            <div class="meeting-meta">
-                <span>Criada em: ${new Date(meeting.createdAt).toLocaleDateString('pt-BR')}</span>
-            </div>
-            <div class="meeting-link">
-                <strong>Link da Reunião:</strong><br>
-                <a href="${meeting.meetLink || '#'}" target="_blank" class="meet-link">
+            <div class="meeting-info">
+                <div class="meeting-title">${meeting.title}</div>
+                <div class="meeting-status">
+                    <i class="fas fa-check"></i>
+                    Ativo
+                </div>
+                <div class="meeting-date">${new Date(meeting.createdAt).toLocaleDateString('pt-BR')}</div>
+                <div class="meeting-separator">-</div>
+                <a href="${meeting.meetLink || '#'}" target="_blank" class="meeting-link">
                     ${meeting.meetLink || 'Link não disponível'}
                 </a>
             </div>
             <div class="meeting-actions">
-                <button class="btn btn-primary btn-small" onclick="copyMeetingLink('${meeting.meetLink || ''}')">
-                    <i class="fas fa-link"></i>
-                    Copiar Link
+                <button class="meeting-action-btn" onclick="window.open('${meeting.meetLink || ''}', '_blank')" title="Visualizar">
+                    <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-success btn-small" onclick="window.open('${meeting.meetLink || ''}', '_blank')">
-                    <i class="fas fa-video"></i>
-                    Entrar na Reunião
+                <button class="meeting-action-btn" onclick="copyMeetingLink('${meeting.meetLink || ''}')" title="Copiar Link">
+                    <i class="fas fa-th-large"></i>
                 </button>
-                <button class="btn btn-outline btn-small" onclick="deleteMeeting('${meeting._id}')">
+                <button class="meeting-action-btn" onclick="window.open('${meeting.meetLink || ''}', '_blank')" title="Editar">
+                    <i class="fas fa-pencil"></i>
+                </button>
+                <button class="meeting-action-btn delete" onclick="deleteMeeting('${meeting._id}')" title="Deletar">
                     <i class="fas fa-trash"></i>
-                    Deletar
                 </button>
             </div>
         `;
