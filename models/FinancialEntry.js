@@ -10,17 +10,31 @@ const financialEntrySchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Data é obrigatória']
   },
-  revenue: {
+  grossRevenue: {
     type: Number,
     default: 0,
-    min: [0, 'Faturamento não pode ser negativo']
+    min: [0, 'Faturamento bruto não pode ser negativo']
   },
-  expenses: {
+  chipCost: {
     type: Number,
     default: 0,
-    min: [0, 'Gastos não podem ser negativos']
+    min: [0, 'Custo com chip não pode ser negativo']
   },
-  profit: {
+  additionalCost: {
+    type: Number,
+    default: 0,
+    min: [0, 'Custo adicional não pode ser negativo']
+  },
+  adsCost: {
+    type: Number,
+    default: 0,
+    min: [0, 'Custo com ads não pode ser negativo']
+  },
+  totalExpenses: {
+    type: Number,
+    default: 0
+  },
+  netProfit: {
     type: Number,
     default: 0
   },
@@ -47,7 +61,8 @@ financialEntrySchema.index({ user: 1, createdAt: -1 });
 
 // Middleware para calcular o lucro automaticamente
 financialEntrySchema.pre('save', function(next) {
-  this.profit = this.revenue - this.expenses;
+  this.totalExpenses = this.chipCost + this.additionalCost + this.adsCost;
+  this.netProfit = this.grossRevenue - this.totalExpenses;
   next();
 });
 

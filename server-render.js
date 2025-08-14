@@ -253,6 +253,12 @@ app.get('/test-auth', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
 });
 
+// Rota para página de compra de tokens
+app.get('/comprar-tokens', (req, res) => {
+    console.log('💰 GET /comprar-tokens - Página de compra de tokens acessada');
+    res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
+});
+
 // ===== ARQUIVOS ESTÁTICOS =====
 app.use(express.static('public'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));

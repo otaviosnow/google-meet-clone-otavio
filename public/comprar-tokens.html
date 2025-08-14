@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar Tokens - CallX</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div class="tokens-container">
+        <!-- Header com navegação -->
+        <header class="tokens-header">
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Voltar para o Dashboard
+            </a>
+        </header>
+
+        <!-- Conteúdo principal -->
+        <main class="tokens-content">
+            <div class="tokens-card">
+                <h1 class="tokens-title">Comprar Tokens</h1>
+                
+                <div class="tokens-info">
+                    <p><i class="fas fa-key"></i> 1 token = 1 reunião</p>
+                    <p><i class="fas fa-dollar-sign"></i> Valor unitário: R$ 2,00</p>
+                    <p><i class="fas fa-shopping-cart"></i> Compra mínima: 5 tokens (R$ 10,00)</p>
+                </div>
+
+                <form class="tokens-form" id="tokensForm">
+                    <div class="form-group">
+                        <label for="tokenQuantity">Quantidade de Tokens</label>
+                        <div class="quantity-input">
+                            <input type="number" id="tokenQuantity" name="quantity" min="5" value="5" step="1">
+                            <div class="quantity-controls">
+                                <button type="button" class="quantity-btn" id="increaseBtn">
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                                <button type="button" class="quantity-btn" id="decreaseBtn">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="total-section">
+                        <span class="total-label">Valor total:</span>
+                        <span class="total-value" id="totalValue">R$ 10,00</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-pix" id="generatePixBtn">
+                        <i class="fas fa-qrcode"></i>
+                        Gerar QR Code Pix
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/tokens.js"></script>
+</body>
+</html>

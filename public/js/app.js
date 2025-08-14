@@ -182,6 +182,14 @@ function initializeEventListeners() {
     // Avatar System
     initializeAvatar();
     
+    // Botão de compra de tokens
+    const buyTokenBtn = document.getElementById('buyTokenBtn');
+    if (buyTokenBtn) {
+        buyTokenBtn.addEventListener('click', () => {
+            window.location.href = '/comprar-tokens';
+        });
+    }
+    
     // Click outside modal to close
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
@@ -902,6 +910,12 @@ async function loadUserData() {
     userName.textContent = currentUser.name;
     profileName.value = currentUser.name;
     profileEmail.value = currentUser.email;
+    
+    // Atualizar contador de tokens
+    const tokenCount = document.getElementById('tokenCount');
+    if (tokenCount) {
+        tokenCount.textContent = currentUser.visionTokens || 0;
+    }
     
     // Carregar dados financeiros
     loadFinancialData();

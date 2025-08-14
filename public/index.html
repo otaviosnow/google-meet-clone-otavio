@@ -173,7 +173,7 @@
                         </button>
                         <button class="menu-item" data-tab="meetings">
                             <i class="fas fa-users"></i>
-                            Minhas Reuniões
+                            Reuniões
                         </button>
                         <button class="menu-item" data-tab="goals">
                             <i class="fas fa-chart-line"></i>
@@ -184,6 +184,16 @@
                             Perfil
                         </button>
                     </nav>
+                    <div class="token-section">
+                        <div class="token-display">
+                            <i class="fas fa-key"></i>
+                            <span id="tokenCount">0</span>
+                            <span class="token-label">VISION KEY</span>
+                        </div>
+                        <button class="btn btn-token" id="buyTokenBtn">
+                            <i class="fas fa-shopping-cart"></i> COMPRAR TOKEN
+                        </button>
+                    </div>
                     <div class="user-menu">
                         <span id="userName">Usuário</span>
                         <button id="logoutBtn" class="btn btn-outline btn-small">Sair</button>
@@ -211,7 +221,7 @@
                 <!-- Meetings Tab -->
                 <div id="meetingsTab" class="tab-content">
                     <div class="tab-header">
-                        <h2>Minhas Reuniões</h2>
+                        <h2>Reuniões</h2>
                         <button id="createMeetingBtn" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
                             Criar Reunião
@@ -238,40 +248,57 @@
                     <div class="goals-content">
                         <!-- Resumo Geral -->
                         <div class="goals-overview">
-                            <div class="overview-card">
-                                <div class="overview-icon">
-                                    <i class="fas fa-target"></i>
+                            <div class="overview-card cosmic-card">
+                                <div class="card-glow"></div>
+                                <div class="overview-icon cosmic-icon">
+                                    <i class="fas fa-bullseye"></i>
+                                    <div class="icon-rings"></div>
                                 </div>
                                 <div class="overview-info">
                                     <h3>Meta Mensal</h3>
-                                    <p id="monthlyGoalDisplay">R$ 0,00</p>
+                                    <p id="monthlyGoalDisplay" class="cosmic-text">R$ 0,00</p>
+                                    <div class="progress-ring">
+                                        <svg class="ring-svg" viewBox="0 0 100 100">
+                                            <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                                            <circle class="ring-progress" cx="50" cy="50" r="45"></circle>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="overview-card">
-                                <div class="overview-icon">
-                                    <i class="fas fa-chart-pie"></i>
+                            <div class="overview-card cosmic-card">
+                                <div class="card-glow"></div>
+                                <div class="overview-icon cosmic-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div class="icon-rings"></div>
                                 </div>
                                 <div class="overview-info">
                                     <h3>Progresso</h3>
-                                    <p id="goalProgressDisplay">0%</p>
+                                    <p id="goalProgressDisplay" class="cosmic-text">0%</p>
+                                    <div class="floating-particles"></div>
                                 </div>
                             </div>
-                            <div class="overview-card">
-                                <div class="overview-icon">
-                                    <i class="fas fa-calendar-alt"></i>
+                            <div class="overview-card cosmic-card">
+                                <div class="card-glow"></div>
+                                <div class="overview-icon cosmic-icon">
+                                    <i class="fas fa-clock"></i>
+                                    <div class="icon-rings"></div>
                                 </div>
                                 <div class="overview-info">
                                     <h3>Dias Restantes</h3>
-                                    <p id="daysRemaining">0 dias</p>
+                                    <p id="daysRemaining" class="cosmic-text">0 dias</p>
+                                    <div class="time-waves"></div>
                                 </div>
                             </div>
-                            <div class="overview-card">
-                                <div class="overview-icon">
-                                    <i class="fas fa-trending-up"></i>
+                            <div class="overview-card cosmic-card">
+                                <div class="card-glow"></div>
+                                <div class="overview-icon cosmic-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <div class="icon-rings"></div>
                                 </div>
                                 <div class="overview-info">
                                     <h3>Média Diária</h3>
-                                    <p id="dailyAverage">R$ 0,00</p>
+                                    <p id="dailyAverage" class="cosmic-text">R$ 0,00</p>
+                                    <div class="data-flow"></div>
                                 </div>
                             </div>
                         </div>
@@ -431,6 +458,81 @@
                             </div>
                         </div>
 
+                        <!-- Ranking de Vendas -->
+                        <div class="sales-ranking">
+                            <h3><i class="fas fa-trophy"></i> Ranking de Vendas</h3>
+                            
+                            <!-- Filtros do Ranking -->
+                            <div class="ranking-filters">
+                                <div class="filter-group">
+                                    <label for="rankingPeriod">Período</label>
+                                    <select id="rankingPeriod">
+                                        <option value="week">Esta Semana</option>
+                                        <option value="month" selected>Este Mês</option>
+                                        <option value="quarter">Este Trimestre</option>
+                                        <option value="year">Este Ano</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="rankingType">Tipo</label>
+                                    <select id="rankingType">
+                                        <option value="revenue">Faturamento</option>
+                                        <option value="profit">Lucro</option>
+                                        <option value="meetings">Reuniões</option>
+                                    </select>
+                                </div>
+                                <button id="refreshRankingBtn" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt"></i> Atualizar
+                                </button>
+                            </div>
+
+                            <!-- Top 10 Ranking -->
+                            <div class="ranking-list">
+                                <div class="ranking-header">
+                                    <div class="rank-position">#</div>
+                                    <div class="rank-user">Usuário</div>
+                                    <div class="rank-value">Valor</div>
+                                    <div class="rank-progress">Progresso</div>
+                                    <div class="rank-badge">Status</div>
+                                </div>
+                                <div id="rankingListBody">
+                                    <!-- Ranking será carregado dinamicamente -->
+                                </div>
+                            </div>
+
+                            <!-- Estatísticas do Ranking -->
+                            <div class="ranking-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-medal"></i>
+                                    <div class="stat-info">
+                                        <h4>Sua Posição</h4>
+                                        <p id="userRank">#0</p>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-crown"></i>
+                                    <div class="stat-info">
+                                        <h4>Líder Atual</h4>
+                                        <p id="topUser">N/A</p>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div class="stat-info">
+                                        <h4>Média Geral</h4>
+                                        <p id="averageValue">R$ 0,00</p>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-users"></i>
+                                    <div class="stat-info">
+                                        <h4>Participantes</h4>
+                                        <p id="totalParticipants">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Histórico e Relatórios -->
                         <div class="history-reports">
                             <h3><i class="fas fa-history"></i> Histórico e Relatórios</h3>
@@ -465,12 +567,12 @@
                                 <table id="entriesTable">
                                     <thead>
                                         <tr>
-                                            <th>Data</th>
-                                            <th>Faturamento</th>
-                                            <th>Gastos</th>
-                                            <th>Lucro</th>
-                                            <th>Observações</th>
-                                            <th>Ações</th>
+                                            <th><i class="fas fa-calendar"></i> Data</th>
+                                            <th><i class="fas fa-dollar-sign"></i> Faturamento</th>
+                                            <th><i class="fas fa-minus-circle"></i> Gastos</th>
+                                            <th><i class="fas fa-plus-circle"></i> Lucro</th>
+                                            <th><i class="fas fa-sticky-note"></i> Observações</th>
+                                            <th><i class="fas fa-cogs"></i> Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="entriesTableBody">

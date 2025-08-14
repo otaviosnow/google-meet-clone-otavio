@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  visionTokens: {
+    type: Number,
+    default: 10, // Tokens iniciais gratuitos
+    min: [0, 'Tokens não podem ser negativos']
+  },
   // Campos para recuperação de senha
   resetPasswordToken: {
     type: String,
@@ -81,6 +86,7 @@ userSchema.methods.toPublicJSON = function() {
     name: this.name,
     email: this.email,
     isActive: this.isActive,
+    visionTokens: this.visionTokens,
     lastLogin: this.lastLogin,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt
