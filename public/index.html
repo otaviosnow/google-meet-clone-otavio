@@ -288,8 +288,12 @@
                     </select>
                 </div>
                 <div class="form-group" id="uploadGroup">
-                    <label for="videoFile">Arquivo de Vídeo</label>
+                    <label for="videoFile">Arquivo de Vídeo (Máximo 100MB)</label>
                     <input type="file" id="videoFile" name="video" accept="video/*">
+                    <small style="color: #ea4335; margin-top: 8px; display: block;">
+                        ⚠️ <strong>Atenção:</strong> Upload local pode não funcionar no servidor. 
+                        Recomendamos usar Google Drive ou URL externa.
+                    </small>
                 </div>
                 <div class="form-group" id="urlGroup" style="display: none;">
                     <label for="videoUrl">URL do Vídeo</label>
