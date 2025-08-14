@@ -1,6 +1,6 @@
-// ===== VERSÃO ATUALIZADA - DEPLOY FORÇADO =====
-// ÚLTIMA ATUALIZAÇÃO: 14/08/2025 12:50 AM
-// SE VOCÊ NÃO VER ESTA MENSAGEM, O DEPLOY NÃO ATUALIZOU!
+// ===== VERSÃO SIMPLIFICADA - DIAGNÓSTICO REAL =====
+// ÚLTIMA ATUALIZAÇÃO: 14/08/2025 01:10 AM
+// SE VOCÊ NÃO VER ESTA MENSAGEM, O ARQUIVO NÃO ESTÁ SENDO EXECUTADO!
 
 const express = require('express');
 const cors = require('cors');
@@ -11,13 +11,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ===== LOGS INICIAIS MUITO VISÍVEIS =====
-console.log('🚨🚨🚨 INICIANDO SERVIDOR COM CÓDIGO ATUALIZADO 🚨🚨🚨');
-console.log('🚨🚨🚨 VERSÃO: DEPLOY FORÇADO - 14/08/2025 12:50 AM 🚨🚨🚨');
+// ===== LOGS CRÍTICOS =====
+console.log('🚨🚨🚨 ARQUIVO server-render.js EXECUTADO! 🚨🚨🚨');
+console.log('🚨🚨🚨 VERSÃO: SIMPLIFICADA - 14/08/2025 01:10 AM 🚨🚨🚨');
 console.log('📅 Data/Hora:', new Date().toISOString());
-console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
-console.log('📊 Porta:', PORT);
 console.log('📂 Diretório atual:', __dirname);
+console.log('📊 Porta:', PORT);
+console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
 
 // Conectar ao MongoDB
 console.log('🔗 Conectando ao MongoDB...');
@@ -35,95 +35,21 @@ mongoose.connect(process.env.MONGODB_URI, {
     process.exit(1);
 });
 
-// Middleware
+// Middleware básico
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// ===== CARREGAMENTO DE ROTAS SIMPLIFICADO =====
-console.log('📁 CARREGANDO ROTAS...');
-
-// Verificar se o diretório routes existe
-const fs = require('fs');
-const routesDir = path.join(__dirname, 'routes');
-console.log('📂 Verificando diretório routes:', routesDir);
-
-if (fs.existsSync(routesDir)) {
-    console.log('✅ Diretório routes EXISTE!');
-    const files = fs.readdirSync(routesDir);
-    console.log('📄 Arquivos encontrados:', files);
-} else {
-    console.error('❌ ERRO: Diretório routes NÃO EXISTE!');
-    console.error('❌ Isso explica por que as rotas não funcionam!');
-}
-
-// Carregar rotas com logs muito visíveis
-let authRoutes, userRoutes, videoRoutes, meetingRoutes;
-
-try {
-    console.log('🔄 CARREGANDO auth.js...');
-    authRoutes = require('./routes/auth');
-    console.log('✅ auth.js CARREGADO COM SUCESSO!');
-} catch (error) {
-    console.error('❌ ERRO ao carregar auth.js:', error.message);
-    console.error('❌ Stack trace:', error.stack);
-    authRoutes = express.Router();
-    // Rota de fallback para detectar tentativas
-    authRoutes.post('/login', (req, res) => {
-        console.log('🔑 FALLBACK: Tentativa de login detectada!');
-        res.status(500).json({ error: 'Sistema de autenticação não disponível - auth.js não carregou' });
-    });
-    authRoutes.post('/register', (req, res) => {
-        console.log('📝 FALLBACK: Tentativa de registro detectada!');
-        res.status(500).json({ error: 'Sistema de registro não disponível - auth.js não carregou' });
-    });
-    authRoutes.get('/me', (req, res) => {
-        console.log('🔐 FALLBACK: Verificação de auth detectada!');
-        res.status(500).json({ error: 'Sistema de verificação não disponível - auth.js não carregou' });
-    });
-}
-
-try {
-    console.log('🔄 CARREGANDO users.js...');
-    userRoutes = require('./routes/users');
-    console.log('✅ users.js CARREGADO COM SUCESSO!');
-} catch (error) {
-    console.error('❌ ERRO ao carregar users.js:', error.message);
-    userRoutes = express.Router();
-}
-
-try {
-    console.log('🔄 CARREGANDO videos.js...');
-    videoRoutes = require('./routes/videos');
-    console.log('✅ videos.js CARREGADO COM SUCESSO!');
-} catch (error) {
-    console.error('❌ ERRO ao carregar videos.js:', error.message);
-    videoRoutes = express.Router();
-}
-
-try {
-    console.log('🔄 CARREGANDO meetings.js...');
-    meetingRoutes = require('./routes/meetings');
-    console.log('✅ meetings.js CARREGADO COM SUCESSO!');
-} catch (error) {
-    console.error('❌ ERRO ao carregar meetings.js:', error.message);
-    meetingRoutes = express.Router();
-}
-
-// ===== ROTAS API =====
+// ===== ROTAS SIMPLIFICADAS =====
 
 // Rota principal
 app.get('/', (req, res) => {
   console.log('📥 GET / - Página principal acessada');
   res.json({
-    message: '🚀 Google Meet Fake SaaS - Servidor funcionando!',
+    message: '🚀 Google Meet Fake SaaS - VERSÃO SIMPLIFICADA!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    version: '2.0.1 - DEPLOY FORÇADO',
-    port: PORT,
-    host: '0.0.0.0',
-    database: 'MongoDB Connected',
-    routesLoaded: 'SIM'
+    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM',
+    database: 'MongoDB Connected'
   });
 });
 
@@ -131,27 +57,86 @@ app.get('/', (req, res) => {
 app.get('/api/test', (req, res) => {
   console.log('📥 GET /api/test - API de teste acessada');
   res.json({
-    message: '✅ API funcionando perfeitamente!',
+    message: '✅ API funcionando - VERSÃO SIMPLIFICADA!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    status: 'online',
-    port: PORT,
-    host: '0.0.0.0',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routesLoaded: 'SIM',
-    version: 'DEPLOY FORÇADO - 14/08/2025'
+    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
-// Usar rotas de autenticação reais
-console.log('🔗 CONFIGURANDO ROTAS DA API...');
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/videos', videoRoutes);
-app.use('/api/meetings', meetingRoutes);
-console.log('✅ ROTAS CONFIGURADAS!');
+// ===== ROTAS DE AUTENTICAÇÃO SIMPLIFICADAS =====
 
-// API Mock para estatísticas (mantida para compatibilidade)
+// Login - VERSÃO SIMPLIFICADA
+app.post('/api/auth/login', (req, res) => {
+  console.log('🔑 POST /api/auth/login - Tentativa de login:', req.body);
+  
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Email e senha são obrigatórios - VERSÃO SIMPLIFICADA'
+    });
+  }
+  
+  // VERSÃO SIMPLIFICADA - SEMPRE REJEITA LOGIN INVÁLIDO
+  console.log('❌ LOGIN REJEITADO - VERSÃO SIMPLIFICADA');
+  return res.status(401).json({
+    success: false,
+    error: 'Email ou senha incorretos - VERSÃO SIMPLIFICADA'
+  });
+});
+
+// Registro - VERSÃO SIMPLIFICADA
+app.post('/api/auth/register', (req, res) => {
+  console.log('📝 POST /api/auth/register - Tentativa de registro:', req.body);
+  
+  const { name, email, password } = req.body;
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Todos os campos são obrigatórios - VERSÃO SIMPLIFICADA'
+    });
+  }
+  
+  console.log('✅ REGISTRO ACEITO - VERSÃO SIMPLIFICADA');
+  res.json({
+    success: true,
+    message: 'Usuário registrado com sucesso - VERSÃO SIMPLIFICADA',
+    token: 'token_simplificado_' + Date.now(),
+    user: {
+      id: Date.now().toString(),
+      email: email,
+      name: name
+    }
+  });
+});
+
+// Verificar autenticação - VERSÃO SIMPLIFICADA
+app.get('/api/auth/me', (req, res) => {
+  console.log('🔐 GET /api/auth/me - Verificação de autenticação');
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      error: 'Token não fornecido - VERSÃO SIMPLIFICADA'
+    });
+  }
+  
+  console.log('✅ AUTH VERIFICADA - VERSÃO SIMPLIFICADA');
+  res.json({
+    success: true,
+    user: {
+      id: 'user_simplificado',
+      email: 'teste@simplificado.com',
+      name: 'Usuário Simplificado'
+    }
+  });
+});
+
+// API Mock para estatísticas
 app.get('/api/users/stats', (req, res) => {
   console.log('📊 GET /api/users/stats - API de estatísticas acessada');
   res.json({
@@ -160,29 +145,7 @@ app.get('/api/users/stats', (req, res) => {
     totalMeetings: 567,
     success: true,
     timestamp: new Date().toISOString(),
-    port: PORT
-  });
-});
-
-// Rota para verificar arquivos estáticos
-app.get('/api/files/check', (req, res) => {
-  console.log('📁 GET /api/files/check - Verificando arquivos estáticos');
-  const fs = require('fs');
-  
-  const files = {
-    'meet-logo.png': fs.existsSync(path.join(__dirname, 'public', 'images', 'meet-logo.png')),
-    'hero-screenshot.png': fs.existsSync(path.join(__dirname, 'public', 'images', 'hero-screenshot.png')),
-    'favicon.ico': fs.existsSync(path.join(__dirname, 'public', 'favicon.ico')),
-    'index.html': fs.existsSync(path.join(__dirname, 'public', 'index.html')),
-    'meet.html': fs.existsSync(path.join(__dirname, 'public', 'meet.html')),
-    'test-auth.html': fs.existsSync(path.join(__dirname, 'public', 'test-auth.html'))
-  };
-  
-  res.json({
-    success: true,
-    files,
-    publicDir: path.join(__dirname, 'public'),
-    imagesDir: path.join(__dirname, 'public', 'images')
+    version: 'SIMPLIFICADA'
   });
 });
 
@@ -217,7 +180,7 @@ app.get('/test-auth', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('❌ Erro:', err);
   res.status(500).json({
-    error: 'Erro interno do servidor',
+    error: 'Erro interno do servidor - VERSÃO SIMPLIFICADA',
     message: err.message
   });
 });
@@ -226,29 +189,17 @@ app.use((err, req, res, next) => {
 app.use('*', (req, res) => {
   console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
   res.status(404).json({
-    error: 'Rota não encontrada',
+    error: 'Rota não encontrada - VERSÃO SIMPLIFICADA',
     path: req.originalUrl,
-    availableRoutes: [
-      'GET /',
-      'GET /api/test',
-      'GET /api/users/stats',
-      'POST /api/auth/login',
-      'POST /api/auth/register',
-      'GET /api/auth/me',
-      'POST /api/videos/upload',
-      'POST /api/meetings/create',
-      'GET /meet',
-      'GET /app',
-      'GET /test-auth'
-    ]
+    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM'
   });
 });
 
 // Iniciar servidor
 console.log('🔧 CONFIGURANDO SERVIDOR...');
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀🚀🚀 SERVIDOR RENDER INICIADO COM CÓDIGO ATUALIZADO! 🚀🚀🚀');
-  console.log('🚀🚀🚀 VERSÃO: DEPLOY FORÇADO - 14/08/2025 12:50 AM 🚀🚀🚀');
+  console.log('🚀🚀🚀 SERVIDOR SIMPLIFICADO INICIADO! 🚀🚀🚀');
+  console.log('🚀🚀🚨 VERSÃO: SIMPLIFICADA - 14/08/2025 01:10 AM 🚨🚀🚀');
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
   console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
@@ -260,7 +211,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor pronto para receber conexões!`);
   console.log(`🎉 Deploy bem-sucedido!`);
   console.log(`🗄️  Banco de dados: MongoDB`);
-  console.log(`📁 Rotas carregadas: SIM`);
+  console.log(`📁 Versão: SIMPLIFICADA`);
 });
 
 // Tratamento de erros do servidor
