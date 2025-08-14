@@ -25,8 +25,7 @@ const registerBtn = document.getElementById('registerBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userName = document.getElementById('userName');
 
-const heroRegisterBtn = document.getElementById('heroRegisterBtn');
-const heroDemoBtn = document.getElementById('heroDemoBtn');
+
 
 // Dashboard elements
 const menuItems = document.querySelectorAll('.menu-item');
@@ -121,8 +120,6 @@ function initializeEventListeners() {
     // Auth buttons
     loginBtn.addEventListener('click', () => showAuthModal('login'));
     registerBtn.addEventListener('click', () => showAuthModal('register'));
-    heroRegisterBtn.addEventListener('click', () => showAuthModal('register'));
-    heroDemoBtn.addEventListener('click', () => window.location.href = '/meet/demo');
     
     // Modal controls
     closeModal.addEventListener('click', hideAuthModal);
