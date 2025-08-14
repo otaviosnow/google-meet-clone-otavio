@@ -43,6 +43,8 @@ const User = require('./models/User');
 
 // ===== ROTAS =====
 const videoRoutes = require('./routes/videos');
+const meetingRoutes = require('./routes/meetings');
+const userRoutes = require('./routes/users');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -220,6 +222,8 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 
 // ===== ROTAS DE API =====
 app.use('/api/videos', videoRoutes);
+app.use('/api/meetings', meetingRoutes);
+app.use('/api/users', userRoutes);
 
 // ===== ROTAS DE PÁGINAS =====
 
@@ -310,9 +314,14 @@ process.on('SIGTERM', () => {
     console.log('🛑 Recebido SIGTERM, encerrando servidor...');
     server.close(() => {
         console.log('✅ Servidor encerrado.');
-        mongoose.connection.close(() => {
-            console.log('✅ Conexão com MongoDB fechada.');
-            process.exit(0);
-        });
+        mongoose.connection.close()
+            .then(() => {
+                console.log('✅ Conexão com MongoDB fechada.');
+                process.exit(0);
+            })
+            .catch((error) => {
+                console.log('⚠️ Erro ao fechar conexão MongoDB:', error.message);
+                process.exit(0);
+            });
     });
 }); 
