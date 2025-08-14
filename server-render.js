@@ -1,6 +1,6 @@
-// ===== VERSÃO SIMPLIFICADA - DIAGNÓSTICO REAL =====
-// ÚLTIMA ATUALIZAÇÃO: 14/08/2025 01:10 AM
-// SE VOCÊ NÃO VER ESTA MENSAGEM, O ARQUIVO NÃO ESTÁ SENDO EXECUTADO!
+// ===== VERSÃO ULTRA SIMPLES - SEMPRE REJEITA LOGIN INVÁLIDO =====
+// ÚLTIMA ATUALIZAÇÃO: 14/08/2025 01:30 AM
+// SE VOCÊ CONSEGUIR LOGAR COM QUALQUER EMAIL/SENHA, O CÓDIGO NÃO ESTÁ SENDO EXECUTADO!
 
 const express = require('express');
 const cors = require('cors');
@@ -12,12 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // ===== LOGS CRÍTICOS =====
-console.log('🚨🚨🚨 ARQUIVO server-render.js EXECUTADO! 🚨🚨🚨');
-console.log('🚨🚨🚨 VERSÃO: SIMPLIFICADA - 14/08/2025 01:10 AM 🚨🚨🚨');
+console.log('🚨🚨🚨 VERSÃO ULTRA SIMPLES EXECUTADA! 🚨🚨🚨');
+console.log('🚨🚨🚨 SEMPRE REJEITA LOGIN INVÁLIDO! 🚨🚨🚨');
 console.log('📅 Data/Hora:', new Date().toISOString());
 console.log('📂 Diretório atual:', __dirname);
 console.log('📊 Porta:', PORT);
-console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
 
 // Conectar ao MongoDB
 console.log('🔗 Conectando ao MongoDB...');
@@ -27,8 +26,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => {
     console.log('✅ Conectado ao MongoDB com sucesso!');
-    console.log('📊 Database:', mongoose.connection.db.databaseName);
-    console.log('🔗 Host:', mongoose.connection.host);
 })
 .catch((error) => {
     console.error('❌ Erro ao conectar ao MongoDB:', error.message);
@@ -40,15 +37,15 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// ===== ROTAS SIMPLIFICADAS =====
+// ===== ROTAS ULTRA SIMPLES =====
 
 // Rota principal
 app.get('/', (req, res) => {
   console.log('📥 GET / - Página principal acessada');
   res.json({
-    message: '🚀 Google Meet Fake SaaS - VERSÃO SIMPLIFICADA!',
+    message: '🚀 Google Meet Fake SaaS - VERSÃO ULTRA SIMPLES!',
     timestamp: new Date().toISOString(),
-    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM',
+    version: 'ULTRA SIMPLES - 14/08/2025 01:30 AM',
     database: 'MongoDB Connected'
   });
 });
@@ -57,37 +54,36 @@ app.get('/', (req, res) => {
 app.get('/api/test', (req, res) => {
   console.log('📥 GET /api/test - API de teste acessada');
   res.json({
-    message: '✅ API funcionando - VERSÃO SIMPLIFICADA!',
+    message: '✅ API funcionando - VERSÃO ULTRA SIMPLES!',
     timestamp: new Date().toISOString(),
-    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM',
+    version: 'ULTRA SIMPLES - 14/08/2025 01:30 AM',
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
-// ===== ROTAS DE AUTENTICAÇÃO SIMPLIFICADAS =====
-
-// Login - VERSÃO SIMPLIFICADA
+// ===== LOGIN - SEMPRE REJEITA INVÁLIDO =====
 app.post('/api/auth/login', (req, res) => {
   console.log('🔑 POST /api/auth/login - Tentativa de login:', req.body);
   
   const { email, password } = req.body;
   
   if (!email || !password) {
+    console.log('❌ LOGIN REJEITADO - Campos vazios');
     return res.status(400).json({
       success: false,
-      error: 'Email e senha são obrigatórios - VERSÃO SIMPLIFICADA'
+      error: 'Email e senha são obrigatórios - VERSÃO ULTRA SIMPLES'
     });
   }
   
-  // VERSÃO SIMPLIFICADA - SEMPRE REJEITA LOGIN INVÁLIDO
-  console.log('❌ LOGIN REJEITADO - VERSÃO SIMPLIFICADA');
+  // SEMPRE REJEITA - NUNCA ACEITA QUALQUER EMAIL/SENHA
+  console.log('❌ LOGIN REJEITADO - VERSÃO ULTRA SIMPLES SEMPRE REJEITA');
   return res.status(401).json({
     success: false,
-    error: 'Email ou senha incorretos - VERSÃO SIMPLIFICADA'
+    error: 'Email ou senha incorretos - VERSÃO ULTRA SIMPLES'
   });
 });
 
-// Registro - VERSÃO SIMPLIFICADA
+// ===== REGISTRO - FUNCIONA =====
 app.post('/api/auth/register', (req, res) => {
   console.log('📝 POST /api/auth/register - Tentativa de registro:', req.body);
   
@@ -96,15 +92,15 @@ app.post('/api/auth/register', (req, res) => {
   if (!name || !email || !password) {
     return res.status(400).json({
       success: false,
-      error: 'Todos os campos são obrigatórios - VERSÃO SIMPLIFICADA'
+      error: 'Todos os campos são obrigatórios - VERSÃO ULTRA SIMPLES'
     });
   }
   
-  console.log('✅ REGISTRO ACEITO - VERSÃO SIMPLIFICADA');
+  console.log('✅ REGISTRO ACEITO - VERSÃO ULTRA SIMPLES');
   res.json({
     success: true,
-    message: 'Usuário registrado com sucesso - VERSÃO SIMPLIFICADA',
-    token: 'token_simplificado_' + Date.now(),
+    message: 'Usuário registrado com sucesso - VERSÃO ULTRA SIMPLES',
+    token: 'token_ultra_simples_' + Date.now(),
     user: {
       id: Date.now().toString(),
       email: email,
@@ -113,7 +109,7 @@ app.post('/api/auth/register', (req, res) => {
   });
 });
 
-// Verificar autenticação - VERSÃO SIMPLIFICADA
+// ===== VERIFICAÇÃO - FUNCIONA =====
 app.get('/api/auth/me', (req, res) => {
   console.log('🔐 GET /api/auth/me - Verificação de autenticação');
   const authHeader = req.headers.authorization;
@@ -121,37 +117,22 @@ app.get('/api/auth/me', (req, res) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       success: false,
-      error: 'Token não fornecido - VERSÃO SIMPLIFICADA'
+      error: 'Token não fornecido - VERSÃO ULTRA SIMPLES'
     });
   }
   
-  console.log('✅ AUTH VERIFICADA - VERSÃO SIMPLIFICADA');
+  console.log('✅ AUTH VERIFICADA - VERSÃO ULTRA SIMPLES');
   res.json({
     success: true,
     user: {
-      id: 'user_simplificado',
-      email: 'teste@simplificado.com',
-      name: 'Usuário Simplificado'
+      id: 'user_ultra_simples',
+      email: 'teste@ultrasimples.com',
+      name: 'Usuário Ultra Simples'
     }
   });
 });
 
-// API Mock para estatísticas
-app.get('/api/users/stats', (req, res) => {
-  console.log('📊 GET /api/users/stats - API de estatísticas acessada');
-  res.json({
-    totalUsers: 1250,
-    activeUsers: 89,
-    totalMeetings: 567,
-    success: true,
-    timestamp: new Date().toISOString(),
-    version: 'SIMPLIFICADA'
-  });
-});
-
 // ===== ARQUIVOS ESTÁTICOS =====
-
-// Servir arquivos estáticos
 app.use(express.static('public'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
@@ -180,7 +161,7 @@ app.get('/test-auth', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('❌ Erro:', err);
   res.status(500).json({
-    error: 'Erro interno do servidor - VERSÃO SIMPLIFICADA',
+    error: 'Erro interno do servidor - VERSÃO ULTRA SIMPLES',
     message: err.message
   });
 });
@@ -189,17 +170,18 @@ app.use((err, req, res, next) => {
 app.use('*', (req, res) => {
   console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
   res.status(404).json({
-    error: 'Rota não encontrada - VERSÃO SIMPLIFICADA',
+    error: 'Rota não encontrada - VERSÃO ULTRA SIMPLES',
     path: req.originalUrl,
-    version: 'SIMPLIFICADA - 14/08/2025 01:10 AM'
+    version: 'ULTRA SIMPLES - 14/08/2025 01:30 AM'
   });
 });
 
 // Iniciar servidor
 console.log('🔧 CONFIGURANDO SERVIDOR...');
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀🚀🚀 SERVIDOR SIMPLIFICADO INICIADO! 🚀🚀🚀');
-  console.log('🚀🚀🚨 VERSÃO: SIMPLIFICADA - 14/08/2025 01:10 AM 🚨🚀🚀');
+  console.log('🚀🚀🚀 SERVIDOR ULTRA SIMPLES INICIADO! 🚀🚀🚀');
+  console.log('🚨🚨🚨 SEMPRE REJEITA LOGIN INVÁLIDO! 🚨🚨🚨');
+  console.log('📅 VERSÃO: ULTRA SIMPLES - 14/08/2025 01:30 AM');
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
   console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
@@ -211,7 +193,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor pronto para receber conexões!`);
   console.log(`🎉 Deploy bem-sucedido!`);
   console.log(`🗄️  Banco de dados: MongoDB`);
-  console.log(`📁 Versão: SIMPLIFICADA`);
+  console.log(`📁 Versão: ULTRA SIMPLES`);
 });
 
 // Tratamento de erros do servidor
