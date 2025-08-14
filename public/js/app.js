@@ -179,6 +179,17 @@ function initializeEventListeners() {
     if (saveGoalBtn) saveGoalBtn.addEventListener('click', saveMonthlyGoal);
     if (addEntryBtn) addEntryBtn.addEventListener('click', addDailyEntry);
     
+    // Quick Entry System
+    const quickEntryForm = document.getElementById('quickEntryForm');
+    if (quickEntryForm) {
+        quickEntryForm.addEventListener('submit', addQuickEntry);
+    }
+    
+    const manualEntryForm = document.getElementById('manualEntryForm');
+    if (manualEntryForm) {
+        manualEntryForm.addEventListener('submit', addManualEntry);
+    }
+    
     // Avatar System
     initializeAvatar();
     
@@ -1147,6 +1158,113 @@ function calculateMonthlyProjection(data) {
     return projectedRevenue;
 }
 
+// Adicionar entrada rápida (hoje)
+async function addQuickEntry(e) {
+    e.preventDefault();
+    
+    // Usar data atual automaticamente
+    const today = new Date().toISOString().split('T')[0];
+    const grossRevenue = parseFloat(document.getElementById('quickGrossRevenue').value) || 0;
+    const chipCost = parseFloat(document.getElementById('quickChipCost').value) || 0;
+    const additionalCost = parseFloat(document.getElementById('quickAdditionalCost').value) || 0;
+    const adsCost = parseFloat(document.getElementById('quickAdsCost').value) || 0;
+    
+    if (grossRevenue < 0 || chipCost < 0 || additionalCost < 0 || adsCost < 0) {
+        showNotification('Valores não podem ser negativos', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                date: today,
+                grossRevenue,
+                chipCost,
+                additionalCost,
+                adsCost
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada rápida adicionada com sucesso!', 'success');
+            // Limpar campos
+            document.getElementById('quickGrossRevenue').value = '';
+            document.getElementById('quickChipCost').value = '';
+            document.getElementById('quickAdditionalCost').value = '';
+            document.getElementById('quickAdsCost').value = '';
+            loadFinancialData();
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar entrada rápida:', error);
+        showNotification('Erro ao adicionar entrada rápida', 'error');
+    }
+}
+
+// Adicionar entrada manual
+async function addManualEntry(e) {
+    e.preventDefault();
+    
+    const date = document.getElementById('entryDate').value;
+    const grossRevenue = parseFloat(document.getElementById('entryGrossRevenue').value) || 0;
+    const chipCost = parseFloat(document.getElementById('entryChipCost').value) || 0;
+    const additionalCost = parseFloat(document.getElementById('entryAdditionalCost').value) || 0;
+    const adsCost = parseFloat(document.getElementById('entryAdsCost').value) || 0;
+    const notes = document.getElementById('entryNotes').value;
+    
+    if (!date) {
+        showNotification('Data é obrigatória', 'error');
+        return;
+    }
+    
+    if (grossRevenue < 0 || chipCost < 0 || additionalCost < 0 || adsCost < 0) {
+        showNotification('Valores não podem ser negativos', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                date,
+                grossRevenue,
+                chipCost,
+                additionalCost,
+                adsCost,
+                notes
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada manual adicionada com sucesso!', 'success');
+            // Limpar campos
+            document.getElementById('entryGrossRevenue').value = '';
+            document.getElementById('entryChipCost').value = '';
+            document.getElementById('entryAdditionalCost').value = '';
+            document.getElementById('entryAdsCost').value = '';
+            document.getElementById('entryNotes').value = '';
+            loadFinancialData();
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar entrada manual:', error);
+        showNotification('Erro ao adicionar entrada manual', 'error');
+    }
+}
+
 // Atualizar display financeiro
 function updateFinancialDisplay(data) {
     if (monthlyGoal) monthlyGoal.value = data.monthlyGoal || 0;
@@ -1196,14 +1314,10 @@ async function saveMonthlyGoal() {
 
 // Adicionar entrada diária
 async function addDailyEntry() {
-    const date = entryDate.value;
+    // Usar data atual automaticamente
+    const today = new Date().toISOString().split('T')[0];
     const revenue = parseFloat(entryRevenue.value) || 0;
     const expenses = parseFloat(entryExpenses.value) || 0;
-    
-    if (!date) {
-        showNotification('Data é obrigatória', 'error');
-        return;
-    }
     
     if (revenue < 0 || expenses < 0) {
         showNotification('Valores não podem ser negativos', 'error');
@@ -1217,7 +1331,7 @@ async function addDailyEntry() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ date, revenue, expenses })
+            body: JSON.stringify({ date: today, revenue, expenses })
         });
         
         if (response.ok) {
