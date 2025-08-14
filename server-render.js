@@ -31,37 +31,70 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Importar rotas com tratamento de erro
+// Importar rotas com tratamento de erro detalhado
 console.log('📁 Carregando rotas...');
+console.log('📂 Diretório atual:', __dirname);
+console.log('📂 Verificando arquivos de rotas...');
+
+const fs = require('fs');
+const routesDir = path.join(__dirname, 'routes');
+console.log('📂 Diretório de rotas:', routesDir);
+
+if (fs.existsSync(routesDir)) {
+    console.log('✅ Diretório routes existe');
+    const files = fs.readdirSync(routesDir);
+    console.log('📄 Arquivos encontrados:', files);
+} else {
+    console.error('❌ Diretório routes não existe!');
+}
+
 let authRoutes, userRoutes, videoRoutes, meetingRoutes;
 
 try {
+    console.log('🔄 Tentando carregar auth.js...');
     authRoutes = require('./routes/auth');
-    console.log('✅ Rota auth carregada');
+    console.log('✅ Rota auth carregada com sucesso');
 } catch (error) {
     console.error('❌ Erro ao carregar rota auth:', error.message);
+    console.error('❌ Stack trace:', error.stack);
     authRoutes = express.Router();
+    // Adicionar rota de fallback para auth
+    authRoutes.post('/login', (req, res) => {
+        console.log('🔑 FALLBACK: Tentativa de login detectada');
+        res.status(500).json({ error: 'Sistema de autenticação não disponível' });
+    });
+    authRoutes.post('/register', (req, res) => {
+        console.log('📝 FALLBACK: Tentativa de registro detectada');
+        res.status(500).json({ error: 'Sistema de registro não disponível' });
+    });
+    authRoutes.get('/me', (req, res) => {
+        console.log('🔐 FALLBACK: Verificação de auth detectada');
+        res.status(500).json({ error: 'Sistema de verificação não disponível' });
+    });
 }
 
 try {
+    console.log('🔄 Tentando carregar users.js...');
     userRoutes = require('./routes/users');
-    console.log('✅ Rota users carregada');
+    console.log('✅ Rota users carregada com sucesso');
 } catch (error) {
     console.error('❌ Erro ao carregar rota users:', error.message);
     userRoutes = express.Router();
 }
 
 try {
+    console.log('🔄 Tentando carregar videos.js...');
     videoRoutes = require('./routes/videos');
-    console.log('✅ Rota videos carregada');
+    console.log('✅ Rota videos carregada com sucesso');
 } catch (error) {
     console.error('❌ Erro ao carregar rota videos:', error.message);
     videoRoutes = express.Router();
 }
 
 try {
+    console.log('🔄 Tentando carregar meetings.js...');
     meetingRoutes = require('./routes/meetings');
-    console.log('✅ Rota meetings carregada');
+    console.log('✅ Rota meetings carregada com sucesso');
 } catch (error) {
     console.error('❌ Erro ao carregar rota meetings:', error.message);
     meetingRoutes = express.Router();
