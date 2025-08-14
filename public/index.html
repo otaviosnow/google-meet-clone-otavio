@@ -273,15 +273,15 @@
             <form id="addVideoForm" class="video-form" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="videoTitle">Título</label>
-                    <input type="text" id="videoTitle" required>
+                    <input type="text" id="videoTitle" name="title" required>
                 </div>
                 <div class="form-group">
                     <label for="videoDescription">Descrição</label>
-                    <textarea id="videoDescription" rows="3"></textarea>
+                    <textarea id="videoDescription" name="description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="videoType">Tipo</label>
-                    <select id="videoType" required>
+                    <select id="videoType" name="type" required>
                         <option value="upload">Upload do Computador</option>
                         <option value="drive">Google Drive</option>
                         <option value="url">URL Externa</option>
@@ -289,11 +289,11 @@
                 </div>
                 <div class="form-group" id="uploadGroup">
                     <label for="videoFile">Arquivo de Vídeo</label>
-                    <input type="file" id="videoFile" accept="video/*">
+                    <input type="file" id="videoFile" name="video" accept="video/*">
                 </div>
                 <div class="form-group" id="urlGroup" style="display: none;">
                     <label for="videoUrl">URL do Vídeo</label>
-                    <input type="url" id="videoUrl" placeholder="https://exemplo.com/video.mp4">
+                    <input type="url" id="videoUrl" name="url" placeholder="https://exemplo.com/video.mp4">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Adicionar Vídeo</button>
             </form>
