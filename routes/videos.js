@@ -111,12 +111,31 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/videos - Criar novo vídeo (upload) - VERSÃO SIMPLIFICADA
-router.post('/', authenticateToken, (req, res, next) => {
+// POST /api/videos - Criar novo vídeo (upload) - VERSÃO ULTRA SIMPLES
+router.post('/', upload.single('video'), async (req, res) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Headers:', req.headers);
-  next();
-}, upload.single('video'), async (req, res) => {
+  console.log('🔑 Auth Header:', req.headers.authorization);
+  
+  // Verificar autenticação manualmente
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Token não fornecido' });
+  }
+  
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
+    
+    req.user = user;
+  } catch (error) {
+    return res.status(401).json({ error: 'Token inválido' });
+  }
   try {
     console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
     console.log('🎬 POST /api/videos - Tentativa de criar vídeo');
