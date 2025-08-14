@@ -196,7 +196,7 @@
                 <!-- Videos Tab -->
                 <div id="videosTab" class="tab-content active">
                     <div class="tab-header">
-                        <h2>Meus Vídeos</h2>
+                        <h2>Meus Vídeos <span id="videoCount" style="font-size: 14px; color: #9ca3af; font-weight: normal;">(0/5)</span></h2>
                         <button id="addVideoBtn" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
                             Adicionar Vídeo
@@ -215,6 +215,14 @@
                             <i class="fas fa-plus"></i>
                             Criar Reunião
                         </button>
+                    </div>
+                    <div class="meetings-header">
+                        <div class="meeting-column">Nome da Reunião</div>
+                        <div class="meeting-column">Status</div>
+                        <div class="meeting-column">Data</div>
+                        <div class="meeting-column">Horário</div>
+                        <div class="meeting-column">Link</div>
+                        <div class="meeting-column">Ações</div>
                     </div>
                     <div id="meetingsList" class="meetings-grid">
                         <!-- Meetings will be loaded here -->

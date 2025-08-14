@@ -447,9 +447,34 @@ async function loadVideos() {
 function renderVideos(videos) {
     videosList.innerHTML = '';
     
+    // Atualizar contador de vídeos
+    const videoCount = document.getElementById('videoCount');
+    if (videoCount) {
+        videoCount.textContent = `(${videos.length}/5)`;
+    }
+    
+    // Verificar se atingiu o limite
+    if (videos.length >= 5) {
+        const addVideoBtn = document.getElementById('addVideoBtn');
+        if (addVideoBtn) {
+            addVideoBtn.disabled = true;
+            addVideoBtn.innerHTML = '<i class="fas fa-ban"></i> Limite Atingido';
+            addVideoBtn.style.opacity = '0.5';
+            addVideoBtn.style.cursor = 'not-allowed';
+        }
+    } else {
+        const addVideoBtn = document.getElementById('addVideoBtn');
+        if (addVideoBtn) {
+            addVideoBtn.disabled = false;
+            addVideoBtn.innerHTML = '<i class="fas fa-plus"></i> Adicionar Vídeo';
+            addVideoBtn.style.opacity = '1';
+            addVideoBtn.style.cursor = 'pointer';
+        }
+    }
+    
     if (videos.length === 0) {
         videosList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #5f6368;">
+            <div style="text-align: center; padding: 40px; color: #9ca3af;">
                 <i class="fas fa-video" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p>Nenhum vídeo encontrado</p>
                 <p>Adicione seu primeiro vídeo para começar</p>
@@ -620,30 +645,34 @@ function renderMeetings(meetings) {
     meetings.forEach(meeting => {
         const meetingCard = document.createElement('div');
         meetingCard.className = 'meeting-card';
+        
+        // Verificar se a reunião foi criada há menos de 1 minuto
+        const createdAt = new Date(meeting.createdAt);
+        const now = new Date();
+        const timeDiff = now - createdAt;
+        const oneMinute = 60 * 1000; // 1 minuto em milissegundos
+        const canDelete = timeDiff < oneMinute;
+        
+        // Truncar o link para mostrar apenas parte + "..."
+        const link = meeting.meetLink || 'Link não disponível';
+        const truncatedLink = link.length > 50 ? link.substring(0, 50) + '...' : link;
+        
         meetingCard.innerHTML = `
-            <div class="meeting-info">
-                <div class="meeting-title">${meeting.title}</div>
-                <div class="meeting-status">
-                    <i class="fas fa-check"></i>
-                    Ativo
-                </div>
-                <div class="meeting-date">${new Date(meeting.createdAt).toLocaleDateString('pt-BR')}</div>
-                <div class="meeting-separator">-</div>
-                <a href="${meeting.meetLink || '#'}" target="_blank" class="meeting-link">
-                    ${meeting.meetLink || 'Link não disponível'}
-                </a>
+            <div class="meeting-title">${meeting.title}</div>
+            <div class="meeting-status">
+                <i class="fas fa-check"></i>
+                Ativo
             </div>
+            <div class="meeting-date">${createdAt.toLocaleDateString('pt-BR')}</div>
+            <div class="meeting-time">${createdAt.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</div>
+            <a href="${meeting.meetLink || '#'}" target="_blank" class="meeting-link" title="${meeting.meetLink || 'Link não disponível'}">
+                ${truncatedLink}
+            </a>
             <div class="meeting-actions">
-                <button class="meeting-action-btn" onclick="window.open('${meeting.meetLink || ''}', '_blank')" title="Visualizar">
-                    <i class="fas fa-eye"></i>
-                </button>
                 <button class="meeting-action-btn" onclick="copyMeetingLink('${meeting.meetLink || ''}')" title="Copiar Link">
-                    <i class="fas fa-th-large"></i>
+                    <i class="fas fa-link"></i>
                 </button>
-                <button class="meeting-action-btn" onclick="window.open('${meeting.meetLink || ''}', '_blank')" title="Editar">
-                    <i class="fas fa-pencil"></i>
-                </button>
-                <button class="meeting-action-btn delete" onclick="deleteMeeting('${meeting._id}')" title="Deletar">
+                <button class="meeting-action-btn delete ${canDelete ? '' : 'hidden'}" onclick="deleteMeeting('${meeting._id}')" title="Deletar (disponível por 1 minuto)">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>

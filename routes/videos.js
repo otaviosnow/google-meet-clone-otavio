@@ -151,6 +151,14 @@ router.post('/', authenticateToken, upload.single('video'), handleMulterError, a
   console.log('🔍 Content-Type:', req.headers['content-type']);
   
   try {
+    // Verificar limite de 5 vídeos por usuário
+    const userVideoCount = await Video.countDocuments({ user: req.user._id });
+    if (userVideoCount >= 5) {
+      return res.status(400).json({
+        error: 'Limite de 5 vídeos atingido. Delete um vídeo para adicionar outro.'
+      });
+    }
+
     const { title, description, type, url } = req.body;
 
     let videoData = {

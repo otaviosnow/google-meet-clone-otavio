@@ -573,75 +573,99 @@ body {
     gap: 12px;
 }
 
+/* Meetings Header */
+.meetings-header {
+    display: grid;
+    grid-template-columns: 1fr 100px 100px 100px 2fr 120px;
+    gap: 20px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 16px 16px 0 0;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.meeting-column {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 /* Meeting Cards */
 .meeting-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    border-radius: 16px;
-    padding: 20px 24px;
-    margin-bottom: 12px;
+    border-radius: 0;
+    padding: 16px 24px;
+    margin-bottom: 0;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 100px 100px 100px 2fr 120px;
     gap: 20px;
+    align-items: center;
+}
+
+.meeting-card:last-child {
+    border-radius: 0 0 16px 16px;
 }
 
 .meeting-card:hover {
     border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-1px);
-}
-
-.meeting-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
 }
 
 .meeting-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #e8eaed;
-    min-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .meeting-status {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
+    gap: 6px;
+    padding: 4px 8px;
     background: linear-gradient(135deg, #059669, #047857);
-    border-radius: 20px;
-    font-size: 12px;
+    border-radius: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: #ffffff;
+    justify-content: center;
 }
 
 .meeting-status i {
-    font-size: 10px;
+    font-size: 8px;
 }
 
 .meeting-date {
     color: #e8eaed;
-    font-size: 14px;
-    min-width: 100px;
+    font-size: 12px;
+    text-align: center;
 }
 
-.meeting-separator {
-    color: #6b7280;
-    font-size: 14px;
+.meeting-time {
+    color: #e8eaed;
+    font-size: 12px;
+    text-align: center;
 }
 
 .meeting-link {
     color: #e8eaed;
-    font-size: 14px;
+    font-size: 12px;
     text-decoration: none;
-    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: 100%;
 }
 
 .meeting-link:hover {
@@ -652,21 +676,23 @@ body {
     display: flex;
     gap: 8px;
     align-items: center;
+    justify-content: center;
 }
 
 .meeting-action-btn {
     background: none;
     border: none;
     color: #3b82f6;
-    padding: 8px;
-    border-radius: 8px;
+    padding: 6px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
 }
 
 .meeting-action-btn:hover {
@@ -680,6 +706,10 @@ body {
 
 .meeting-action-btn.delete:hover {
     background-color: rgba(239, 68, 68, 0.1);
+}
+
+.meeting-action-btn.hidden {
+    display: none;
 }
 
 /* Profile */
@@ -863,30 +893,42 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .meeting-card {
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px;
+    .meetings-header {
+        display: none;
     }
     
-    .meeting-info {
+    .meeting-card {
+        display: flex;
         flex-direction: column;
         gap: 12px;
-        width: 100%;
+        padding: 16px;
+        border-radius: 16px !important;
+        margin-bottom: 12px;
     }
     
-    .meeting-title,
-    .meeting-date {
-        min-width: auto;
+    .meeting-card:last-child {
+        border-radius: 16px !important;
+    }
+    
+    .meeting-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .meeting-date,
+    .meeting-time {
+        font-size: 14px;
+        text-align: left;
     }
     
     .meeting-link {
         word-break: break-all;
         white-space: normal;
+        font-size: 14px;
     }
     
     .meeting-actions {
-        justify-content: center;
+        justify-content: flex-start;
         width: 100%;
     }
     
