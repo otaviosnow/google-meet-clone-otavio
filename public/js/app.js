@@ -459,11 +459,22 @@ function renderVideos(videos) {
     }
     
     videos.forEach(video => {
+        // Construir URL completa do vídeo
+        let videoUrl = video.url;
+        if (videoUrl.startsWith('/uploads/')) {
+            videoUrl = window.location.origin + videoUrl;
+        }
+        
         const videoCard = document.createElement('div');
         videoCard.className = 'video-card';
         videoCard.innerHTML = `
             <div class="video-thumbnail">
-                <i class="fas fa-play" style="font-size: 32px;"></i>
+                <video src="${videoUrl}" preload="metadata" style="width: 100%; height: 100%; object-fit: cover;">
+                    <i class="fas fa-play" style="font-size: 32px;"></i>
+                </video>
+                <div class="play-overlay">
+                    <i class="fas fa-play" style="font-size: 32px;"></i>
+                </div>
             </div>
             <div class="video-info">
                 <h3 class="video-title">${video.title}</h3>
@@ -473,7 +484,7 @@ function renderVideos(videos) {
                     <span>${video.views} visualizações</span>
                 </div>
                 <div class="video-actions">
-                    <button class="btn btn-outline btn-small" onclick="copyVideoUrl('${video.url}')">
+                    <button class="btn btn-outline btn-small" onclick="copyVideoUrl('${videoUrl}')">
                         <i class="fas fa-link"></i>
                         Copiar URL
                     </button>
