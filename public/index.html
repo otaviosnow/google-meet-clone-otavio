@@ -162,106 +162,46 @@
 
     <!-- Dashboard (hidden by default) -->
     <div id="dashboard" class="dashboard" style="display: none;">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <img src="images/meet-logo.png" alt="Google Meet Fake" width="40">
-                    <span>Fake</span>
-                </div>
-                <div class="user-info">
-                    <div class="user-name" id="sidebarUserName">Usuário</div>
-                    <div class="user-email" id="sidebarUserEmail">email@exemplo.com</div>
+        <header class="dashboard-header">
+            <div class="container">
+                <div class="dashboard-nav">
+                    <div class="logo">
+                        <img src="images/meet-logo.png" alt="Google Meet Fake" width="100">
+                        <span>Fake</span>
+                    </div>
+                    <nav class="dashboard-menu">
+                        <button class="menu-item active" data-tab="videos">
+                            <i class="fas fa-video"></i>
+                            Meus Vídeos
+                        </button>
+                        <button class="menu-item" data-tab="meetings">
+                            <i class="fas fa-users"></i>
+                            Minhas Reuniões
+                        </button>
+                        <button class="menu-item" data-tab="profile">
+                            <i class="fas fa-user"></i>
+                            Perfil
+                        </button>
+                    </nav>
+                    <div class="user-menu">
+                        <span id="userName">Usuário</span>
+                        <button id="logoutBtn" class="btn btn-outline btn-small">Sair</button>
+                    </div>
                 </div>
             </div>
-            
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-tab="dashboard">
-                    <i class="fas fa-th-large"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="nav-item" data-tab="videos">
-                    <i class="fas fa-video"></i>
-                    <span>Vídeos</span>
-                </a>
-                <a href="#" class="nav-item" data-tab="meetings">
-                    <i class="fas fa-users"></i>
-                    <span>Reuniões</span>
-                </a>
-                <a href="#" class="nav-item" data-tab="tokens">
-                    <i class="fas fa-cube"></i>
-                    <span>Comprar Tokens</span>
-                </a>
-                <hr class="sidebar-divider">
-                <a href="#" class="nav-item" id="sidebarLogoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Sair</span>
-                </a>
-            </nav>
-        </aside>
+        </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="dashboard-header">
-                <div class="header-content">
-                    <h1 id="pageTitle">Dashboard</h1>
-                    <div class="header-actions">
-                        <button id="addVideoBtn" class="btn btn-primary" style="display: none;">
+        <main class="dashboard-content">
+            <div class="container">
+                <!-- Videos Tab -->
+                <div id="videosTab" class="tab-content active">
+                    <div class="tab-header">
+                        <h2>Meus Vídeos</h2>
+                        <button id="addVideoBtn" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
                             Adicionar Vídeo
                         </button>
-                        <button id="createMeetingBtn" class="btn btn-primary" style="display: none;">
-                            <i class="fas fa-plus"></i>
-                            Criar Reunião
-                        </button>
                     </div>
-                </div>
-            </header>
-
-            <div class="dashboard-content">
-                <!-- Dashboard Tab -->
-                <div id="dashboardTab" class="tab-content active">
-                    <div class="dashboard-stats">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-video"></i>
-                            </div>
-                            <div class="stat-number" id="dashboardTotalVideos">0</div>
-                            <div class="stat-label">Total de Vídeos</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-number" id="dashboardTotalMeetings">0</div>
-                            <div class="stat-label">Total de Reuniões</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                            <div class="stat-number" id="dashboardTotalViews">0</div>
-                            <div class="stat-label">Visualizações</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-cube"></i>
-                            </div>
-                            <div class="stat-number" id="dashboardTokens">0</div>
-                            <div class="stat-label">Tokens Disponíveis</div>
-                        </div>
-                    </div>
-                    
-                    <div class="recent-activity">
-                        <h3>Atividade Recente</h3>
-                        <div id="recentActivityList">
-                            <!-- Recent activity will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Videos Tab -->
-                <div id="videosTab" class="tab-content">
                     <div id="videosList" class="videos-grid">
                         <!-- Videos will be loaded here -->
                     </div>
@@ -269,36 +209,49 @@
 
                 <!-- Meetings Tab -->
                 <div id="meetingsTab" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Minhas Reuniões</h2>
+                        <button id="createMeetingBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Criar Reunião
+                        </button>
+                    </div>
                     <div id="meetingsList" class="meetings-grid">
                         <!-- Meetings will be loaded here -->
                     </div>
                 </div>
 
-                <!-- Tokens Tab -->
-                <div id="tokensTab" class="tab-content">
-                    <div class="tokens-content">
-                        <h3>Comprar Tokens</h3>
-                        <p>Tokens são necessários para criar reuniões e fazer upload de vídeos.</p>
-                        <div class="tokens-packages">
-                            <div class="token-package">
-                                <h4>Pacote Básico</h4>
-                                <div class="token-price">R$ 29,90</div>
-                                <div class="token-amount">50 Tokens</div>
-                                <button class="btn btn-primary">Comprar</button>
+                <!-- Profile Tab -->
+                <div id="profileTab" class="tab-content">
+                    <div class="tab-header">
+                        <h2>Meu Perfil</h2>
+                    </div>
+                    <div class="profile-content">
+                        <div class="profile-stats">
+                            <div class="stat-card">
+                                <h3>Vídeos</h3>
+                                <p id="totalVideos">0</p>
                             </div>
-                            <div class="token-package">
-                                <h4>Pacote Pro</h4>
-                                <div class="token-price">R$ 49,90</div>
-                                <div class="token-amount">100 Tokens</div>
-                                <button class="btn btn-primary">Comprar</button>
+                            <div class="stat-card">
+                                <h3>Reuniões</h3>
+                                <p id="totalMeetings">0</p>
                             </div>
-                            <div class="token-package">
-                                <h4>Pacote Premium</h4>
-                                <div class="token-price">R$ 89,90</div>
-                                <div class="token-amount">200 Tokens</div>
-                                <button class="btn btn-primary">Comprar</button>
+                            <div class="stat-card">
+                                <h3>Visualizações</h3>
+                                <p id="totalViews">0</p>
                             </div>
                         </div>
+                        <form id="profileForm" class="profile-form">
+                            <div class="form-group">
+                                <label for="profileName">Nome</label>
+                                <input type="text" id="profileName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmail">Email</label>
+                                <input type="email" id="profileEmail" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Atualizar Perfil</button>
+                        </form>
                     </div>
                 </div>
             </div>
