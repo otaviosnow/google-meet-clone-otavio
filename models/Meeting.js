@@ -79,7 +79,7 @@ const meetingSchema = new mongoose.Schema({
   },
   meetLink: {
     type: String,
-    required: [true, 'Link da reunião é obrigatório']
+    required: false
   },
   createdAt: {
     type: Date,
