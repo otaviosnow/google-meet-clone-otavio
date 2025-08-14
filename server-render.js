@@ -1,3 +1,7 @@
+// ===== VERSÃO ATUALIZADA - DEPLOY FORÇADO =====
+// ÚLTIMA ATUALIZAÇÃO: 14/08/2025 12:50 AM
+// SE VOCÊ NÃO VER ESTA MENSAGEM, O DEPLOY NÃO ATUALIZOU!
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,6 +13,7 @@ const PORT = process.env.PORT || 10000;
 
 // ===== LOGS INICIAIS MUITO VISÍVEIS =====
 console.log('🚨🚨🚨 INICIANDO SERVIDOR COM CÓDIGO ATUALIZADO 🚨🚨🚨');
+console.log('🚨🚨🚨 VERSÃO: DEPLOY FORÇADO - 14/08/2025 12:50 AM 🚨🚨🚨');
 console.log('📅 Data/Hora:', new Date().toISOString());
 console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
 console.log('📊 Porta:', PORT);
@@ -114,7 +119,7 @@ app.get('/', (req, res) => {
     message: '🚀 Google Meet Fake SaaS - Servidor funcionando!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: '2.0.1',
+    version: '2.0.1 - DEPLOY FORÇADO',
     port: PORT,
     host: '0.0.0.0',
     database: 'MongoDB Connected',
@@ -133,7 +138,8 @@ app.get('/api/test', (req, res) => {
     port: PORT,
     host: '0.0.0.0',
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routesLoaded: 'SIM'
+    routesLoaded: 'SIM',
+    version: 'DEPLOY FORÇADO - 14/08/2025'
   });
 });
 
@@ -242,6 +248,7 @@ app.use('*', (req, res) => {
 console.log('🔧 CONFIGURANDO SERVIDOR...');
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('🚀🚀🚀 SERVIDOR RENDER INICIADO COM CÓDIGO ATUALIZADO! 🚀🚀🚀');
+  console.log('🚀🚀🚀 VERSÃO: DEPLOY FORÇADO - 14/08/2025 12:50 AM 🚀🚀🚀');
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
   console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
