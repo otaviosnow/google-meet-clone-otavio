@@ -31,7 +31,7 @@ const upload = multer({
   storage: storage,
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB - muito maior que 100MB
-    files: 1
+    files: 5 // Aumentar para 5 arquivos
   },
   fileFilter: function (req, file, cb) {
     console.log('🔍 Verificando arquivo:', file.originalname, file.mimetype);
@@ -122,8 +122,27 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
+// Middleware para tratar erros do Multer
+const handleMulterError = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    console.log('🚨🚨🚨 ERRO MULTER DETECTADO:', error.code);
+    
+    switch (error.code) {
+      case 'LIMIT_FILE_SIZE':
+        return res.status(400).json({ error: 'Arquivo muito grande. Máximo 500MB.' });
+      case 'LIMIT_FILE_COUNT':
+        return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 arquivos.' });
+      case 'LIMIT_UNEXPECTED_FILE':
+        return res.status(400).json({ error: 'Campo de arquivo inesperado.' });
+      default:
+        return res.status(400).json({ error: `Erro de upload: ${error.message}` });
+    }
+  }
+  next(error);
+};
+
 // POST /api/videos - Criar novo vídeo (upload) - COM MULTER
-router.post('/', authenticateToken, upload.single('video'), async (req, res) => {
+router.post('/', authenticateToken, upload.single('video'), handleMulterError, async (req, res) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Body:', req.body);
   console.log('📁 File:', req.file);
