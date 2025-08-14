@@ -441,8 +441,18 @@ function startVSL() {
         return;
     }
     
+    // Construir URL completa do vídeo
+    let videoUrl = meetingData.video.url;
+    
+    // Se é um upload local, adicionar o domínio
+    if (videoUrl.startsWith('/uploads/')) {
+        videoUrl = window.location.origin + videoUrl;
+    }
+    
+    console.log('🎬 URL do vídeo:', videoUrl);
+    
     // Configurar o vídeo VSL
-    vslVideo.src = meetingData.video.url;
+    vslVideo.src = videoUrl;
     vslVideo.loop = false; // Não repetir
     vslVideo.muted = false; // Com som
     vslVideo.volume = 1.0; // Volume máximo
