@@ -86,6 +86,9 @@ async function loadMeetingData() {
             const data = await response.json();
             meetingData = data.meeting;
             
+            console.log('📊 Dados completos da reunião:', meetingData);
+            console.log('🎬 Dados do vídeo:', meetingData.video);
+            
             // Atualizar ID da reunião na interface
             meetingIdElement.textContent = meetingData.meetingId;
             
@@ -435,9 +438,13 @@ function startCall() {
 // Função para iniciar VSL
 function startVSL() {
     console.log('=== INICIANDO VSL ===');
+    console.log('📋 MeetingData:', meetingData);
+    console.log('🎬 Video data:', meetingData?.video);
     
     if (!meetingData || !meetingData.video) {
         console.error('❌ Dados da reunião não encontrados');
+        console.error('❌ MeetingData:', meetingData);
+        console.error('❌ Video:', meetingData?.video);
         return;
     }
     
@@ -449,7 +456,8 @@ function startVSL() {
         videoUrl = window.location.origin + videoUrl;
     }
     
-    console.log('🎬 URL do vídeo:', videoUrl);
+    console.log('🎬 URL original:', meetingData.video.url);
+    console.log('🎬 URL completa:', videoUrl);
     
     // Configurar o vídeo VSL
     vslVideo.src = videoUrl;

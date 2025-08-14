@@ -125,13 +125,20 @@ router.post('/', authenticateToken, meetingValidation, handleValidationErrors, a
 
     const meeting = new Meeting({
       user: req.user._id,
-      video: videoId,
+      video: videoId, // Este é o ObjectId do vídeo
       title,
       description,
       maxParticipants,
       isPublic,
       meetLink,
       meetingId: meetingIdFromLink // Usar o ID gerado pelo JavaScript
+    });
+    
+    console.log('📋 Dados da reunião antes de salvar:', {
+      user: req.user._id,
+      video: videoId,
+      title,
+      meetingId: meetingIdFromLink
     });
 
     await meeting.save();
@@ -177,7 +184,9 @@ router.get('/:meetingId', async (req, res) => {
         meetingId: meeting.meetingId,
         title: meeting.title,
         isActive: meeting.isActive,
-        video: meeting.video ? meeting.video.title : 'N/A'
+        video: meeting.video ? meeting.video.title : 'N/A',
+        videoId: meeting.video,
+        videoType: typeof meeting.video
       });
     }
 
