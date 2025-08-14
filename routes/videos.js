@@ -51,7 +51,7 @@ const upload = multer({
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 100 * 1024 * 1024 // 100MB
   }
-});
+}).any();
 
 // Validações para criação/edição de vídeo
 const videoValidation = [
