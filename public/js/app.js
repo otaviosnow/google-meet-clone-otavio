@@ -714,11 +714,17 @@ function renderMeetings(meetings) {
         const link = meeting.meetLink || 'Link não disponível';
         const truncatedLink = link.length > 50 ? link.substring(0, 50) + '...' : link;
         
+        // Determinar status da reunião
+        const isEnded = meeting.status === 'ended' || !meeting.isActive;
+        const statusText = isEnded ? 'Encerrado' : 'Ativo';
+        const statusIcon = isEnded ? 'fa-times' : 'fa-check';
+        const statusClass = isEnded ? 'ended' : 'active';
+        
         meetingCard.innerHTML = `
             <div class="meeting-title">${meeting.title}</div>
-            <div class="meeting-status">
-                <i class="fas fa-check"></i>
-                Ativo
+            <div class="meeting-status ${statusClass}">
+                <i class="fas ${statusIcon}"></i>
+                ${statusText}
             </div>
             <div class="meeting-date">${createdAt.toLocaleDateString('pt-BR')}</div>
             <div class="meeting-time">${createdAt.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</div>

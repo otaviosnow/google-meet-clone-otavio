@@ -215,7 +215,7 @@ router.get('/:meetingId', async (req, res) => {
     // Verificar se a reunião pode ser acessada
     if (!meeting.canBeAccessed(userIdentifier)) {
       return res.status(403).json({
-        error: 'Esta reunião já está sendo utilizada por outra pessoa. Não é possível utilizar o mesmo link para mais pessoas.'
+        error: 'Acesso negado. Esta reunião só pode ser acessada pelo criador e uma pessoa autorizada.'
       });
     }
 
@@ -224,6 +224,9 @@ router.get('/:meetingId', async (req, res) => {
       await meeting.markAsAccessed(userIdentifier);
       console.log('✅ Reunião marcada como acessada por:', userIdentifier);
     }
+    
+    // Se for o criador e quiser autorizar alguém, pode fazer isso aqui
+    // (implementação futura para autorização via interface)
 
     res.json({
       meeting: meeting.toPublicJSON()

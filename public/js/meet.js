@@ -905,25 +905,42 @@ async function endCallAndDeleteMeeting() {
         vslIframe.src = '';
     }
     
-    // Deletar reunião do banco de dados
+    // Marcar reunião como encerrada e depois deletar
     if (meetingId && meetingId !== 'demo') {
         try {
+            console.log('🔴 Marcando reunião como encerrada:', meetingId);
+            
+            // Primeiro, marcar como encerrada
+            const endResponse = await fetch(`/api/meetings/${meetingId}/end`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (endResponse.ok) {
+                console.log('✅ Reunião marcada como encerrada');
+            } else {
+                console.error('❌ Erro ao marcar reunião como encerrada:', endResponse.status);
+            }
+            
+            // Depois, deletar a reunião
             console.log('🗑️ Deletando reunião:', meetingId);
             
-            const response = await fetch(`/api/meetings/${meetingId}`, {
+            const deleteResponse = await fetch(`/api/meetings/${meetingId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
             
-            if (response.ok) {
+            if (deleteResponse.ok) {
                 console.log('✅ Reunião deletada com sucesso');
             } else {
-                console.error('❌ Erro ao deletar reunião:', response.status);
+                console.error('❌ Erro ao deletar reunião:', deleteResponse.status);
             }
         } catch (error) {
-            console.error('❌ Erro ao deletar reunião:', error);
+            console.error('❌ Erro ao processar reunião:', error);
         }
     }
     

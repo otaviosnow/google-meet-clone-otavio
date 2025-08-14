@@ -49,6 +49,11 @@ const meetingSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  status: {
+    type: String,
+    enum: ['active', 'ended'],
+    default: 'active'
+  },
   isPublic: {
     type: Boolean,
     default: false
@@ -89,6 +94,10 @@ const meetingSchema = new mongoose.Schema({
     type: String, // IP ou identificador único do primeiro acessante
     default: null
   },
+  authorizedUser: {
+    type: String, // Identificador da pessoa autorizada pelo criador
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -118,6 +127,7 @@ meetingSchema.methods.startMeeting = function() {
 meetingSchema.methods.endMeeting = function() {
   this.endedAt = new Date();
   this.isActive = false;
+  this.status = 'ended';
   if (this.startedAt) {
     this.duration = Math.floor((this.endedAt - this.startedAt) / 1000);
   }
@@ -155,14 +165,30 @@ meetingSchema.methods.markAsAccessed = function(identifier) {
   return this.save();
 };
 
+// Método para autorizar uma pessoa adicional
+meetingSchema.methods.authorizeUser = function(identifier) {
+  this.authorizedUser = identifier;
+  return this.save();
+};
+
 // Método para verificar se reunião pode ser acessada
 meetingSchema.methods.canBeAccessed = function(identifier) {
-  // Se nunca foi acessada, pode ser acessada
+  // Se nunca foi acessada, pode ser acessada (primeira pessoa)
   if (!this.isAccessed) {
     return true;
   }
-  // Se já foi acessada, só pode ser acessada pelo mesmo identificador
-  return this.accessedBy === identifier;
+  
+  // Se já foi acessada, verificar se é o criador, o primeiro acessante ou uma pessoa autorizada
+  const isCreator = this.user.toString() === identifier;
+  const isFirstAccessor = this.accessedBy === identifier;
+  const isAuthorized = this.authorizedUser === identifier;
+  
+  return isCreator || isFirstAccessor || isAuthorized;
+};
+
+// Método para verificar se é o criador da reunião
+meetingSchema.methods.isCreator = function(identifier) {
+  return this.user.toString() === identifier;
 };
 
 // Método para retornar dados públicos da reunião
