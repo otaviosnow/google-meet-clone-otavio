@@ -247,341 +247,341 @@
                     <div class="tab-header">
                         <h2><i class="fas fa-chart-line"></i> Sistema de Metas</h2>
                     </div>
-                    <div class="goals-content">
-                        <!-- Resumo Geral -->
-                        <div class="goals-overview">
-                            <div class="overview-card cosmic-card">
-                                <div class="card-glow"></div>
-                                <div class="overview-icon cosmic-icon">
-                                    <i class="fas fa-bullseye"></i>
-                                    <div class="icon-rings"></div>
-                                </div>
-                                <div class="overview-info">
-                                    <h3>Meta Mensal</h3>
-                                    <p id="monthlyGoalDisplay" class="cosmic-text">R$ 0,00</p>
-                                    <div class="progress-ring">
-                                        <svg class="ring-svg" viewBox="0 0 100 100">
-                                            <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                                            <circle class="ring-progress" cx="50" cy="50" r="45"></circle>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="overview-card cosmic-card">
-                                <div class="card-glow"></div>
-                                <div class="overview-icon cosmic-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                    <div class="icon-rings"></div>
-                                </div>
-                                <div class="overview-info">
-                                    <h3>Progresso</h3>
-                                    <p id="goalProgressDisplay" class="cosmic-text">0%</p>
-                                    <div class="floating-particles"></div>
-                                </div>
-                            </div>
-                            <div class="overview-card cosmic-card">
-                                <div class="card-glow"></div>
-                                <div class="overview-icon cosmic-icon">
-                                    <i class="fas fa-clock"></i>
-                                    <div class="icon-rings"></div>
-                                </div>
-                                <div class="overview-info">
-                                    <h3>Dias Restantes</h3>
-                                    <p id="daysRemaining" class="cosmic-text">0 dias</p>
-                                    <div class="time-waves"></div>
-                                </div>
-                            </div>
-                            <div class="overview-card cosmic-card">
-                                <div class="card-glow"></div>
-                                <div class="overview-icon cosmic-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                    <div class="icon-rings"></div>
-                                </div>
-                                <div class="overview-info">
-                                    <h3>PROJEÇÃO MENSAL</h3>
-                                    <p id="monthlyProjection" class="cosmic-text">R$ 0,00</p>
-                                    <small class="projection-note">*Considera diminuição nos últimos 10 dias</small>
-                                </div>
-                            </div>
-
+                    
+                    <!-- Sistema de Abas -->
+                    <div class="goals-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" data-tab="config">
+                                <i class="fas fa-cog"></i> Configurar Metas
+                            </button>
+                            <button class="tab-btn" data-tab="summary">
+                                <i class="fas fa-chart-pie"></i> Resumo Geral
+                            </button>
+                            <button class="tab-btn" data-tab="dashboard">
+                                <i class="fas fa-chart-bar"></i> Dashboard Financeiro
+                            </button>
+                            <button class="tab-btn" data-tab="data">
+                                <i class="fas fa-plus-circle"></i> Adicionar Dados
+                            </button>
+                            <button class="tab-btn" data-tab="history">
+                                <i class="fas fa-history"></i> Histórico e Relatórios
+                            </button>
                         </div>
-
-                        <!-- Configuração de Metas -->
-                        <div class="goals-config">
-                            <h3><i class="fas fa-cog"></i> Configurar Metas</h3>
-                            <div class="goals-form">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="monthlyGoal">Meta Mensal (R$)</label>
-                                        <input type="number" id="monthlyGoal" placeholder="0.00" step="0.01">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="goalType">Tipo de Meta</label>
-                                        <select id="goalType">
-                                            <option value="revenue">Faturamento</option>
-                                            <option value="profit">Lucro</option>
-                                            <option value="custom">Personalizada</option>
-                                        </select>
+                        
+                        <!-- Conteúdo das Abas -->
+                        <div class="tab-content-wrapper">
+                            <!-- Aba 1: Configurar Metas -->
+                            <div id="config-tab" class="tab-panel active">
+                                <div class="goals-config">
+                                    <h3><i class="fas fa-cog"></i> Configurar Metas</h3>
+                                    <div class="goals-form">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="monthlyGoal">Meta Mensal (R$)</label>
+                                                <input type="number" id="monthlyGoal" placeholder="0.00" step="0.01">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="goalType">Tipo de Meta</label>
+                                                <select id="goalType">
+                                                    <option value="revenue">Faturamento</option>
+                                                    <option value="profit">Lucro</option>
+                                                    <option value="custom">Personalizada</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="goalDeadline">Data Limite</label>
+                                                <input type="date" id="goalDeadline">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="goalPriority">Prioridade</label>
+                                                <select id="goalPriority">
+                                                    <option value="low">Baixa</option>
+                                                    <option value="medium">Média</option>
+                                                    <option value="high">Alta</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="goalDescription">Descrição da Meta</label>
+                                            <textarea id="goalDescription" placeholder="Descreva sua meta em detalhes..."></textarea>
+                                        </div>
+                                        <button id="saveGoalBtn" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Salvar Meta
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="goalDeadline">Data Limite</label>
-                                        <input type="date" id="goalDeadline">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="goalPriority">Prioridade</label>
-                                        <select id="goalPriority">
-                                            <option value="low">Baixa</option>
-                                            <option value="medium">Média</option>
-                                            <option value="high">Alta</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button id="saveGoalBtn" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Salvar Meta
-                                </button>
                             </div>
-                        </div>
-
-                        <!-- Dashboard Financeiro -->
-                        <div class="financial-dashboard">
-                            <h3><i class="fas fa-chart-bar"></i> Dashboard Financeiro</h3>
                             
-                            <!-- Resumo Financeiro -->
-                            <div class="financial-summary">
-                                <div class="summary-card">
-                                    <h4><i class="fas fa-dollar-sign"></i> Faturamento</h4>
-                                    <p id="totalRevenue">R$ 0,00</p>
-                                    <small id="revenueChange">+0% vs mês anterior</small>
-                                </div>
-                                <div class="summary-card">
-                                    <h4><i class="fas fa-minus-circle"></i> Gastos</h4>
-                                    <p id="totalExpenses">R$ 0,00</p>
-                                    <small id="expensesChange">+0% vs mês anterior</small>
-                                </div>
-                                <div class="summary-card">
-                                    <h4><i class="fas fa-plus-circle"></i> Lucro</h4>
-                                    <p id="totalProfit">R$ 0,00</p>
-                                    <small id="profitChange">+0% vs mês anterior</small>
-                                </div>
-                                <div class="summary-card">
-                                    <h4><i class="fas fa-percentage"></i> Margem</h4>
-                                    <p id="profitMargin">0%</p>
-                                    <small id="marginChange">+0% vs mês anterior</small>
+                            <!-- Aba 2: Resumo Geral -->
+                            <div id="summary-tab" class="tab-panel">
+                                <div class="goals-overview">
+                                    <div class="overview-card cosmic-card">
+                                        <div class="card-glow"></div>
+                                        <div class="overview-icon cosmic-icon">
+                                            <i class="fas fa-bullseye"></i>
+                                            <div class="icon-rings"></div>
+                                        </div>
+                                        <div class="overview-info">
+                                            <h3>Meta Mensal</h3>
+                                            <p id="monthlyGoalDisplay" class="cosmic-text">R$ 0,00</p>
+                                            <div class="progress-ring">
+                                                <svg class="ring-svg" viewBox="0 0 100 100">
+                                                    <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                                                    <circle class="ring-progress" cx="50" cy="50" r="45"></circle>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="overview-card cosmic-card">
+                                        <div class="card-glow"></div>
+                                        <div class="overview-icon cosmic-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                            <div class="icon-rings"></div>
+                                        </div>
+                                        <div class="overview-info">
+                                            <h3>Progresso</h3>
+                                            <p id="goalProgressDisplay" class="cosmic-text">0%</p>
+                                            <div class="floating-particles"></div>
+                                        </div>
+                                    </div>
+                                    <div class="overview-card cosmic-card">
+                                        <div class="card-glow"></div>
+                                        <div class="overview-icon cosmic-icon">
+                                            <i class="fas fa-clock"></i>
+                                            <div class="icon-rings"></div>
+                                        </div>
+                                        <div class="overview-info">
+                                            <h3>Dias Restantes</h3>
+                                            <p id="daysRemaining" class="cosmic-text">0 dias</p>
+                                            <div class="time-waves"></div>
+                                        </div>
+                                    </div>
+                                    <div class="overview-card cosmic-card">
+                                        <div class="card-glow"></div>
+                                        <div class="overview-icon cosmic-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                            <div class="icon-rings"></div>
+                                        </div>
+                                        <div class="overview-info">
+                                            <h3>PROJEÇÃO MENSAL</h3>
+                                            <p id="monthlyProjection" class="cosmic-text">R$ 0,00</p>
+                                            <small class="projection-note">*Considera diminuição nos últimos 10 dias</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Gráfico de Progresso -->
-                            <div class="progress-chart">
-                                <h4><i class="fas fa-chart-line"></i> Progresso da Meta</h4>
-                                <div class="chart-container">
-                                    <canvas id="progressChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- Análise de Tendências -->
-                            <div class="trends-analysis">
-                                <h4><i class="fas fa-trending-up"></i> Análise de Tendências</h4>
-                                <div class="trends-grid">
-                                    <div class="trend-card">
-                                        <h5>Melhor Dia</h5>
-                                        <p id="bestDay">N/A</p>
-                                    </div>
-                                    <div class="trend-card">
-                                        <h5>Pior Dia</h5>
-                                        <p id="worstDay">N/A</p>
-                                    </div>
-                                    <div class="trend-card">
-                                        <h5>Média Semanal</h5>
-                                        <p id="weeklyAverage">R$ 0,00</p>
-                                    </div>
-                                    <div class="trend-card">
-                                        <h5>Projeção Mensal</h5>
-                                        <p id="monthlyProjection">R$ 0,00</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Entrada de Dados -->
-                        <div class="data-entry">
-                            <h3><i class="fas fa-plus-circle"></i> Adicionar Dados</h3>
                             
-                            <!-- Entrada Rápida -->
-                            <div class="quick-entry">
-                                <h4><i class="fas fa-bolt"></i> Entrada Rápida (Hoje)</h4>
-                                <div class="entry-form">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="entryRevenue">Faturamento (R$)</label>
-                                            <input type="number" id="entryRevenue" placeholder="0.00" step="0.01">
+                            <!-- Aba 3: Dashboard Financeiro -->
+                            <div id="dashboard-tab" class="tab-panel">
+                                <div class="financial-dashboard">
+                                    <h3><i class="fas fa-chart-bar"></i> Dashboard Financeiro</h3>
+                                    
+                                    <!-- Resumo Financeiro -->
+                                    <div class="financial-summary">
+                                        <div class="summary-card">
+                                            <h4><i class="fas fa-dollar-sign"></i> Faturamento Total</h4>
+                                            <p id="totalRevenue">R$ 0,00</p>
+                                            <small>Este mês</small>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="entryExpenses">Gastos (R$)</label>
-                                            <input type="number" id="entryExpenses" placeholder="0.00" step="0.01">
+                                        <div class="summary-card">
+                                            <h4><i class="fas fa-chart-line"></i> Média Diária</h4>
+                                            <p id="dailyAverage">R$ 0,00</p>
+                                            <small>Últimos 7 dias</small>
+                                        </div>
+                                        <div class="summary-card">
+                                            <h4><i class="fas fa-trending-up"></i> Melhor Dia</h4>
+                                            <p id="bestDay">R$ 0,00</p>
+                                            <small>Dia 15</small>
+                                        </div>
+                                        <div class="summary-card">
+                                            <h4><i class="fas fa-trending-down"></i> Pior Dia</h4>
+                                            <p id="worstDay">R$ 0,00</p>
+                                            <small>Dia 8</small>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="entryNotes">Observações</label>
-                                        <textarea id="entryNotes" placeholder="Adicione observações sobre o dia..."></textarea>
+
+                                    <!-- Gráfico de Progresso -->
+                                    <div class="progress-chart">
+                                        <h4><i class="fas fa-chart-area"></i> Progresso da Meta</h4>
+                                        <div class="chart-container">
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" id="progressFill"></div>
+                                            </div>
+                                            <div class="chart-info">
+                                                <span id="progressText">0% da meta atingida</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <button id="addEntryBtn" class="btn btn-primary">
-                                        <i class="fas fa-plus"></i> Adicionar Entrada
-                                    </button>
+
+                                    <!-- Análise de Tendências -->
+                                    <div class="trends-analysis">
+                                        <h4><i class="fas fa-chart-line"></i> Análise de Tendências</h4>
+                                        <div class="trends-grid">
+                                            <div class="trend-card">
+                                                <h5><i class="fas fa-arrow-up"></i> Crescimento</h5>
+                                                <p id="growthRate">+15%</p>
+                                                <small>vs. mês anterior</small>
+                                            </div>
+                                            <div class="trend-card">
+                                                <h5><i class="fas fa-calendar"></i> Frequência</h5>
+                                                <p id="frequencyRate">85%</p>
+                                                <small>dias com vendas</small>
+                                            </div>
+                                            <div class="trend-card">
+                                                <h5><i class="fas fa-target"></i> Eficiência</h5>
+                                                <p id="efficiencyRate">92%</p>
+                                                <small>meta vs. realidade</small>
+                                            </div>
+                                            <div class="trend-card">
+                                                <h5><i class="fas fa-rocket"></i> Projeção</h5>
+                                                <p id="projectionRate">+25%</p>
+                                                <small>próximo mês</small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Entrada Manual -->
-                            <div class="manual-entry">
-                                <h4><i class="fas fa-calendar-day"></i> Entrada Manual</h4>
-                                <div class="entry-form">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="entryDate">Data</label>
-                                            <input type="date" id="entryDate" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="entryRevenueManual">Faturamento (R$)</label>
-                                            <input type="number" id="entryRevenueManual" placeholder="0.00" step="0.01">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="entryExpensesManual">Gastos (R$)</label>
-                                            <input type="number" id="entryExpensesManual" placeholder="0.00" step="0.01">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="entryNotesManual">Observações</label>
-                                        <textarea id="entryNotesManual" placeholder="Adicione observações..."></textarea>
-                                    </div>
-                                    <button id="addManualEntryBtn" class="btn btn-outline">
-                                        <i class="fas fa-plus"></i> Adicionar Manual
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Ranking de Vendas -->
-                        <div class="sales-ranking">
-                            <h3><i class="fas fa-trophy"></i> Ranking de Vendas</h3>
                             
-                            <!-- Filtros do Ranking -->
-                            <div class="ranking-filters">
-                                <div class="filter-group">
-                                    <label for="rankingPeriod">Período</label>
-                                    <select id="rankingPeriod">
-                                        <option value="week">Esta Semana</option>
-                                        <option value="month" selected>Este Mês</option>
-                                        <option value="quarter">Este Trimestre</option>
-                                        <option value="year">Este Ano</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label for="rankingType">Tipo</label>
-                                    <select id="rankingType">
-                                        <option value="revenue">Faturamento</option>
-                                        <option value="profit">Lucro</option>
-                                        <option value="meetings">Reuniões</option>
-                                    </select>
-                                </div>
-                                <button id="refreshRankingBtn" class="btn btn-primary">
-                                    <i class="fas fa-sync-alt"></i> Atualizar
-                                </button>
-                            </div>
+                            <!-- Aba 4: Adicionar Dados -->
+                            <div id="data-tab" class="tab-panel">
+                                <div class="data-entry">
+                                    <h3><i class="fas fa-plus-circle"></i> Adicionar Dados</h3>
+                                    
+                                    <!-- Entrada Rápida -->
+                                    <div class="quick-entry">
+                                        <h4><i class="fas fa-bolt"></i> Entrada Rápida (Hoje)</h4>
+                                        <div class="entry-form">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="quickGrossRevenue">Faturamento Bruto (R$)</label>
+                                                    <input type="number" id="quickGrossRevenue" placeholder="0.00" step="0.01">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="quickChipCost">Custo com Chip (R$)</label>
+                                                    <input type="number" id="quickChipCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="quickAdditionalCost">Custo Adicional (R$)</label>
+                                                    <input type="number" id="quickAdditionalCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="quickAdsCost">Custo com Ads (R$)</label>
+                                                    <input type="number" id="quickAdsCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="quickNotes">Observações</label>
+                                                <textarea id="quickNotes" placeholder="Adicione observações sobre o dia..."></textarea>
+                                            </div>
+                                            <button id="quickEntryBtn" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i> Adicionar Entrada Rápida
+                                            </button>
+                                        </div>
+                                    </div>
 
-                            <!-- Top 10 Ranking -->
-                            <div class="ranking-list">
-                                <div class="ranking-header">
-                                    <div class="rank-position">#</div>
-                                    <div class="rank-user">Usuário</div>
-                                    <div class="rank-value">Valor</div>
-                                    <div class="rank-progress">Progresso</div>
-                                    <div class="rank-badge">Status</div>
-                                </div>
-                                <div id="rankingListBody">
-                                    <!-- Ranking será carregado dinamicamente -->
-                                </div>
-                            </div>
-
-                            <!-- Estatísticas do Ranking -->
-                            <div class="ranking-stats">
-                                <div class="stat-item">
-                                    <i class="fas fa-medal"></i>
-                                    <div class="stat-info">
-                                        <h4>Sua Posição</h4>
-                                        <p id="userRank">#0</p>
-                                    </div>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-crown"></i>
-                                    <div class="stat-info">
-                                        <h4>Líder Atual</h4>
-                                        <p id="topUser">N/A</p>
-                                    </div>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-chart-line"></i>
-                                    <div class="stat-info">
-                                        <h4>Média Geral</h4>
-                                        <p id="averageValue">R$ 0,00</p>
-                                    </div>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-users"></i>
-                                    <div class="stat-info">
-                                        <h4>Participantes</h4>
-                                        <p id="totalParticipants">0</p>
+                                    <!-- Entrada Manual -->
+                                    <div class="manual-entry">
+                                        <h4><i class="fas fa-calendar-day"></i> Entrada Manual</h4>
+                                        <div class="entry-form">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="manualDate">Data</label>
+                                                    <input type="date" id="manualDate" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="manualGrossRevenue">Faturamento Bruto (R$)</label>
+                                                    <input type="number" id="manualGrossRevenue" placeholder="0.00" step="0.01">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="manualChipCost">Custo com Chip (R$)</label>
+                                                    <input type="number" id="manualChipCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="manualAdditionalCost">Custo Adicional (R$)</label>
+                                                    <input type="number" id="manualAdditionalCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label for="manualAdsCost">Custo com Ads (R$)</label>
+                                                    <input type="number" id="manualAdsCost" placeholder="0.00" step="0.01">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="manualNotes">Observações</label>
+                                                    <input type="text" id="manualNotes" placeholder="Observações...">
+                                                </div>
+                                            </div>
+                                            <button id="manualEntryBtn" class="btn btn-outline">
+                                                <i class="fas fa-plus"></i> Adicionar Entrada Manual
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Histórico e Relatórios -->
-                        <div class="history-reports">
-                            <h3><i class="fas fa-history"></i> Histórico e Relatórios</h3>
                             
-                            <!-- Filtros -->
-                            <div class="filters">
-                                <div class="filter-group">
-                                    <label for="periodFilter">Período</label>
-                                    <select id="periodFilter">
-                                        <option value="7">Últimos 7 dias</option>
-                                        <option value="30" selected>Últimos 30 dias</option>
-                                        <option value="90">Últimos 90 dias</option>
-                                        <option value="custom">Personalizado</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label for="categoryFilter">Categoria</label>
-                                    <select id="categoryFilter">
-                                        <option value="all">Todas</option>
-                                        <option value="revenue">Faturamento</option>
-                                        <option value="expenses">Gastos</option>
-                                        <option value="profit">Lucro</option>
-                                    </select>
-                                </div>
-                                <button id="exportBtn" class="btn btn-outline">
-                                    <i class="fas fa-download"></i> Exportar
-                                </button>
-                            </div>
+                            <!-- Aba 5: Histórico e Relatórios -->
+                            <div id="history-tab" class="tab-panel">
+                                <div class="history-reports">
+                                    <h3><i class="fas fa-history"></i> Histórico e Relatórios</h3>
+                                    
+                                    <!-- Filtros -->
+                                    <div class="filters">
+                                        <div class="filter-group">
+                                            <label for="dateFilter">Período</label>
+                                            <select id="dateFilter">
+                                                <option value="7">Últimos 7 dias</option>
+                                                <option value="30" selected>Últimos 30 dias</option>
+                                                <option value="90">Últimos 90 dias</option>
+                                                <option value="365">Último ano</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="typeFilter">Tipo</label>
+                                            <select id="typeFilter">
+                                                <option value="all">Todos</option>
+                                                <option value="revenue">Faturamento</option>
+                                                <option value="expenses">Gastos</option>
+                                                <option value="profit">Lucro</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="sortFilter">Ordenar por</label>
+                                            <select id="sortFilter">
+                                                <option value="date">Data</option>
+                                                <option value="value">Valor</option>
+                                                <option value="type">Tipo</option>
+                                            </select>
+                                        </div>
+                                        <button id="applyFiltersBtn" class="btn btn-primary">
+                                            <i class="fas fa-filter"></i> Aplicar Filtros
+                                        </button>
+                                    </div>
 
-                            <!-- Tabela de Histórico -->
-                            <div class="history-table">
-                                <table id="entriesTable">
-                                    <thead>
-                                        <tr>
-                                            <th><i class="fas fa-calendar"></i> Data</th>
-                                            <th><i class="fas fa-dollar-sign"></i> Faturamento</th>
-                                            <th><i class="fas fa-minus-circle"></i> Gastos</th>
-                                            <th><i class="fas fa-plus-circle"></i> Lucro</th>
-                                            <th><i class="fas fa-sticky-note"></i> Observações</th>
-                                            <th><i class="fas fa-cogs"></i> Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="entriesTableBody">
-                                        <!-- Dados serão carregados dinamicamente -->
-                                    </tbody>
-                                </table>
+                                    <!-- Tabela de Histórico -->
+                                    <div class="history-table">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th><i class="fas fa-calendar"></i> Data</th>
+                                                    <th><i class="fas fa-dollar-sign"></i> Faturamento</th>
+                                                    <th><i class="fas fa-minus-circle"></i> Gastos</th>
+                                                    <th><i class="fas fa-plus-circle"></i> Lucro</th>
+                                                    <th><i class="fas fa-comment"></i> Observações</th>
+                                                    <th><i class="fas fa-cog"></i> Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="historyTableBody">
+                                                <!-- Dados serão carregados aqui -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

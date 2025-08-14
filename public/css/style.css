@@ -1689,12 +1689,41 @@ body {
     background: rgba(59, 130, 246, 0.5);
 }
 
-/* Zoom-Friendly Responsive Design */
-@media (min-width: 769px) {
-    /* Garantir que elementos se adaptem ao zoom */
+/* Responsive Design */
+@media (max-width: 768px) {
     .container {
-        max-width: 90vw;
-        margin: 0 auto;
+        padding: 0 16px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .hero {
+        padding: 40px 0;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .features {
+        padding: 40px 0;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
     }
     
     .dashboard-nav {
@@ -1708,169 +1737,143 @@ body {
     }
     
     .goals-overview {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: clamp(16px, 2vw, 32px);
+        grid-template-columns: 1fr;
+        gap: 24px;
     }
     
     .financial-summary {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: clamp(16px, 2vw, 24px);
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
     
     .trends-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: clamp(12px, 1.5vw, 20px);
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
     .form-row {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: clamp(16px, 2vw, 20px);
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
     .entry-form .form-row {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: clamp(12px, 1.5vw, 16px);
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
+} 
+
+/* Sistema de Abas para Metas */
+.goals-tabs {
+    width: 100%;
 }
 
-/* High DPI and Zoom Support */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .overview-icon,
-    .cosmic-icon {
-        transform: scale(1.1);
-    }
-    
-    .btn,
-    .menu-item {
-        transform: scale(1.05);
-    }
-}
-
-/* Ultra-wide screens */
-@media (min-width: 1920px) {
-    .container {
-        max-width: 1600px;
-    }
-    
-    .goals-overview {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .financial-summary {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* Small screens with zoom */
-@media (max-width: 1200px) and (min-resolution: 120dpi) {
-    .goals-overview {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
-    
-    .financial-summary {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    }
-}
-
-/* Ensure text remains readable at all zoom levels */
-@media (max-width: 1000px) {
-    body {
-        font-size: clamp(14px, 2vw, 16px);
-    }
-    
-    h1, h2, h3 {
-        font-size: clamp(1.5rem, 4vw, 2.5rem);
-    }
-    
-    h4, h5, h6 {
-        font-size: clamp(1.1rem, 3vw, 1.5rem);
-    }
-    
-    .btn {
-        font-size: clamp(12px, 2vw, 14px);
-        padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
-    }
-}
-
-/* Maintain aspect ratios and prevent layout breaking */
-.goals-overview,
-.financial-summary,
-.trends-grid,
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    gap: clamp(16px, 2vw, 32px);
-    align-items: start;
-}
-
-.overview-card,
-.summary-card,
-.trend-card {
-    aspect-ratio: auto;
-    min-height: 200px;
+.tab-buttons {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 16px;
+    flex-wrap: wrap;
 }
 
-/* Ensure modals and overlays work at all zoom levels */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+.tab-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 20px;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
 }
 
-.modal-content {
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: auto;
-    margin: auto;
-}
-
-/* Prevent horizontal scrolling */
-body {
-    overflow-x: hidden;
+.tab-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
     width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.5s;
 }
 
-.container {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 clamp(16px, 3vw, 32px);
-    box-sizing: border-box;
+.tab-btn:hover::before {
+    left: 100%;
 }
 
-/* Ensure all elements scale proportionally */
-* {
-    box-sizing: border-box;
+.tab-btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #e8eaed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
 }
 
-img, svg {
-    max-width: 100%;
-    height: auto;
+.tab-btn.active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(29, 78, 216, 0.1));
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #3b82f6;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
-/* Maintain button and input sizes at different zoom levels */
-input, select, textarea, button {
-    font-size: clamp(14px, 2vw, 16px);
-    padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    border-radius: 2px;
 }
 
-/* Ensure tables remain readable */
-table {
-    width: 100%;
-    min-width: 0;
-    font-size: clamp(12px, 1.8vw, 14px);
+.tab-content-wrapper {
+    position: relative;
+    min-height: 400px;
 }
 
-th, td {
-    padding: clamp(8px, 1.5vw, 12px);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+.tab-panel {
+    display: none;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividade para as abas */
+@media (max-width: 768px) {
+    .tab-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .tab-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tab-btn.active::after {
+        display: none;
+    }
 } 

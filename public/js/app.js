@@ -25,11 +25,13 @@ const registerBtn = document.getElementById('registerBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userName = document.getElementById('userName');
 
-
-
 // Dashboard elements
 const menuItems = document.querySelectorAll('.menu-item');
 const tabContents = document.querySelectorAll('.tab-content');
+
+// Sistema de Abas para Metas
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
 
 // Videos
 const addVideoBtn = document.getElementById('addVideoBtn');
@@ -158,6 +160,14 @@ function initializeEventListeners() {
         item.addEventListener('click', () => {
             const tab = item.dataset.tab;
             switchTab(tab);
+        });
+    });
+    
+    // Sistema de Abas para Metas
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            switchGoalsTab(tabName);
         });
     });
     
@@ -448,22 +458,65 @@ function showDashboard() {
     loadProfileStats();
 }
 
+// Função para alternar entre abas do dashboard
 function switchTab(tabName) {
-    // Atualizar menu
-    menuItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.tab === tabName) {
-            item.classList.add('active');
-        }
-    });
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
     
-    // Atualizar conteúdo
-    tabContents.forEach(content => {
-        content.classList.remove('active');
-        if (content.id === `${tabName}Tab`) {
-            content.classList.add('active');
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector(`[data-tab="${tabName}"]`);
+    const selectedTabContent = document.getElementById(`${tabName}Tab`);
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        
+        // Carregar dados específicos da aba
+        switch(tabName) {
+            case 'videos':
+                loadVideos();
+                break;
+            case 'meetings':
+                loadMeetings();
+                break;
+            case 'goals':
+                loadFinancialData();
+                break;
+            case 'profile':
+                loadProfileStats();
+                break;
         }
-    });
+    }
+}
+
+// Função para alternar entre abas do sistema de metas
+function switchGoalsTab(tabName) {
+    // Remover classe active de todos os botões e painéis
+    tabButtons.forEach(button => button.classList.remove('active'));
+    tabPanels.forEach(panel => panel.classList.remove('active'));
+    
+    // Adicionar classe active ao botão e painel selecionados
+    const selectedButton = document.querySelector(`[data-tab="${tabName}"]`);
+    const selectedPanel = document.getElementById(`${tabName}-tab`);
+    
+    if (selectedButton && selectedPanel) {
+        selectedButton.classList.add('active');
+        selectedPanel.classList.add('active');
+        
+        // Carregar dados específicos da aba se necessário
+        switch(tabName) {
+            case 'summary':
+                loadFinancialData();
+                break;
+            case 'dashboard':
+                loadFinancialData();
+                break;
+            case 'history':
+                loadFinancialHistory();
+                break;
+        }
+    }
 }
 
 // Funções de vídeos
