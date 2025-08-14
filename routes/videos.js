@@ -51,7 +51,7 @@ const upload = multer({
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 100 * 1024 * 1024 // 100MB
   }
-}).any();
+});
 
 // Validações para criação/edição de vídeo
 const videoValidation = [
@@ -133,7 +133,13 @@ router.post('/', (req, res, next) => {
   console.log('🚨🚨🚨 ROTA /api/videos POST ACESSADA! 🚨🚨🚨');
   console.log('📋 Headers:', req.headers);
   next();
-}, authenticateToken, upload.single('video'), async (req, res) => {
+}, authenticateToken, upload.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'title', maxCount: 1 },
+  { name: 'description', maxCount: 1 },
+  { name: 'type', maxCount: 1 },
+  { name: 'url', maxCount: 1 }
+]), async (req, res) => {
   try {
     console.log('🚨🚨🚨 POST /api/videos - REQUISIÇÃO RECEBIDA! 🚨🚨🚨');
     console.log('🎬 POST /api/videos - Tentativa de criar vídeo');
@@ -151,12 +157,13 @@ router.post('/', (req, res, next) => {
     };
 
     // Se tem arquivo, é upload
-    if (req.file) {
-      console.log('✅ Arquivo recebido:', req.file.filename);
+    if (req.files && req.files.video && req.files.video[0]) {
+      const videoFile = req.files.video[0];
+      console.log('✅ Arquivo recebido:', videoFile.filename);
       videoData.type = 'upload';
-      videoData.url = `/uploads/${req.file.filename}`;
-      videoData.filename = req.file.filename;
-      videoData.size = req.file.size;
+      videoData.url = `/uploads/${videoFile.filename}`;
+      videoData.filename = videoFile.filename;
+      videoData.size = videoFile.size;
     } else if (type === 'drive' || type === 'url') {
       // Vídeo do Google Drive ou URL externa
       console.log('🔗 URL recebida:', url);
@@ -164,7 +171,7 @@ router.post('/', (req, res, next) => {
     } else {
       console.log('❌ Erro: Arquivo não encontrado para upload');
       console.log('📊 Tipo:', type);
-      console.log('📁 Arquivo:', req.file);
+      console.log('📁 Arquivos:', req.files);
       return res.status(400).json({
         error: 'Arquivo de vídeo é obrigatório para upload'
       });
