@@ -7,11 +7,15 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-console.log('🚀 Iniciando servidor...');
-console.log(`📊 Porta: ${PORT}`);
-console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+// ===== LOGS INICIAIS MUITO VISÍVEIS =====
+console.log('🚨🚨🚨 INICIANDO SERVIDOR COM CÓDIGO ATUALIZADO 🚨🚨🚨');
+console.log('📅 Data/Hora:', new Date().toISOString());
+console.log('🌍 Ambiente:', process.env.NODE_ENV || 'development');
+console.log('📊 Porta:', PORT);
+console.log('📂 Diretório atual:', __dirname);
 
 // Conectar ao MongoDB
+console.log('🔗 Conectando ao MongoDB...');
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -31,72 +35,73 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Importar rotas com tratamento de erro detalhado
-console.log('📁 Carregando rotas...');
-console.log('📂 Diretório atual:', __dirname);
-console.log('📂 Verificando arquivos de rotas...');
+// ===== CARREGAMENTO DE ROTAS SIMPLIFICADO =====
+console.log('📁 CARREGANDO ROTAS...');
 
+// Verificar se o diretório routes existe
 const fs = require('fs');
 const routesDir = path.join(__dirname, 'routes');
-console.log('📂 Diretório de rotas:', routesDir);
+console.log('📂 Verificando diretório routes:', routesDir);
 
 if (fs.existsSync(routesDir)) {
-    console.log('✅ Diretório routes existe');
+    console.log('✅ Diretório routes EXISTE!');
     const files = fs.readdirSync(routesDir);
     console.log('📄 Arquivos encontrados:', files);
 } else {
-    console.error('❌ Diretório routes não existe!');
+    console.error('❌ ERRO: Diretório routes NÃO EXISTE!');
+    console.error('❌ Isso explica por que as rotas não funcionam!');
 }
 
+// Carregar rotas com logs muito visíveis
 let authRoutes, userRoutes, videoRoutes, meetingRoutes;
 
 try {
-    console.log('🔄 Tentando carregar auth.js...');
+    console.log('🔄 CARREGANDO auth.js...');
     authRoutes = require('./routes/auth');
-    console.log('✅ Rota auth carregada com sucesso');
+    console.log('✅ auth.js CARREGADO COM SUCESSO!');
 } catch (error) {
-    console.error('❌ Erro ao carregar rota auth:', error.message);
+    console.error('❌ ERRO ao carregar auth.js:', error.message);
     console.error('❌ Stack trace:', error.stack);
     authRoutes = express.Router();
-    // Adicionar rota de fallback para auth
+    // Rota de fallback para detectar tentativas
     authRoutes.post('/login', (req, res) => {
-        console.log('🔑 FALLBACK: Tentativa de login detectada');
-        res.status(500).json({ error: 'Sistema de autenticação não disponível' });
+        console.log('🔑 FALLBACK: Tentativa de login detectada!');
+        res.status(500).json({ error: 'Sistema de autenticação não disponível - auth.js não carregou' });
     });
     authRoutes.post('/register', (req, res) => {
-        console.log('📝 FALLBACK: Tentativa de registro detectada');
-        res.status(500).json({ error: 'Sistema de registro não disponível' });
+        console.log('📝 FALLBACK: Tentativa de registro detectada!');
+        res.status(500).json({ error: 'Sistema de registro não disponível - auth.js não carregou' });
     });
     authRoutes.get('/me', (req, res) => {
-        console.log('🔐 FALLBACK: Verificação de auth detectada');
-        res.status(500).json({ error: 'Sistema de verificação não disponível' });
+        console.log('🔐 FALLBACK: Verificação de auth detectada!');
+        res.status(500).json({ error: 'Sistema de verificação não disponível - auth.js não carregou' });
     });
 }
 
 try {
-    console.log('🔄 Tentando carregar users.js...');
+    console.log('🔄 CARREGANDO users.js...');
     userRoutes = require('./routes/users');
-    console.log('✅ Rota users carregada com sucesso');
+    console.log('✅ users.js CARREGADO COM SUCESSO!');
 } catch (error) {
-    console.error('❌ Erro ao carregar rota users:', error.message);
+    console.error('❌ ERRO ao carregar users.js:', error.message);
     userRoutes = express.Router();
 }
 
 try {
-    console.log('🔄 Tentando carregar videos.js...');
+    console.log('🔄 CARREGANDO videos.js...');
     videoRoutes = require('./routes/videos');
-    console.log('✅ Rota videos carregada com sucesso');
+    console.log('✅ videos.js CARREGADO COM SUCESSO!');
 } catch (error) {
-    console.error('❌ Erro ao carregar rota videos:', error.message);
+    console.error('❌ ERRO ao carregar videos.js:', error.message);
     videoRoutes = express.Router();
 }
 
 try {
-    console.log('🔄 Tentando carregar meetings.js...');
+    console.log('🔄 CARREGANDO meetings.js...');
     meetingRoutes = require('./routes/meetings');
-    console.log('✅ Rota meetings carregada com sucesso');
+    console.log('✅ meetings.js CARREGADO COM SUCESSO!');
 } catch (error) {
-    console.error('❌ Erro ao carregar rota meetings:', error.message);
+    console.error('❌ ERRO ao carregar meetings.js:', error.message);
     meetingRoutes = express.Router();
 }
 
@@ -112,7 +117,8 @@ app.get('/', (req, res) => {
     version: '2.0.1',
     port: PORT,
     host: '0.0.0.0',
-    database: 'MongoDB Connected'
+    database: 'MongoDB Connected',
+    routesLoaded: 'SIM'
   });
 });
 
@@ -126,16 +132,18 @@ app.get('/api/test', (req, res) => {
     status: 'online',
     port: PORT,
     host: '0.0.0.0',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    routesLoaded: 'SIM'
   });
 });
 
 // Usar rotas de autenticação reais
-console.log('🔗 Configurando rotas da API...');
+console.log('🔗 CONFIGURANDO ROTAS DA API...');
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/meetings', meetingRoutes);
+console.log('✅ ROTAS CONFIGURADAS!');
 
 // API Mock para estatísticas (mantida para compatibilidade)
 app.get('/api/users/stats', (req, res) => {
@@ -231,9 +239,9 @@ app.use('*', (req, res) => {
 });
 
 // Iniciar servidor
-console.log('🔧 Configurando servidor...');
+console.log('🔧 CONFIGURANDO SERVIDOR...');
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀 Servidor Render otimizado iniciado!');
+  console.log('🚀🚀🚀 SERVIDOR RENDER INICIADO COM CÓDIGO ATUALIZADO! 🚀🚀🚀');
   console.log(`📱 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/test`);
   console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
@@ -245,6 +253,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Servidor pronto para receber conexões!`);
   console.log(`🎉 Deploy bem-sucedido!`);
   console.log(`🗄️  Banco de dados: MongoDB`);
+  console.log(`📁 Rotas carregadas: SIM`);
 });
 
 // Tratamento de erros do servidor
