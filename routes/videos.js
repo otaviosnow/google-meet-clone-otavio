@@ -8,7 +8,7 @@ const Video = require('../models/Video');
 
 const router = express.Router();
 
-// Configuração do Multer para upload de arquivos
+// Configuração SIMPLIFICADA do Multer para upload de arquivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = process.env.UPLOAD_PATH || './uploads';
@@ -28,28 +28,11 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  console.log('🔍 Verificando arquivo:', file.originalname);
-  console.log('📋 MIME Type:', file.mimetype);
-  console.log('📁 Field Name:', file.fieldname);
-  
-  // Verificar se é um arquivo de vídeo
-  const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov'];
-  
-  if (allowedTypes.includes(file.mimetype)) {
-    console.log('✅ Arquivo aceito:', file.originalname);
-    cb(null, true);
-  } else {
-    console.log('❌ Arquivo rejeitado:', file.originalname, '- MIME Type:', file.mimetype);
-    cb(new Error('Tipo de arquivo não suportado. Use apenas arquivos de vídeo.'), false);
-  }
-};
-
+// CONFIGURAÇÃO MÍNIMA DO MULTER - SEM FILTROS
 const upload = multer({
   storage: storage,
-  // fileFilter: fileFilter, // COMENTADO TEMPORARIAMENTE PARA DEBUG
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 100 * 1024 * 1024 // 100MB
+    fileSize: 100 * 1024 * 1024 // 100MB
   }
 });
 
