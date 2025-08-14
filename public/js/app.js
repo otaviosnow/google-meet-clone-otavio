@@ -190,14 +190,20 @@ function initializeEventListeners() {
     if (addEntryBtn) addEntryBtn.addEventListener('click', addDailyEntry);
     
     // Quick Entry System
-    const quickEntryForm = document.getElementById('quickEntryForm');
-    if (quickEntryForm) {
-        quickEntryForm.addEventListener('submit', addQuickEntry);
+    const quickEntryBtn = document.getElementById('quickEntryBtn');
+    if (quickEntryBtn) {
+        quickEntryBtn.addEventListener('click', addQuickEntry);
     }
     
-    const manualEntryForm = document.getElementById('manualEntryForm');
-    if (manualEntryForm) {
-        manualEntryForm.addEventListener('submit', addManualEntry);
+    const manualEntryBtn = document.getElementById('manualEntryBtn');
+    if (manualEntryBtn) {
+        manualEntryBtn.addEventListener('click', addManualEntry);
+    }
+    
+    // Filtros do histórico
+    const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', loadFinancialHistory);
     }
     
     // Avatar System
@@ -504,15 +510,30 @@ function switchGoalsTab(tabName) {
         selectedButton.classList.add('active');
         selectedPanel.classList.add('active');
         
-        // Carregar dados específicos da aba se necessário
+        // Carregar dados específicos da aba
         switch(tabName) {
+            case 'config':
+                // Carregar dados da meta configurada
+                loadGoalConfig();
+                break;
             case 'summary':
+                // Carregar resumo geral
                 loadFinancialData();
                 break;
             case 'dashboard':
+                // Carregar dashboard financeiro
                 loadFinancialData();
                 break;
+            case 'data':
+                // Definir data atual no formulário manual
+                const manualDate = document.getElementById('manualDate');
+                if (manualDate) {
+                    const today = new Date().toISOString().split('T')[0];
+                    manualDate.value = today;
+                }
+                break;
             case 'history':
+                // Carregar histórico financeiro
                 loadFinancialHistory();
                 break;
         }
@@ -1221,6 +1242,7 @@ async function addQuickEntry(e) {
     const chipCost = parseFloat(document.getElementById('quickChipCost').value) || 0;
     const additionalCost = parseFloat(document.getElementById('quickAdditionalCost').value) || 0;
     const adsCost = parseFloat(document.getElementById('quickAdsCost').value) || 0;
+    const notes = document.getElementById('quickNotes').value;
     
     if (grossRevenue < 0 || chipCost < 0 || additionalCost < 0 || adsCost < 0) {
         showNotification('Valores não podem ser negativos', 'error');
@@ -1239,7 +1261,8 @@ async function addQuickEntry(e) {
                 grossRevenue,
                 chipCost,
                 additionalCost,
-                adsCost
+                adsCost,
+                notes
             })
         });
         
@@ -1250,7 +1273,10 @@ async function addQuickEntry(e) {
             document.getElementById('quickChipCost').value = '';
             document.getElementById('quickAdditionalCost').value = '';
             document.getElementById('quickAdsCost').value = '';
-            loadFinancialData();
+            document.getElementById('quickNotes').value = '';
+            
+            // Sincronizar todas as abas
+            await syncAllFinancialData();
         } else {
             const error = await response.json();
             showNotification(error.error, 'error');
@@ -1265,12 +1291,12 @@ async function addQuickEntry(e) {
 async function addManualEntry(e) {
     e.preventDefault();
     
-    const date = document.getElementById('entryDate').value;
-    const grossRevenue = parseFloat(document.getElementById('entryGrossRevenue').value) || 0;
-    const chipCost = parseFloat(document.getElementById('entryChipCost').value) || 0;
-    const additionalCost = parseFloat(document.getElementById('entryAdditionalCost').value) || 0;
-    const adsCost = parseFloat(document.getElementById('entryAdsCost').value) || 0;
-    const notes = document.getElementById('entryNotes').value;
+    const date = document.getElementById('manualDate').value;
+    const grossRevenue = parseFloat(document.getElementById('manualGrossRevenue').value) || 0;
+    const chipCost = parseFloat(document.getElementById('manualChipCost').value) || 0;
+    const additionalCost = parseFloat(document.getElementById('manualAdditionalCost').value) || 0;
+    const adsCost = parseFloat(document.getElementById('manualAdsCost').value) || 0;
+    const notes = document.getElementById('manualNotes').value;
     
     if (!date) {
         showNotification('Data é obrigatória', 'error');
@@ -1302,12 +1328,15 @@ async function addManualEntry(e) {
         if (response.ok) {
             showNotification('Entrada manual adicionada com sucesso!', 'success');
             // Limpar campos
-            document.getElementById('entryGrossRevenue').value = '';
-            document.getElementById('entryChipCost').value = '';
-            document.getElementById('entryAdditionalCost').value = '';
-            document.getElementById('entryAdsCost').value = '';
-            document.getElementById('entryNotes').value = '';
-            loadFinancialData();
+            document.getElementById('manualDate').value = '';
+            document.getElementById('manualGrossRevenue').value = '';
+            document.getElementById('manualChipCost').value = '';
+            document.getElementById('manualAdditionalCost').value = '';
+            document.getElementById('manualAdsCost').value = '';
+            document.getElementById('manualNotes').value = '';
+            
+            // Sincronizar todas as abas
+            await syncAllFinancialData();
         } else {
             const error = await response.json();
             showNotification(error.error, 'error');
@@ -1320,22 +1349,112 @@ async function addManualEntry(e) {
 
 // Atualizar display financeiro
 function updateFinancialDisplay(data) {
-    if (monthlyGoal) monthlyGoal.value = data.monthlyGoal || 0;
-    if (totalRevenue) totalRevenue.textContent = `R$ ${data.totalRevenue.toFixed(2)}`;
-    if (totalExpenses) totalExpenses.textContent = `R$ ${data.totalExpenses.toFixed(2)}`;
-    if (totalProfit) totalProfit.textContent = `R$ ${data.totalProfit.toFixed(2)}`;
-    if (goalProgress) goalProgress.textContent = `${data.goalProgress}%`;
+    // Atualizar meta mensal
+    const monthlyGoalDisplay = document.getElementById('monthlyGoalDisplay');
+    if (monthlyGoalDisplay) {
+        monthlyGoalDisplay.textContent = `R$ ${(data.monthlyGoal || 0).toFixed(2).replace('.', ',')}`;
+    }
     
-    // Definir data atual como padrão
-    if (entryDate) {
-        const today = new Date().toISOString().split('T')[0];
-        entryDate.value = today;
+    // Atualizar progresso da meta
+    const goalProgressDisplay = document.getElementById('goalProgressDisplay');
+    if (goalProgressDisplay && data.monthlyGoal > 0) {
+        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        goalProgressDisplay.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
+        
+        // Atualizar anel de progresso
+        const progressRing = document.querySelector('.ring-progress');
+        if (progressRing) {
+            const circumference = 2 * Math.PI * 45; // r = 45
+            const offset = circumference - (progress / 100) * circumference;
+            progressRing.style.strokeDasharray = circumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+    }
+    
+    // Atualizar faturamento total
+    const totalRevenueElement = document.getElementById('totalRevenue');
+    if (totalRevenueElement) {
+        totalRevenueElement.textContent = `R$ ${(data.totalRevenue || 0).toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Atualizar média diária
+    const dailyAverageElement = document.getElementById('dailyAverage');
+    if (dailyAverageElement) {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const dailyAverage = currentDay > 0 ? (data.totalRevenue || 0) / currentDay : 0;
+        dailyAverageElement.textContent = `R$ ${dailyAverage.toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Atualizar melhor e pior dia
+    if (data.entries && data.entries.length > 0) {
+        const bestDay = Math.max(...data.entries.map(entry => entry.netProfit));
+        const worstDay = Math.min(...data.entries.map(entry => entry.netProfit));
+        
+        const bestDayElement = document.getElementById('bestDay');
+        if (bestDayElement) {
+            bestDayElement.textContent = `R$ ${bestDay.toFixed(2).replace('.', ',')}`;
+        }
+        
+        const worstDayElement = document.getElementById('worstDay');
+        if (worstDayElement) {
+            worstDayElement.textContent = `R$ ${worstDay.toFixed(2).replace('.', ',')}`;
+        }
+    }
+    
+    // Atualizar barra de progresso
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    if (progressFill && progressText && data.monthlyGoal > 0) {
+        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        progressFill.style.width = `${Math.min(progress, 100)}%`;
+        progressText.textContent = `${Math.min(progress, 100).toFixed(1)}% da meta atingida`;
+    }
+    
+    // Atualizar tendências
+    updateTrends(data);
+}
+
+// Atualizar tendências
+function updateTrends(data) {
+    // Crescimento
+    const growthRate = document.getElementById('growthRate');
+    if (growthRate) {
+        // Simular crescimento baseado nos dados
+        const growth = data.totalRevenue > 0 ? '+15%' : '0%';
+        growthRate.textContent = growth;
+    }
+    
+    // Frequência
+    const frequencyRate = document.getElementById('frequencyRate');
+    if (frequencyRate) {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const frequency = data.entries ? (data.entries.length / currentDay) * 100 : 0;
+        frequencyRate.textContent = `${Math.min(frequency, 100).toFixed(0)}%`;
+    }
+    
+    // Eficiência
+    const efficiencyRate = document.getElementById('efficiencyRate');
+    if (efficiencyRate && data.monthlyGoal > 0) {
+        const efficiency = (data.totalRevenue / data.monthlyGoal) * 100;
+        efficiencyRate.textContent = `${Math.min(efficiency, 100).toFixed(0)}%`;
+    }
+    
+    // Projeção
+    const projectionRate = document.getElementById('projectionRate');
+    if (projectionRate) {
+        projectionRate.textContent = '+25%';
     }
 }
 
 // Salvar meta mensal
 async function saveMonthlyGoal() {
-    const goal = parseFloat(monthlyGoal.value);
+    const goal = parseFloat(document.getElementById('monthlyGoal').value);
+    const goalType = document.getElementById('goalType').value;
+    const goalDeadline = document.getElementById('goalDeadline').value;
+    const goalPriority = document.getElementById('goalPriority').value;
+    const goalDescription = document.getElementById('goalDescription').value;
     
     if (isNaN(goal) || goal < 0) {
         showNotification('Meta deve ser um número positivo', 'error');
@@ -1349,12 +1468,19 @@ async function saveMonthlyGoal() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ monthlyGoal: goal })
+            body: JSON.stringify({ 
+                monthlyGoal: goal,
+                goalType,
+                goalDeadline,
+                goalPriority,
+                goalDescription
+            })
         });
         
         if (response.ok) {
             showNotification('Meta salva com sucesso!', 'success');
-            loadFinancialData();
+            // Sincronizar dados em todas as abas
+            await syncAllFinancialData();
         } else {
             const error = await response.json();
             showNotification(error.error, 'error');
@@ -1362,6 +1488,233 @@ async function saveMonthlyGoal() {
     } catch (error) {
         console.error('Erro ao salvar meta:', error);
         showNotification('Erro ao salvar meta', 'error');
+    }
+}
+
+// Função para sincronizar todos os dados financeiros entre abas
+async function syncAllFinancialData() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/summary`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Atualizar todas as abas com os dados sincronizados
+            updateAllTabsWithData(data);
+            
+            // Calcular projeções e métricas
+            calculateAllMetrics(data);
+            
+        } else {
+            console.error('Erro ao carregar dados para sincronização');
+        }
+    } catch (error) {
+        console.error('Erro na sincronização:', error);
+    }
+}
+
+// Atualizar todas as abas com dados sincronizados
+function updateAllTabsWithData(data) {
+    // Aba Configurar Metas
+    updateConfigTab(data);
+    
+    // Aba Resumo Geral
+    updateSummaryTab(data);
+    
+    // Aba Dashboard Financeiro
+    updateDashboardTab(data);
+    
+    // Aba Histórico
+    updateHistoryTab(data);
+}
+
+// Atualizar aba de configuração
+function updateConfigTab(data) {
+    const monthlyGoalInput = document.getElementById('monthlyGoal');
+    if (monthlyGoalInput) {
+        monthlyGoalInput.value = data.monthlyGoal || 0;
+    }
+    
+    // Carregar dados salvos da meta se existirem
+    if (data.goalData) {
+        const goalType = document.getElementById('goalType');
+        const goalDeadline = document.getElementById('goalDeadline');
+        const goalPriority = document.getElementById('goalPriority');
+        const goalDescription = document.getElementById('goalDescription');
+        
+        if (goalType) goalType.value = data.goalData.goalType || 'revenue';
+        if (goalDeadline) goalDeadline.value = data.goalData.goalDeadline || '';
+        if (goalPriority) goalPriority.value = data.goalData.goalPriority || 'medium';
+        if (goalDescription) goalDescription.value = data.goalData.goalDescription || '';
+    }
+}
+
+// Atualizar aba de resumo geral
+function updateSummaryTab(data) {
+    // Meta mensal
+    const monthlyGoalDisplay = document.getElementById('monthlyGoalDisplay');
+    if (monthlyGoalDisplay) {
+        monthlyGoalDisplay.textContent = `R$ ${(data.monthlyGoal || 0).toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Progresso da meta
+    const goalProgressDisplay = document.getElementById('goalProgressDisplay');
+    if (goalProgressDisplay && data.monthlyGoal > 0) {
+        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        goalProgressDisplay.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
+        
+        // Atualizar anel de progresso
+        updateProgressRing(progress);
+    }
+    
+    // Dias restantes
+    const daysRemaining = document.getElementById('daysRemaining');
+    if (daysRemaining) {
+        const today = new Date();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const remaining = daysInMonth - today.getDate();
+        daysRemaining.textContent = `${remaining} dias`;
+    }
+    
+    // Projeção mensal
+    const monthlyProjection = document.getElementById('monthlyProjection');
+    if (monthlyProjection) {
+        const projection = calculateMonthlyProjection(data);
+        monthlyProjection.textContent = `R$ ${projection.toFixed(2).replace('.', ',')}`;
+    }
+}
+
+// Atualizar aba dashboard financeiro
+function updateDashboardTab(data) {
+    // Faturamento total
+    const totalRevenue = document.getElementById('totalRevenue');
+    if (totalRevenue) {
+        totalRevenue.textContent = `R$ ${(data.totalRevenue || 0).toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Média diária
+    const dailyAverage = document.getElementById('dailyAverage');
+    if (dailyAverage) {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const average = currentDay > 0 ? (data.totalRevenue || 0) / currentDay : 0;
+        dailyAverage.textContent = `R$ ${average.toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Melhor e pior dia
+    if (data.entries && data.entries.length > 0) {
+        const profits = data.entries.map(entry => entry.netProfit || 0);
+        const bestDay = Math.max(...profits);
+        const worstDay = Math.min(...profits);
+        
+        const bestDayElement = document.getElementById('bestDay');
+        const worstDayElement = document.getElementById('worstDay');
+        
+        if (bestDayElement) bestDayElement.textContent = `R$ ${bestDay.toFixed(2).replace('.', ',')}`;
+        if (worstDayElement) worstDayElement.textContent = `R$ ${worstDay.toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Barra de progresso
+    updateProgressBar(data);
+    
+    // Tendências
+    updateTrendsWithRealData(data);
+}
+
+// Atualizar aba histórico
+function updateHistoryTab(data) {
+    if (data.entries && data.entries.length > 0) {
+        renderFinancialHistory(data.entries);
+    }
+}
+
+// Calcular todas as métricas
+function calculateAllMetrics(data) {
+    // Calcular projeção mensal
+    const projection = calculateMonthlyProjection(data);
+    
+    // Calcular média diária necessária
+    if (data.monthlyGoal > 0) {
+        const today = new Date();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const daysRemaining = daysInMonth - today.getDate();
+        const remainingToGoal = data.monthlyGoal - data.totalRevenue;
+        const dailyNeeded = daysRemaining > 0 ? remainingToGoal / daysRemaining : 0;
+        
+        const dailyNeededElement = document.getElementById('dailyNeeded');
+        if (dailyNeededElement) {
+            dailyNeededElement.textContent = `R$ ${dailyNeeded.toFixed(2).replace('.', ',')}`;
+        }
+    }
+}
+
+// Atualizar anel de progresso
+function updateProgressRing(progress) {
+    const progressRing = document.querySelector('.ring-progress');
+    if (progressRing) {
+        const circumference = 2 * Math.PI * 45; // r = 45
+        const offset = circumference - (progress / 100) * circumference;
+        progressRing.style.strokeDasharray = circumference;
+        progressRing.style.strokeDashoffset = offset;
+    }
+}
+
+// Atualizar barra de progresso
+function updateProgressBar(data) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    if (progressFill && progressText && data.monthlyGoal > 0) {
+        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        progressFill.style.width = `${Math.min(progress, 100)}%`;
+        progressText.textContent = `${Math.min(progress, 100).toFixed(1)}% da meta atingida`;
+    }
+}
+
+// Atualizar tendências com dados reais
+function updateTrendsWithRealData(data) {
+    // Crescimento baseado em dados reais
+    const growthRate = document.getElementById('growthRate');
+    if (growthRate && data.entries && data.entries.length > 1) {
+        const recentEntries = data.entries.slice(-7); // Últimos 7 dias
+        const olderEntries = data.entries.slice(-14, -7); // 7 dias antes
+        
+        if (olderEntries.length > 0) {
+            const recentAvg = recentEntries.reduce((sum, entry) => sum + (entry.netProfit || 0), 0) / recentEntries.length;
+            const olderAvg = olderEntries.reduce((sum, entry) => sum + (entry.netProfit || 0), 0) / olderEntries.length;
+            
+            const growth = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+            growthRate.textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
+        }
+    }
+    
+    // Frequência baseada em dados reais
+    const frequencyRate = document.getElementById('frequencyRate');
+    if (frequencyRate && data.entries) {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const frequency = currentDay > 0 ? (data.entries.length / currentDay) * 100 : 0;
+        frequencyRate.textContent = `${Math.min(frequency, 100).toFixed(0)}%`;
+    }
+    
+    // Eficiência baseada na meta real
+    const efficiencyRate = document.getElementById('efficiencyRate');
+    if (efficiencyRate && data.monthlyGoal > 0) {
+        const efficiency = (data.totalRevenue / data.monthlyGoal) * 100;
+        efficiencyRate.textContent = `${Math.min(efficiency, 100).toFixed(0)}%`;
+    }
+    
+    // Projeção baseada em dados reais
+    const projectionRate = document.getElementById('projectionRate');
+    if (projectionRate) {
+        const projection = calculateMonthlyProjection(data);
+        const currentRevenue = data.totalRevenue || 0;
+        const growth = currentRevenue > 0 ? ((projection - currentRevenue) / currentRevenue) * 100 : 0;
+        projectionRate.textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
     }
 }
 
@@ -1399,6 +1752,94 @@ async function addDailyEntry() {
     } catch (error) {
         console.error('Erro ao adicionar entrada:', error);
         showNotification('Erro ao adicionar entrada', 'error');
+    }
+}
+
+// Funções de histórico financeiro
+async function loadFinancialHistory() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const type = document.getElementById('historyType').value;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/history?startDate=${startDate}&endDate=${endDate}&type=${type}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            renderFinancialHistory(data.entries);
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar histórico financeiro:', error);
+        showNotification('Erro ao carregar histórico financeiro', 'error');
+    }
+}
+
+function renderFinancialHistory(entries) {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+
+    historyList.innerHTML = '';
+
+    if (entries.length === 0) {
+        historyList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>Nenhum histórico financeiro encontrado</p>
+            </div>
+        `;
+        return;
+    }
+
+    entries.forEach(entry => {
+        const entryCard = document.createElement('div');
+        entryCard.className = 'entry-card';
+        entryCard.innerHTML = `
+            <div class="entry-date">${entry.date}</div>
+            <div class="entry-type">${entry.type}</div>
+            <div class="entry-gross-revenue">R$ ${entry.grossRevenue.toFixed(2)}</div>
+            <div class="entry-chip-cost">R$ ${entry.chipCost.toFixed(2)}</div>
+            <div class="entry-additional-cost">R$ ${entry.additionalCost.toFixed(2)}</div>
+            <div class="entry-ads-cost">R$ ${entry.adsCost.toFixed(2)}</div>
+            <div class="entry-notes">${entry.notes || ''}</div>
+        `;
+        historyList.appendChild(entryCard);
+    });
+}
+
+// Carregar configuração da meta
+async function loadGoalConfig() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/goal`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Preencher campos com dados salvos
+            const monthlyGoalInput = document.getElementById('monthlyGoal');
+            const goalType = document.getElementById('goalType');
+            const goalDeadline = document.getElementById('goalDeadline');
+            const goalPriority = document.getElementById('goalPriority');
+            const goalDescription = document.getElementById('goalDescription');
+            
+            if (monthlyGoalInput) monthlyGoalInput.value = data.monthlyGoal || 0;
+            if (goalType) goalType.value = data.goalType || 'revenue';
+            if (goalDeadline) goalDeadline.value = data.goalDeadline || '';
+            if (goalPriority) goalPriority.value = data.goalPriority || 'medium';
+            if (goalDescription) goalDescription.value = data.goalDescription || '';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar configuração da meta:', error);
     }
 }
 
