@@ -239,6 +239,12 @@ app.get('/meet', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'meet.html'));
 });
 
+// Rota para reunião específica
+app.get('/meet/:meetingId', (req, res) => {
+    console.log(`🎯 GET /meet/${req.params.meetingId} - Reunião específica acessada`);
+    res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+});
+
 // Rota para teste de autenticação
 app.get('/test-auth', (req, res) => {
     console.log('🔐 GET /test-auth - Página de teste de auth acessada');

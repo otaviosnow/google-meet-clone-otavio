@@ -615,17 +615,17 @@ function renderMeetings(meetings) {
                 <span>Criada em: ${new Date(meeting.createdAt).toLocaleDateString('pt-BR')}</span>
             </div>
             <div class="meeting-link">
-                <strong>Link do Google Meet:</strong><br>
-                <a href="${meeting.googleMeetLink || '#'}" target="_blank" class="meet-link">
-                    ${meeting.googleMeetLink || 'Link não disponível'}
+                <strong>Link da Reunião:</strong><br>
+                <a href="${meeting.meetLink || '#'}" target="_blank" class="meet-link">
+                    ${meeting.meetLink || 'Link não disponível'}
                 </a>
             </div>
             <div class="meeting-actions">
-                <button class="btn btn-primary btn-small" onclick="copyMeetingLink('${meeting.googleMeetLink || ''}')">
+                <button class="btn btn-primary btn-small" onclick="copyMeetingLink('${meeting.meetLink || ''}')">
                     <i class="fas fa-link"></i>
                     Copiar Link
                 </button>
-                <button class="btn btn-success btn-small" onclick="window.open('${meeting.googleMeetLink || ''}', '_blank')">
+                <button class="btn btn-success btn-small" onclick="window.open('${meeting.meetLink || ''}', '_blank')">
                     <i class="fas fa-video"></i>
                     Entrar na Reunião
                 </button>
@@ -686,9 +686,9 @@ async function handleCreateMeeting(e) {
     const selectedOption = meetingVideo.options[meetingVideo.selectedIndex];
     const videoUrl = selectedOption.dataset.videoUrl;
     
-    // Criar link do Google Meet com parâmetros
+    // Criar link da nossa página de reunião fake
     const meetingId = generateMeetingId();
-    const googleMeetLink = `https://meet.google.com/${meetingId}?video=${encodeURIComponent(videoUrl)}`;
+    const meetLink = `${window.location.origin}/meet/${meetingId}?video=${encodeURIComponent(videoUrl)}`;
     
     try {
         // Salvar reunião no banco de dados
@@ -696,7 +696,7 @@ async function handleCreateMeeting(e) {
             title: title,
             videoId: videoId,
             meetingId: meetingId,
-            googleMeetLink: googleMeetLink,
+            meetLink: meetLink,
             createdBy: currentUser._id
         };
         
@@ -716,16 +716,16 @@ async function handleCreateMeeting(e) {
             createMeetingForm.reset();
             loadMeetings();
             
-            // Mostrar o link do Google Meet
+            // Mostrar o link da reunião
             showNotification('Reunião criada com sucesso! Link copiado para área de transferência.', 'success');
             
             // Copiar link para área de transferência
-            navigator.clipboard.writeText(googleMeetLink).then(() => {
-                console.log('Link do Google Meet copiado:', googleMeetLink);
+            navigator.clipboard.writeText(meetLink).then(() => {
+                console.log('Link da reunião copiado:', meetLink);
             });
             
             // Abrir link em nova aba
-            window.open(googleMeetLink, '_blank');
+            window.open(meetLink, '_blank');
         } else {
             showNotification(result.error, 'error');
         }
@@ -779,14 +779,14 @@ async function deleteMeeting(meetingId) {
     }
 }
 
-function copyMeetingLink(googleMeetLink) {
-    if (!googleMeetLink) {
+function copyMeetingLink(meetLink) {
+    if (!meetLink) {
         showNotification('Link não disponível', 'error');
         return;
     }
     
-    navigator.clipboard.writeText(googleMeetLink).then(() => {
-        showNotification('Link do Google Meet copiado para a área de transferência!', 'success');
+    navigator.clipboard.writeText(meetLink).then(() => {
+        showNotification('Link da reunião copiado para a área de transferência!', 'success');
     });
 }
 
