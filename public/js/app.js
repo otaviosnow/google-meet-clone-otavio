@@ -369,7 +369,24 @@ async function handleRegister(e) {
 async function handleForgotPassword(e) {
     e.preventDefault();
     
-    const email = document.getElementById('forgotEmail').value;
+    const email = document.getElementById('forgotEmail').value.trim();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Validação básica
+    if (!email) {
+        showNotification('Por favor, digite seu email', 'error');
+        return;
+    }
+    
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        showNotification('Por favor, digite um email válido', 'error');
+        return;
+    }
+    
+    // Mostrar loading
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    submitBtn.disabled = true;
     
     try {
         const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
@@ -384,18 +401,33 @@ async function handleForgotPassword(e) {
         
         if (response.ok) {
             showNotification(result.message, 'success');
+            
             // Em produção, o usuário receberia um email
             // Por enquanto, vamos mostrar o token para teste
             if (result.resetToken) {
                 showNotification(`Token para teste: ${result.resetToken}`, 'info');
+                showNotification('Em produção, este token seria enviado por email', 'info');
             }
-            hideAuthModal();
+            
+            // Limpar formulário
+            document.getElementById('forgotEmail').value = '';
+            
+            // Voltar para o login após 3 segundos
+            setTimeout(() => {
+                hideAuthModal();
+                showAuthModal('login');
+            }, 3000);
+            
         } else {
             showNotification(result.error, 'error');
         }
     } catch (error) {
         console.error('Erro na recuperação de senha:', error);
-        showNotification('Erro ao solicitar recuperação de senha', 'error');
+        showNotification('Erro ao solicitar recuperação de senha. Tente novamente.', 'error');
+    } finally {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -403,14 +435,41 @@ async function handleForgotPassword(e) {
 async function handleResetPassword(e) {
     e.preventDefault();
     
-    const token = document.getElementById('resetToken').value;
+    const token = document.getElementById('resetToken').value.trim();
     const password = document.getElementById('resetPassword').value;
     const passwordConfirm = document.getElementById('resetPasswordConfirm').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Validações
+    if (!token) {
+        showNotification('Por favor, digite o token de recuperação', 'error');
+        return;
+    }
+    
+    if (!password) {
+        showNotification('Por favor, digite a nova senha', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showNotification('A senha deve ter pelo menos 6 caracteres', 'error');
+        return;
+    }
+    
+    if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)) {
+        showNotification('A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número', 'error');
+        return;
+    }
     
     if (password !== passwordConfirm) {
         showNotification('As senhas não coincidem', 'error');
         return;
     }
+    
+    // Mostrar loading
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redefinindo...';
+    submitBtn.disabled = true;
     
     try {
         const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
@@ -425,14 +484,28 @@ async function handleResetPassword(e) {
         
         if (response.ok) {
             showNotification(result.message, 'success');
-            hideAuthModal();
-            showAuthModal('login');
+            
+            // Limpar formulário
+            document.getElementById('resetToken').value = '';
+            document.getElementById('resetPassword').value = '';
+            document.getElementById('resetPasswordConfirm').value = '';
+            
+            // Voltar para o login após 2 segundos
+            setTimeout(() => {
+                hideAuthModal();
+                showAuthModal('login');
+            }, 2000);
+            
         } else {
             showNotification(result.error, 'error');
         }
     } catch (error) {
         console.error('Erro ao redefinir senha:', error);
-        showNotification('Erro ao redefinir senha', 'error');
+        showNotification('Erro ao redefinir senha. Tente novamente.', 'error');
+    } finally {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 

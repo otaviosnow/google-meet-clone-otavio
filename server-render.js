@@ -259,6 +259,12 @@ app.get('/comprar-tokens', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
 });
 
+// Rota para página de reset de senha
+app.get('/reset-password', (req, res) => {
+    console.log('🔑 GET /reset-password - Página de reset de senha acessada');
+    res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+
 // ===== ARQUIVOS ESTÁTICOS =====
 app.use(express.static('public'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));

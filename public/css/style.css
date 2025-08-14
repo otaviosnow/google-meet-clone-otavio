@@ -1879,3 +1879,73 @@ body {
         display: none;
     }
 } 
+
+/* Estilos para formulários de recuperação de senha */
+.form-info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-info p {
+    color: #3b82f6;
+    font-size: 14px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.form-info i {
+    font-size: 16px;
+}
+
+/* Melhorar aparência dos placeholders */
+.auth-form input::placeholder {
+    color: #9ca3af;
+    opacity: 0.7;
+}
+
+.auth-form input:focus::placeholder {
+    opacity: 0.5;
+}
+
+/* Estilos para mensagens de sucesso/erro específicas */
+.auth-form .success-message {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #22c55e;
+}
+
+.auth-form .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ef4444;
+}
+
+/* Animação para transição entre formulários */
+.auth-form {
+    transition: all 0.3s ease;
+}
+
+.auth-form.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.auth-form.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+} 
