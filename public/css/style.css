@@ -621,6 +621,7 @@ body {
     color: #3b82f6;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-align: center;
 }
 
 /* Meeting Cards */
@@ -655,6 +656,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
 }
 
 .meeting-status {
@@ -668,6 +670,8 @@ body {
     font-weight: 500;
     color: #ffffff;
     justify-content: center;
+    width: fit-content;
+    margin: 0 auto;
 }
 
 .meeting-status i {
@@ -694,6 +698,7 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 100%;
+    text-align: center;
 }
 
 .meeting-link:hover {
