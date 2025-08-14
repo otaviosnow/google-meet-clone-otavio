@@ -899,10 +899,9 @@ function renderMeetings(meetings) {
         const truncatedLink = link.length > 50 ? link.substring(0, 50) + '...' : link;
         
         // Determinar status da reunião
-        const isEnded = meeting.status === 'ended' || !meeting.isActive;
-        const statusText = isEnded ? 'Encerrado' : 'Ativo';
-        const statusIcon = isEnded ? 'fa-times' : 'fa-check';
-        const statusClass = isEnded ? 'ended' : 'active';
+        const statusText = meeting.status === 'ended' ? 'Encerrado' : 'Ativo';
+        const statusIcon = meeting.status === 'ended' ? 'fa-times-circle' : 'fa-check-circle';
+        const statusClass = meeting.status === 'ended' ? 'ended' : 'active';
         
         meetingCard.innerHTML = `
             <div class="meeting-title">${meeting.title}</div>

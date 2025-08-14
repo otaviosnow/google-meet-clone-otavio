@@ -47,6 +47,19 @@ const meetingSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    // Controle de tempo
+    startedAt: {
+        type: Date,
+        default: null
+    },
+    endedAt: {
+        type: Date,
+        default: null
+    },
+    maxDuration: {
+        type: Number,
+        default: 20 * 60 * 1000 // 20 minutos em milissegundos
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -57,6 +70,13 @@ const meetingSchema = new mongoose.Schema({
 meetingSchema.methods.canAccess = function(ip) {
     // Se a reunião foi encerrada, ninguém pode acessar
     if (this.status === 'ended') {
+        return false;
+    }
+    
+    // Verificar se a reunião expirou por tempo
+    if (this.startedAt && this.isExpired()) {
+        this.status = 'ended';
+        this.endedAt = new Date();
         return false;
     }
     
@@ -74,11 +94,23 @@ meetingSchema.methods.canAccess = function(ip) {
     return ip !== this.creatorIP;
 };
 
+// Método para verificar se a reunião expirou por tempo
+meetingSchema.methods.isExpired = function() {
+    if (!this.startedAt) return false;
+    const now = new Date();
+    const elapsed = now.getTime() - this.startedAt.getTime();
+    return elapsed >= this.maxDuration;
+};
+
 // Método para autorizar acesso de um novo IP
 meetingSchema.methods.authorizeAccess = function(ip) {
     // Se é o criador, apenas incrementa o contador
     if (ip === this.creatorIP) {
         this.accessCount += 1;
+        // Marcar início da reunião se for o primeiro acesso do criador
+        if (!this.startedAt) {
+            this.startedAt = new Date();
+        }
         return { authorized: true, isCreator: true };
     }
     
@@ -86,6 +118,10 @@ meetingSchema.methods.authorizeAccess = function(ip) {
     if (this.additionalAccessIP) {
         if (ip === this.additionalAccessIP) {
             this.accessCount += 1;
+            // Marcar início da reunião se for o primeiro acesso
+            if (!this.startedAt) {
+                this.startedAt = new Date();
+            }
             return { authorized: true, isCreator: false };
         } else {
             return { authorized: false, reason: 'Reunião já está sendo utilizada por outra pessoa' };
@@ -95,13 +131,28 @@ meetingSchema.methods.authorizeAccess = function(ip) {
     // Se não há IP adicional, autoriza este IP
     this.additionalAccessIP = ip;
     this.accessCount += 1;
+    // Marcar início da reunião
+    if (!this.startedAt) {
+        this.startedAt = new Date();
+    }
     return { authorized: true, isCreator: false, isFirstAdditional: true };
 };
 
 // Método para encerrar a reunião
 meetingSchema.methods.endMeeting = function() {
     this.status = 'ended';
+    this.endedAt = new Date();
     return this.save();
+};
+
+// Método para encerrar automaticamente quando o vídeo termina
+meetingSchema.methods.endByVideoCompletion = function() {
+    if (this.status === 'active') {
+        this.status = 'ended';
+        this.endedAt = new Date();
+        return this.save();
+    }
+    return Promise.resolve(this);
 };
 
 module.exports = mongoose.model('Meeting', meetingSchema); 

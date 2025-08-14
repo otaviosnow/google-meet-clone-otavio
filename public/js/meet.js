@@ -398,86 +398,68 @@ function startCall() {
 
 // Função para iniciar VSL
 function startVSL() {
-    console.log('=== INICIANDO VSL ===');
-    console.log('📋 MeetingData:', meetingData);
-    console.log('🎬 Video data:', meetingData?.video);
+    console.log('🎬 Iniciando VSL...');
     
     if (!meetingData || !meetingData.video) {
-        console.error('❌ Dados da reunião não encontrados');
-        console.error('❌ MeetingData:', meetingData);
-        console.error('❌ Video:', meetingData?.video);
+        console.error('❌ Dados do vídeo não encontrados');
         return;
     }
     
-    // Construir URL completa do vídeo
-    let videoUrl = meetingData.video.url;
+    const videoUrl = meetingData.video.url;
+    console.log('📹 URL do vídeo:', videoUrl);
     
-    // Se é um upload local, adicionar o domínio
-    if (videoUrl.startsWith('/uploads/')) {
-        videoUrl = window.location.origin + videoUrl;
-    }
-    
-    console.log('🎬 URL original:', meetingData.video.url);
-    console.log('🎬 URL completa:', videoUrl);
-    
-    // Verificar se é YouTube
+    // Verificar se é um vídeo do YouTube
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
         const videoId = extractYouTubeId(videoUrl);
-        if (videoId) {
-            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`;
-            console.log('🎬 Usando iframe para YouTube:', embedUrl);
-            
-            // Esconder vídeo e mostrar iframe
-            vslVideo.style.display = 'none';
-            vslIframe.style.display = 'block';
-            vslIframe.src = embedUrl;
-            
-            // Não tentar autoplay no vídeo
-            return;
-        }
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
+        
+        console.log('🎥 Configurando vídeo do YouTube:', embedUrl);
+        
+        vslIframe.src = embedUrl;
+        vslIframe.style.display = 'block';
+        vslVideo.style.display = 'none';
+        
+        // Adicionar listener para detectar quando o vídeo termina
+        vslIframe.onload = function() {
+            console.log('✅ Iframe do YouTube carregado');
+            // Para YouTube, vamos usar um timer baseado no tempo estimado do vídeo
+            // Como não podemos detectar diretamente o fim do vídeo do YouTube via iframe,
+            // vamos usar um timeout de 20 minutos como fallback
+            setTimeout(() => {
+                console.log('⏰ Timeout do YouTube atingido - encerrando reunião');
+                endCallAndDeleteMeeting();
+            }, 20 * 60 * 1000); // 20 minutos
+        };
+        
+    } else {
+        // Vídeo local ou de outra fonte
+        console.log('🎥 Configurando vídeo local:', videoUrl);
+        
+        vslVideo.src = videoUrl;
+        vslVideo.style.display = 'block';
+        vslIframe.style.display = 'none';
+        
+        // Adicionar listener para detectar quando o vídeo termina
+        vslVideo.addEventListener('ended', function() {
+            console.log('🎬 Vídeo terminou - encerrando reunião');
+            endCallAndDeleteMeeting();
+        });
+        
+        // Adicionar listener para erros de vídeo
+        vslVideo.addEventListener('error', function(e) {
+            console.error('❌ Erro no vídeo:', e);
+            showErrorScreen('Erro no Vídeo', 'Não foi possível reproduzir o vídeo.', 'fa-video-slash');
+        });
+        
+        // Iniciar reprodução
+        vslVideo.play().catch(error => {
+            console.error('❌ Erro ao reproduzir vídeo:', error);
+            showErrorScreen('Erro de Reprodução', 'Não foi possível reproduzir o vídeo automaticamente.', 'fa-play-circle');
+        });
     }
     
-    // Para vídeos normais, usar elemento video
-    console.log('🎬 Usando elemento video para arquivo local');
-    vslVideo.style.display = 'block';
-    vslIframe.style.display = 'none';
-    
-    // Configurar o vídeo VSL
-    vslVideo.src = videoUrl;
-    vslVideo.loop = false; // Não repetir
-    vslVideo.muted = false; // Com som
-    vslVideo.volume = 1.0; // Volume máximo
-    
-    vslVideo.addEventListener('loadstart', function() {
-        console.log('🔄 VSL: Iniciando carregamento');
-    });
-    
-    vslVideo.addEventListener('loadedmetadata', function() {
-        console.log('📊 VSL: Metadados carregados');
-    });
-
-    vslVideo.addEventListener('canplay', function() {
-        console.log('▶️ VSL: Pode começar a reproduzir');
-    });
-    
-    vslVideo.addEventListener('play', function() {
-        console.log('▶️ VSL: Reprodução iniciada');
-    });
-
-    vslVideo.addEventListener('error', function(e) {
-        console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
-    });
-    
-    // Listener para quando o vídeo termina
-    vslVideo.addEventListener('ended', function() {
-        console.log('🎬 VSL: Vídeo terminou - encerrando chamada automaticamente');
-        endCallAndDeleteMeeting();
-    });
-    
-    // Tentar reproduzir automaticamente
-    setTimeout(function() {
-        attemptAutoplay();
-    }, 500);
+    // Mostrar tela da chamada
+    showCallScreen();
 }
 
 // Função para tentar autoplay
@@ -821,71 +803,31 @@ document.addEventListener('keydown', function(event) {
 
 // Função para encerrar chamada e deletar reunião
 async function endCallAndDeleteMeeting() {
-    console.log('=== ENCERRANDO CHAMADA E DELETANDO REUNIÃO ===');
+    console.log('🔚 Encerrando chamada e deletando reunião...');
     
-    // Salvar no localStorage
-    localStorage.setItem('googleMeetEnded', 'true');
-    localStorage.removeItem('googleMeetInCall');
-    
-    // Parar webcam se estiver ativa
-    if (isWebcamActive) {
-        stopWebcam();
-    }
-    
-    // Parar vídeo VSL
-    if (vslVideo) {
-        vslVideo.pause();
-        vslVideo.src = '';
-    }
-    
-    // Parar iframe se estiver ativo
-    if (vslIframe) {
-        vslIframe.src = '';
-    }
-    
-    // Marcar reunião como encerrada e depois deletar
-    if (meetingId && meetingId !== 'demo') {
-        try {
-            console.log('🔴 Marcando reunião como encerrada:', meetingId);
-            
-            // Primeiro, marcar como encerrada
-            const endResponse = await fetch(`/api/meetings/${meetingId}/end`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (endResponse.ok) {
-                console.log('✅ Reunião marcada como encerrada');
-            } else {
-                console.error('❌ Erro ao marcar reunião como encerrada:', endResponse.status);
-            }
-            
-            // Depois, deletar a reunião
-            console.log('🗑️ Deletando reunião:', meetingId);
-            
-            const deleteResponse = await fetch(`/api/meetings/${meetingId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (deleteResponse.ok) {
-                console.log('✅ Reunião deletada com sucesso');
-            } else {
-                console.error('❌ Erro ao deletar reunião:', deleteResponse.status);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao processar reunião:', error);
+    try {
+        // Primeiro, marcar a reunião como encerrada
+        const endResponse = await fetch(`/api/meetings/${meetingId}/end-video`, {
+            method: 'POST'
+        });
+        
+        if (endResponse.ok) {
+            console.log('✅ Reunião marcada como encerrada');
+        } else {
+            console.error('❌ Erro ao encerrar reunião:', await endResponse.text());
         }
+        
+        // Mostrar tela de encerramento
+        showEndedScreen();
+        
+        // Limpar localStorage
+        localStorage.removeItem('googleMeetInCall');
+        localStorage.setItem('googleMeetEnded', 'true');
+        
+    } catch (error) {
+        console.error('❌ Erro ao encerrar reunião:', error);
+        showErrorScreen('Erro', 'Erro ao encerrar a reunião.', 'fa-exclamation-circle');
     }
-    
-    // Mostrar tela de encerramento
-    showEndedScreen();
-    
-    console.log('✅ Chamada encerrada e reunião deletada');
 }
 
 // Função para extrair ID do YouTube

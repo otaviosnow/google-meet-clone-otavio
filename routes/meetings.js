@@ -151,6 +151,28 @@ router.post('/:meetingId/end', authenticateToken, async (req, res) => {
     }
 });
 
+// Encerrar reunião quando vídeo termina (sem autenticação)
+router.post('/:meetingId/end-video', async (req, res) => {
+    try {
+        const { meetingId } = req.params;
+        
+        const meeting = await Meeting.findOne({ meetingId });
+        
+        if (!meeting) {
+            return res.status(404).json({ error: 'Reunião não encontrada' });
+        }
+
+        await meeting.endByVideoCompletion();
+        
+        console.log(`🎬 Reunião encerrada por término do vídeo: ${meetingId}`);
+        
+        res.json({ message: 'Reunião encerrada com sucesso' });
+    } catch (error) {
+        console.error('Erro ao encerrar reunião por vídeo:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 // Deletar reunião
 router.delete('/:id', authenticateToken, async (req, res) => {
     try {

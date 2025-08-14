@@ -40,6 +40,38 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
 // ===== MODELOS =====
 const User = require('./models/User');
+const Meeting = require('./models/Meeting');
+
+// Job de limpeza automática para encerrar reuniões expiradas
+async function cleanupExpiredMeetings() {
+    try {
+        const now = new Date();
+        const twentyMinutesAgo = new Date(now.getTime() - (20 * 60 * 1000));
+        
+        // Encontrar reuniões ativas que começaram há mais de 20 minutos
+        const expiredMeetings = await Meeting.find({
+            status: 'active',
+            startedAt: { $lt: twentyMinutesAgo }
+        });
+        
+        if (expiredMeetings.length > 0) {
+            console.log(`🕐 Encontradas ${expiredMeetings.length} reuniões expiradas por tempo`);
+            
+            for (const meeting of expiredMeetings) {
+                await meeting.endMeeting();
+                console.log(`⏰ Reunião ${meeting.meetingId} encerrada automaticamente por timeout`);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Erro no job de limpeza de reuniões:', error);
+    }
+}
+
+// Executar limpeza a cada 5 minutos
+setInterval(cleanupExpiredMeetings, 5 * 60 * 1000);
+
+// Executar limpeza inicial após 1 minuto
+setTimeout(cleanupExpiredMeetings, 60 * 1000);
 
 // ===== ROTAS =====
 const videoRoutes = require('./routes/videos');
