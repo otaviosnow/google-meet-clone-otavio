@@ -494,22 +494,20 @@ async function handleAddVideo(e) {
     const formData = new FormData(addVideoForm);
     const type = formData.get('type') || document.getElementById('videoType').value;
     
-    // Adicionar arquivo se for upload
+    // Verificar se é upload e se tem arquivo
     if (type === 'upload') {
         const fileInput = document.getElementById('videoFile');
-        if (fileInput.files.length > 0) {
-            formData.append('video', fileInput.files[0]);
-        } else {
+        if (fileInput.files.length === 0) {
             showNotification('Arquivo de vídeo é obrigatório para upload', 'error');
             return;
         }
+        // O arquivo já está no FormData do formulário, não precisa adicionar novamente
     } else if (type === 'drive' || type === 'url') {
         const url = formData.get('url') || document.getElementById('videoUrl').value;
         if (!url) {
             showNotification('URL é obrigatória para este tipo', 'error');
             return;
         }
-        formData.append('url', url);
     }
     
     try {
