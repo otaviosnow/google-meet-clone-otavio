@@ -1262,6 +1262,13 @@ async function loadVideoOptions() {
                 option.textContent = video.title;
                 option.dataset.videoUrl = video.url;
                 meetingVideo.appendChild(option);
+                
+                console.log('📹 Opção de vídeo criada:', {
+                    id: video._id,
+                    title: video.title,
+                    url: video.url,
+                    datasetUrl: option.dataset.videoUrl
+                });
             });
         }
     } catch (error) {
