@@ -594,9 +594,232 @@ function switchTab(tabName) {
             case 'analytics':
                 window.location.href = '/analytics';
                 break;
+            case 'admin':
+                showAdminTab();
+                break;
         }
     }
 }
+
+// ===== FUNÇÕES DO PAINEL ADMIN =====
+
+// Variável para controlar se o admin está autenticado
+let adminAuthenticated = false;
+
+// Função para mostrar aba admin
+function showAdminTab() {
+    if (!currentUser || !currentUser.isAdmin) {
+        showNotification('Acesso negado. Apenas administradores.', 'error');
+        return;
+    }
+
+    // Se não estiver autenticado, mostrar tela de autenticação
+    if (!adminAuthenticated) {
+        document.getElementById('adminAuth').style.display = 'flex';
+        document.getElementById('adminPanel').style.display = 'none';
+    } else {
+        document.getElementById('adminAuth').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadAdminData();
+    }
+}
+
+// Função para autenticar admin
+async function authenticateAdmin(password) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/verify-admin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            adminAuthenticated = true;
+            showAdminTab();
+            showNotification('Acesso administrativo concedido!', 'success');
+        } else {
+            showNotification(result.error || 'Senha incorreta', 'error');
+        }
+    } catch (error) {
+        console.error('Erro na autenticação admin:', error);
+        showNotification('Erro na autenticação', 'error');
+    }
+}
+
+// Função para sair do admin
+function logoutAdmin() {
+    adminAuthenticated = false;
+    document.getElementById('adminAuth').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('adminPassword').value = '';
+    showNotification('Sessão administrativa encerrada', 'info');
+}
+
+// Função para carregar dados do admin
+async function loadAdminData() {
+    try {
+        // Carregar estatísticas
+        const statsResponse = await fetch(`${API_BASE_URL}/analytics/stats?period=30`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            document.getElementById('adminTotalUsers').textContent = stats.totalUsers.toLocaleString();
+            document.getElementById('adminTotalMeetings').textContent = stats.totalMeetings.toLocaleString();
+            document.getElementById('adminTotalTokens').textContent = stats.totalTokens.toLocaleString();
+        }
+
+        // Carregar usuários
+        await loadAdminUsers();
+
+    } catch (error) {
+        console.error('Erro ao carregar dados admin:', error);
+        showNotification('Erro ao carregar dados administrativos', 'error');
+    }
+}
+
+// Função para carregar usuários
+async function loadAdminUsers() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/admin`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            renderAdminUsersTable(data.users);
+        } else {
+            showNotification('Erro ao carregar usuários', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar usuários:', error);
+        showNotification('Erro ao carregar usuários', 'error');
+    }
+}
+
+// Função para renderizar tabela de usuários
+function renderAdminUsersTable(users) {
+    const tbody = document.getElementById('adminUsersTable');
+    tbody.innerHTML = '';
+
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.name || 'Sem nome'}</td>
+            <td>${user.email}</td>
+            <td><span class="user-status ${user.isBanned ? 'banned' : 'active'}">${user.isBanned ? 'Banido' : 'Ativo'}</span></td>
+            <td>${user.visionTokens}</td>
+            <td><span class="user-admin ${user.isAdmin ? 'yes' : 'no'}">${user.isAdmin ? 'Sim' : 'Não'}</span></td>
+            <td class="user-actions">
+                <button class="btn-edit" onclick="editUser('${user._id}')">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn-ban" onclick="toggleBanUser('${user._id}', ${!user.isBanned})">
+                    <i class="fas fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Desbanir' : 'Banir'}
+                </button>
+                <button class="btn-delete" onclick="deleteUser('${user._id}')">
+                    <i class="fas fa-trash"></i> Deletar
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Função para editar usuário
+async function editUser(userId) {
+    // Implementar modal de edição
+    showNotification('Funcionalidade de edição em desenvolvimento', 'info');
+}
+
+// Função para banir/desbanir usuário
+async function toggleBanUser(userId, ban) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/admin/${userId}/ban`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ isBanned: ban })
+        });
+
+        if (response.ok) {
+            showNotification(`Usuário ${ban ? 'banido' : 'desbanido'} com sucesso!`, 'success');
+            loadAdminUsers();
+        } else {
+            const result = await response.json();
+            showNotification(result.error || 'Erro ao alterar status do usuário', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao alterar status do usuário:', error);
+        showNotification('Erro ao alterar status do usuário', 'error');
+    }
+}
+
+// Função para deletar usuário
+async function deleteUser(userId) {
+    if (!confirm('Tem certeza que deseja deletar este usuário? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/admin/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (response.ok) {
+            showNotification('Usuário deletado com sucesso!', 'success');
+            loadAdminUsers();
+        } else {
+            const result = await response.json();
+            showNotification(result.error || 'Erro ao deletar usuário', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao deletar usuário:', error);
+        showNotification('Erro ao deletar usuário', 'error');
+    }
+}
+
+// Event listeners para o painel admin
+document.addEventListener('DOMContentLoaded', function() {
+    // Form de autenticação admin
+    const adminAuthForm = document.getElementById('adminAuthForm');
+    if (adminAuthForm) {
+        adminAuthForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            authenticateAdmin(password);
+        });
+    }
+
+    // Busca de usuários
+    const adminUserSearch = document.getElementById('adminUserSearch');
+    if (adminUserSearch) {
+        adminUserSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#adminUsersTable tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+});
 
 // Função para alternar entre abas do sistema de metas
 function switchGoalsTab(tabName) {
@@ -710,9 +933,21 @@ function renderVideos(videos) {
         videoCard.className = 'video-card';
         videoCard.innerHTML = `
             <div class="video-thumbnail">
-                <video src="${videoUrl}" preload="metadata" muted style="width: 100%; height: 100%; object-fit: cover;">
-                    <i class="fas fa-play" style="font-size: 32px;"></i>
-                </video>
+                <div class="video-preview-container">
+                    <video src="${videoUrl}" preload="metadata" muted class="video-preview">
+                        <i class="fas fa-play" style="font-size: 32px;"></i>
+                    </video>
+                    <div class="video-preview-overlay">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="video-preview-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Carregando...
+                    </div>
+                    <div class="video-preview-error">
+                        <i class="fas fa-exclamation-triangle"></i><br>
+                        Erro ao carregar vídeo
+                    </div>
+                </div>
             </div>
             <div class="video-info">
                 <h3 class="video-title">${video.title}</h3>
@@ -735,20 +970,46 @@ function renderVideos(videos) {
         `;
         
         // Adicionar funcionalidade de preview automático
-        const videoElement = videoCard.querySelector('video');
+        const videoElement = videoCard.querySelector('.video-preview');
         const thumbnail = videoCard.querySelector('.video-thumbnail');
+        const overlay = videoCard.querySelector('.video-preview-overlay');
+        const loading = videoCard.querySelector('.video-preview-loading');
+        const error = videoCard.querySelector('.video-preview-error');
         
         let previewTimeout;
         let isPlaying = false;
+        let hasError = false;
+        
+        // Configurar eventos do vídeo
+        videoElement.addEventListener('loadstart', () => {
+            loading.classList.add('show');
+            overlay.classList.remove('show');
+            error.classList.remove('show');
+        });
+        
+        videoElement.addEventListener('canplay', () => {
+            loading.classList.remove('show');
+            overlay.classList.add('show');
+        });
+        
+        videoElement.addEventListener('error', () => {
+            loading.classList.remove('show');
+            overlay.classList.remove('show');
+            error.classList.add('show');
+            hasError = true;
+        });
         
         thumbnail.addEventListener('mouseenter', () => {
-            if (!isPlaying) {
+            if (!isPlaying && !hasError) {
                 previewTimeout = setTimeout(() => {
                     videoElement.currentTime = 0;
                     videoElement.play().then(() => {
                         isPlaying = true;
+                        overlay.classList.remove('show');
                     }).catch(err => {
                         console.log('Erro ao reproduzir preview:', err);
+                        error.classList.add('show');
+                        hasError = true;
                     });
                 }, 300); // Pequeno delay para evitar reprodução acidental
             }
@@ -760,6 +1021,7 @@ function renderVideos(videos) {
                 videoElement.pause();
                 videoElement.currentTime = 0;
                 isPlaying = false;
+                overlay.classList.add('show');
             }
         });
         
@@ -769,6 +1031,7 @@ function renderVideos(videos) {
                 videoElement.pause();
                 videoElement.currentTime = 0;
                 isPlaying = false;
+                overlay.classList.add('show');
             }
         });
         
@@ -1138,6 +1401,12 @@ async function loadUserData() {
         const analyticsMenuItem = document.getElementById('analyticsMenuItem');
         if (analyticsMenuItem) {
             analyticsMenuItem.style.display = 'block';
+        }
+        
+        // Mostrar botão de admin
+        const adminMenuItem = document.getElementById('adminMenuItem');
+        if (adminMenuItem) {
+            adminMenuItem.style.display = 'block';
         }
     }
     
