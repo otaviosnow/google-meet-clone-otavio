@@ -1709,10 +1709,16 @@ function updateSummaryTab(data) {
     // Dias restantes
     const daysRemaining = document.getElementById('daysRemaining');
     if (daysRemaining) {
-        const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const remaining = daysInMonth - today.getDate();
-        daysRemaining.textContent = `${remaining} dias`;
+        if (data.daysRemaining !== undefined) {
+            // Usar dados do backend se disponíveis
+            daysRemaining.textContent = `${data.daysRemaining} dias`;
+        } else {
+            // Fallback para cálculo local
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const remaining = daysInMonth - today.getDate();
+            daysRemaining.textContent = `${remaining} dias`;
+        }
     }
     
     // Projeção mensal

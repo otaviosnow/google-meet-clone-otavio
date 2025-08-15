@@ -40,6 +40,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
+  isBanned: {
+    type: Boolean,
+    default: false
+  },
   // Campos para recuperação de senha
   resetPasswordToken: {
     type: String,
@@ -90,6 +98,8 @@ userSchema.methods.toPublicJSON = function() {
     name: this.name,
     email: this.email,
     isActive: this.isActive,
+    isAdmin: this.isAdmin,
+    isBanned: this.isBanned,
     visionTokens: this.visionTokens,
     avatar: this.avatar,
     lastLogin: this.lastLogin,

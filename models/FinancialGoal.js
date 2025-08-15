@@ -11,6 +11,15 @@ const financialGoalSchema = new mongoose.Schema({
     default: 0,
     min: [0, 'Meta não pode ser negativa']
   },
+  deadlineDate: {
+    type: Date,
+    required: [true, 'Data limite é obrigatória'],
+    default: function() {
+      // Por padrão, define como último dia do mês atual
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    }
+  },
   currentMonth: {
     type: String, // Formato: "YYYY-MM"
     required: true

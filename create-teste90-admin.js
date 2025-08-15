@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-// Conectar ao MongoDB de produção
+// Conectar ao MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/google-meet-fake', {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -26,29 +26,28 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-async function createUserInProduction() {
+async function createTeste90Admin() {
     try {
         const userData = {
-            name: 'Otávio Henrique',
-            email: 'tavinmktdigital2@gmail.com',
-            password: '@Snow2012',
+            name: 'Teste 90',
+            email: 'teste90@gmail.com',
+            password: '123456', // Senha padrão, você pode alterar depois
             visionTokens: 10,
             isAdmin: true,
             isActive: true
         };
         
-        console.log('🌐 Criando usuário no banco de produção...');
+        console.log('👑 Criando usuário teste90@gmail.com como administrador...');
         console.log('📧 Email:', userData.email);
         console.log('🔑 Senha:', userData.password);
-        console.log('🌐 MongoDB URI:', process.env.MONGODB_URI ? 'Configurado' : 'Não configurado');
         
         // Verificar se o usuário já existe
         const existingUser = await User.findOne({ email: userData.email });
         
         if (existingUser) {
-            console.log('⚠️ Usuário já existe. Atualizando...');
+            console.log('⚠️ Usuário já existe. Transformando em admin...');
             
-            // Hash da nova senha
+            // Hash da senha
             const saltRounds = 12;
             const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
             
@@ -60,7 +59,7 @@ async function createUserInProduction() {
             
             await existingUser.save();
             
-            console.log('✅ Usuário atualizado com sucesso!');
+            console.log('✅ Usuário atualizado e transformado em administrador!');
         } else {
             console.log('🆕 Usuário não existe. Criando...');
             
@@ -80,7 +79,7 @@ async function createUserInProduction() {
             
             await newUser.save();
             
-            console.log('✅ Usuário criado com sucesso!');
+            console.log('✅ Usuário criado como administrador!');
         }
         
         // Verificar se foi criado/atualizado corretamente
@@ -98,7 +97,11 @@ async function createUserInProduction() {
         console.log('🔑 Senha válida:', isPasswordValid);
         
         if (isPasswordValid) {
-            console.log('\n🎉 Usuário pronto para login no servidor de produção!');
+            console.log('\n🎉 Usuário teste90@gmail.com criado/atualizado com sucesso!');
+            console.log('🔑 Credenciais de login:');
+            console.log('   📧 Email: teste90@gmail.com');
+            console.log('   🔑 Senha: 123456');
+            console.log('   👑 Status: Administrador');
         } else {
             console.log('\n❌ Problema com a senha!');
         }
@@ -111,4 +114,5 @@ async function createUserInProduction() {
     }
 }
 
-createUserInProduction();
+createTeste90Admin();
+

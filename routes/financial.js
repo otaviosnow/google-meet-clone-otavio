@@ -42,7 +42,10 @@ const handleValidationErrors = (req, res, next) => {
 const goalValidation = [
   body('monthlyGoal')
     .isFloat({ min: 0 })
-    .withMessage('Meta deve ser um número positivo')
+    .withMessage('Meta deve ser um número positivo'),
+  body('deadlineDate')
+    .isISO8601()
+    .withMessage('Data limite deve ser uma data válida')
 ];
 
 const entryValidation = [
@@ -95,8 +98,20 @@ router.get('/summary', authenticateToken, async (req, res) => {
     const monthlyGoal = goal ? goal.monthlyGoal : 0;
     const goalProgress = monthlyGoal > 0 ? Math.min((totalProfit / monthlyGoal) * 100, 100) : 0;
     
+    // Calcular dias restantes
+    let daysRemaining = 0;
+    if (goal && goal.deadlineDate) {
+      const now = new Date();
+      const deadline = new Date(goal.deadlineDate);
+      const diffTime = deadline - now;
+      daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      daysRemaining = Math.max(0, daysRemaining); // Não pode ser negativo
+    }
+    
     res.json({
       monthlyGoal,
+      deadlineDate: goal ? goal.deadlineDate : null,
+      daysRemaining,
       totalRevenue,
       totalExpenses,
       totalProfit,
@@ -115,13 +130,16 @@ router.get('/summary', authenticateToken, async (req, res) => {
 // POST /api/financial/goal - Definir meta mensal
 router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, async (req, res) => {
   try {
-    const { monthlyGoal } = req.body;
+    const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     
     // Buscar ou criar meta do mês atual
     const goal = await FinancialGoal.findOneAndUpdate(
       { user: req.user._id, currentMonth },
-      { monthlyGoal },
+      { 
+        monthlyGoal,
+        deadlineDate: new Date(deadlineDate)
+      },
       { upsert: true, new: true }
     );
     

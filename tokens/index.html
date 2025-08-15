@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprar Tokens - CallX</title>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="tokens-container">
+        <!-- Header -->
+        <header class="tokens-header">
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </a>
+        </header>
+
+        <!-- Content -->
+        <main class="tokens-content">
+            <div class="tokens-card">
+                <h1 class="tokens-title">Comprar Tokens</h1>
+                
+                <div class="tokens-info">
+                    <p><i class="fas fa-info-circle"></i> Cada token permite criar uma reunião fake do Google Meet</p>
+                    <p><i class="fas fa-play"></i> Vídeos são reproduzidos automaticamente</p>
+                    <p><i class="fas fa-link"></i> Links únicos para cada reunião</p>
+                </div>
+
+                <div class="tokens-packages">
+                    <div class="package-card">
+                        <div class="package-header">
+                            <h3>Pacote Básico</h3>
+                            <div class="package-price">
+                                <span class="price">R$ 9,90</span>
+                                <span class="tokens">10 tokens</span>
+                            </div>
+                        </div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check"></i> 10 reuniões fake</li>
+                            <li><i class="fas fa-check"></i> Suporte por email</li>
+                            <li><i class="fas fa-check"></i> Acesso por 30 dias</li>
+                        </ul>
+                        <button class="buy-btn" data-tokens="10" data-price="9.90">
+                            Comprar Agora
+                        </button>
+                    </div>
+
+                    <div class="package-card featured">
+                        <div class="package-badge">Mais Popular</div>
+                        <div class="package-header">
+                            <h3>Pacote Pro</h3>
+                            <div class="package-price">
+                                <span class="price">R$ 29,90</span>
+                                <span class="tokens">50 tokens</span>
+                            </div>
+                        </div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check"></i> 50 reuniões fake</li>
+                            <li><i class="fas fa-check"></i> Suporte prioritário</li>
+                            <li><i class="fas fa-check"></i> Acesso por 90 dias</li>
+                            <li><i class="fas fa-check"></i> Relatórios avançados</li>
+                        </ul>
+                        <button class="buy-btn" data-tokens="50" data-price="29.90">
+                            Comprar Agora
+                        </button>
+                    </div>
+
+                    <div class="package-card">
+                        <div class="package-header">
+                            <h3>Pacote Enterprise</h3>
+                            <div class="package-price">
+                                <span class="price">R$ 99,90</span>
+                                <span class="tokens">200 tokens</span>
+                            </div>
+                        </div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check"></i> 200 reuniões fake</li>
+                            <li><i class="fas fa-check"></i> Suporte 24/7</li>
+                            <li><i class="fas fa-check"></i> Acesso por 1 ano</li>
+                            <li><i class="fas fa-check"></i> API personalizada</li>
+                        </ul>
+                        <button class="buy-btn" data-tokens="200" data-price="99.90">
+                            Comprar Agora
+                        </button>
+                    </div>
+                </div>
+
+                <div class="payment-info">
+                    <p><i class="fas fa-shield-alt"></i> Pagamento seguro via PIX</p>
+                    <p><i class="fas fa-clock"></i> Tokens liberados instantaneamente</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Finalizar Compra</h2>
+                <button class="modal-close" id="closePaymentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-summary">
+                    <h3>Resumo do Pedido</h3>
+                    <div class="order-details">
+                        <div class="order-item">
+                            <span id="orderTokens">0 tokens</span>
+                            <span id="orderPrice">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="payment-method">
+                    <h3>Método de Pagamento</h3>
+                    <div class="pix-option">
+                        <input type="radio" id="pix" name="payment" value="pix" checked>
+                        <label for="pix">
+                            <i class="fas fa-qrcode"></i>
+                            PIX
+                        </label>
+                    </div>
+                </div>
+                <button class="confirm-btn" id="confirmPayment">
+                    <i class="fas fa-lock"></i>
+                    Finalizar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/tokens.js"></script>
+</body>
+</html>
+

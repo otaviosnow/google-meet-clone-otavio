@@ -94,44 +94,115 @@ const handleValidationErrors = (req, res, next) => {
 // POST /api/auth/register - Registrar novo usuário
 router.post('/register', registerValidation, handleValidationErrors, async (req, res) => {
   try {
+    console.log('📝 === INÍCIO DO REGISTRO ===');
+    console.log('📅 Timestamp:', new Date().toISOString());
+    console.log('🌐 IP:', req.ip || req.connection.remoteAddress);
+    console.log('👤 User-Agent:', req.get('User-Agent'));
+    
     const { name, email, password } = req.body;
+    
+    console.log('📋 Dados recebidos:');
+    console.log('   👤 Nome:', name);
+    console.log('   📧 Email:', email);
+    console.log('   🔑 Senha:', password ? 'Fornecida' : 'Não fornecida');
+    console.log('   📧 Email normalizado:', email ? email.toLowerCase().trim() : 'N/A');
 
     // Verificar se o email já existe
+    console.log('\n🔍 Verificando se email já existe...');
     const existingUser = await User.findOne({ email });
+    
     if (existingUser) {
+      console.log('❌ Email já existe no banco:');
+      console.log('   👤 Nome existente:', existingUser.name);
+      console.log('   📧 Email existente:', existingUser.email);
+      console.log('   ✅ Ativo:', existingUser.isActive);
+      console.log('   👑 Admin:', existingUser.isAdmin);
+      console.log('   📅 Criado em:', existingUser.createdAt);
+      
       return res.status(400).json({
         error: 'Email já está em uso'
       });
     }
+    
+    console.log('✅ Email não existe, prosseguindo com registro...');
 
     // Criar novo usuário
+    console.log('\n🆕 Criando novo usuário...');
     const user = new User({
       name,
       email,
       password
     });
+    
+    console.log('📋 Dados do usuário antes de salvar:');
+    console.log('   👤 Nome:', user.name);
+    console.log('   📧 Email:', user.email);
+    console.log('   🔑 Senha hash:', user.password ? 'Sim' : 'Não');
+    console.log('   ✅ Ativo:', user.isActive);
+    console.log('   👑 Admin:', user.isAdmin);
+    console.log('   🎫 Tokens:', user.visionTokens);
 
+    // Salvar no banco de dados
+    console.log('\n💾 Salvando no MongoDB...');
     await user.save();
+    
+    console.log('✅ Usuário salvo com sucesso!');
+    console.log('🆔 ID gerado:', user._id);
+    console.log('📅 Criado em:', user.createdAt);
 
     // Gerar token
+    console.log('\n🎫 Gerando token JWT...');
     const token = generateToken(user._id);
+    console.log('✅ Token gerado:', token ? 'Sim' : 'Não');
+
+    // Verificar se o usuário foi realmente salvo no banco
+    console.log('\n🔍 Verificando se usuário foi salvo no banco...');
+    const savedUser = await User.findById(user._id);
+    
+    if (savedUser) {
+      console.log('✅ Usuário confirmado no banco:');
+      console.log('   👤 Nome:', savedUser.name);
+      console.log('   📧 Email:', savedUser.email);
+      console.log('   ✅ Ativo:', savedUser.isActive);
+      console.log('   👑 Admin:', savedUser.isAdmin);
+      console.log('   🎫 Tokens:', savedUser.visionTokens);
+      console.log('   📅 Criado em:', savedUser.createdAt);
+    } else {
+      console.log('❌ ERRO: Usuário não encontrado no banco após salvar!');
+    }
+
+    // Contar total de usuários no banco
+    const totalUsers = await User.countDocuments();
+    console.log('📊 Total de usuários no banco:', totalUsers);
 
     // Retornar dados do usuário (sem senha) e token
+    console.log('\n📤 Enviando resposta de sucesso...');
     res.status(201).json({
       message: 'Usuário registrado com sucesso',
       user: user.toPublicJSON(),
       token
     });
+    
+    console.log('✅ === REGISTRO CONCLUÍDO COM SUCESSO ===\n');
 
   } catch (error) {
-    console.error('Erro no registro:', error);
+    console.error('❌ === ERRO NO REGISTRO ===');
+    console.error('📅 Timestamp:', new Date().toISOString());
+    console.error('🌐 IP:', req.ip || req.connection.remoteAddress);
+    console.error('📧 Email tentado:', req.body.email);
+    console.error('👤 Nome tentado:', req.body.name);
+    console.error('🔍 Tipo de erro:', error.name);
+    console.error('📄 Mensagem:', error.message);
+    console.error('📊 Stack:', error.stack);
     
     if (error.code === 11000) {
+      console.error('❌ Erro de duplicação (código 11000)');
       return res.status(400).json({
         error: 'Email já está em uso'
       });
     }
 
+    console.error('❌ === FIM DO ERRO ===\n');
     res.status(500).json({
       error: 'Erro interno do servidor'
     });

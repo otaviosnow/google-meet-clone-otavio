@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CallX</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1><i class="fas fa-shield-alt"></i> Admin Panel</h1>
+                    <p>CallX - Painel de Administração</p>
+                </div>
+                
+                <form id="adminLoginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="adminEmail">Email Administrativo</label>
+                        <input type="email" id="adminEmail" required placeholder="admin@exemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Senha</label>
+                        <input type="password" id="adminPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i> Acessar Painel
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p><i class="fas fa-info-circle"></i> Acesso restrito a administradores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="admin-dashboard" style="display: none;">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1><i class="fas fa-shield-alt"></i> CallX Admin</h1>
+                    <span class="admin-info">
+                        <i class="fas fa-user-shield"></i>
+                        <span id="adminName">Administrador</span>
+                    </span>
+                </div>
+                <div class="header-right">
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span id="totalUsers">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-key"></i>
+                            <span id="totalTokens">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-video"></i>
+                            <span id="totalMeetings">0</span>
+                        </div>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-container">
+                <!-- Filters and Search -->
+                <div class="admin-controls">
+                    <div class="search-section">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="userSearch" placeholder="Buscar usuários...">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">Todos os Status</option>
+                            <option value="active">Ativos</option>
+                            <option value="banned">Banidos</option>
+                            <option value="admin">Administradores</option>
+                        </select>
+                        
+                        <select id="tokenFilter" class="filter-select">
+                            <option value="">Todos os Tokens</option>
+                            <option value="0">Sem Tokens</option>
+                            <option value="1-10">1-10 Tokens</option>
+                            <option value="11-50">11-50 Tokens</option>
+                            <option value="51+">51+ Tokens</option>
+                        </select>
+                        
+                        <button id="refreshBtn" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="users-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Gerenciar Usuários</h2>
+                        <div class="table-info">
+                            <span id="usersCount">0 usuários encontrados</span>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Tokens</th>
+                                    <th>Reuniões</th>
+                                    <th>Registro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Users will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Manage Tokens Modal -->
+    <div id="manageTokensModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Gerenciar Tokens</h2>
+                <button class="modal-close" id="closeTokensModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="user-info">
+                    <img id="modalUserAvatar" src="" alt="Avatar" class="user-avatar">
+                    <div class="user-details">
+                        <h3 id="modalUserName">Nome do Usuário</h3>
+                        <p id="modalUserEmail">email@exemplo.com</p>
+                        <p>Tokens atuais: <span id="modalCurrentTokens">0</span></p>
+                    </div>
+                </div>
+                
+                <div class="token-actions">
+                    <div class="action-group">
+                        <label for="tokenAmount">Quantidade de Tokens</label>
+                        <input type="number" id="tokenAmount" min="0" value="0">
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="addTokensBtn" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Adicionar Tokens
+                        </button>
+                        <button id="removeTokensBtn" class="btn btn-danger">
+                            <i class="fas fa-minus"></i> Remover Tokens
+                        </button>
+                        <button id="setTokensBtn" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Definir Tokens
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Modal -->
+    <div id="deleteUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Confirmar Exclusão</h2>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Atenção!</h3>
+                    <p>Tem certeza que deseja <strong>excluir permanentemente</strong> o usuário:</p>
+                    <div class="user-to-delete">
+                        <img id="deleteUserAvatar" src="" alt="Avatar" class="user-avatar">
+                        <div>
+                            <h4 id="deleteUserName">Nome do Usuário</h4>
+                            <p id="deleteUserEmail">email@exemplo.com</p>
+                        </div>
+                    </div>
+                    <p class="warning-text">Esta ação não pode ser desfeita!</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="confirmDeleteBtn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sim, Excluir
+                    </button>
+                    <button id="cancelDeleteBtn" class="btn btn-outline">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

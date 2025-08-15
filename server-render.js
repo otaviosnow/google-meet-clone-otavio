@@ -79,6 +79,7 @@ const meetingRoutes = require('./routes/meetings');
 const userRoutes = require('./routes/users');
 const financialRoutes = require('./routes/financial');
 const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -137,6 +138,7 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/financial', financialRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ===== ROTAS DE PÁGINAS =====
 
@@ -175,6 +177,15 @@ app.get('/reset-password', (req, res) => {
     console.log('🔑 GET /reset-password - Página de reset de senha acessada');
     res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
 });
+
+// Rota para painel admin
+app.get('/admin', (req, res) => {
+    console.log('⚙️ GET /admin - Painel admin acessado');
+    res.sendFile(path.join(__dirname, 'admin', 'index.html'));
+});
+
+// Servir arquivos estáticos do admin
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
 // ===== ARQUIVOS ESTÁTICOS =====
 app.use(express.static('public'));

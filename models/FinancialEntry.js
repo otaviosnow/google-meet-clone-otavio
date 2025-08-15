@@ -57,8 +57,17 @@ financialEntrySchema.index({ user: 1, createdAt: -1 });
 
 // Middleware para calcular o lucro automaticamente
 financialEntrySchema.pre('save', function(next) {
+  // Garantir que os custos sejam sempre positivos (descontos)
+  this.chipCost = Math.abs(this.chipCost || 0);
+  this.additionalCost = Math.abs(this.additionalCost || 0);
+  this.adsCost = Math.abs(this.adsCost || 0);
+  
+  // Calcular total de despesas
   this.totalExpenses = this.chipCost + this.additionalCost + this.adsCost;
+  
+  // Calcular lucro líquido (faturamento - despesas)
   this.netProfit = this.grossRevenue - this.totalExpenses;
+  
   next();
 });
 
