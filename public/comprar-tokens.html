@@ -56,10 +56,57 @@
                         Gerar QR Code Pix
                     </button>
                 </form>
+
+                <!-- Modal do QR Code PIX -->
+                <div id="pixModal" class="pix-modal" style="display: none;">
+                    <div class="pix-modal-content">
+                        <div class="pix-modal-header">
+                            <h3><i class="fas fa-qrcode"></i> Pagamento PIX</h3>
+                            <button class="close-modal" id="closePixModal">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="pix-modal-body">
+                            <div class="pix-info">
+                                <p><strong>Quantidade:</strong> <span id="modalQuantity">0</span> tokens</p>
+                                <p><strong>Valor Total:</strong> R$ <span id="modalTotal">0,00</span></p>
+                            </div>
+                            
+                            <div class="pix-qr-container">
+                                <div id="qrCodeContainer" class="qr-code-container">
+                                    <!-- QR Code será gerado aqui -->
+                                </div>
+                                <p class="qr-instruction">Escaneie o QR Code com seu app bancário</p>
+                            </div>
+
+                            <div class="pix-code-section">
+                                <label for="pixCode">Código PIX:</label>
+                                <div class="pix-code-input">
+                                    <input type="text" id="pixCode" readonly>
+                                    <button type="button" id="copyPixCode" class="copy-btn">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="pix-instructions">
+                                <h4>Como pagar:</h4>
+                                <ol>
+                                    <li>Escaneie o QR Code ou copie o código PIX</li>
+                                    <li>Cole no seu app bancário</li>
+                                    <li>Confirme o pagamento</li>
+                                    <li>Os tokens serão creditados automaticamente</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
             </div>
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="js/tokens.js"></script>
 </body>
 </html>
