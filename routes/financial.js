@@ -2,19 +2,23 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 // Middleware de autenticação compatível com o servidor principal
 const authenticateToken = (req, res, next) => {
+    console.log('🔐 Middleware de autenticação - URL:', req.url, 'Método:', req.method);
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
+        console.log('❌ Token não fornecido');
         return res.status(401).json({ success: false, error: 'Token não fornecido' });
     }
 
     const jwt = require('jsonwebtoken');
     jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, decoded) => {
         if (err) {
+            console.log('❌ Token inválido:', err.message);
             return res.status(403).json({ success: false, error: 'Token inválido' });
         }
         req.user = { _id: decoded.userId };
+        console.log('✅ Token válido - Usuário:', decoded.userId);
         next();
     });
 };
@@ -130,6 +134,7 @@ router.get('/summary', authenticateToken, async (req, res) => {
 
 // POST /api/financial/goal - Definir meta mensal
 router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, async (req, res) => {
+  console.log('🎯 POST /api/financial/goal - Rota acessada com sucesso');
   try {
     const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
