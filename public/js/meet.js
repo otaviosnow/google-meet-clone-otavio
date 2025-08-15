@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const meetingIdFromUrl = urlParams.get('meetingId');
     const videoUrl = urlParams.get('video');
     
+    console.log('🔍 Parâmetros da URL:', {
+        meetingIdFromUrl,
+        videoUrl,
+        fullUrl: window.location.href
+    });
+    
     if (meetingIdFromUrl) {
         meetingId = meetingIdFromUrl;
         meetingIdElement.textContent = meetingId;

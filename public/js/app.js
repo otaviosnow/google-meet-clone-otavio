@@ -1286,9 +1286,18 @@ async function handleCreateMeeting(e) {
     const selectedOption = meetingVideo.options[meetingVideo.selectedIndex];
     const videoUrl = selectedOption.dataset.videoUrl;
     
+    console.log('🎬 Criando reunião com vídeo:', {
+        selectedOption: selectedOption,
+        videoUrl: videoUrl,
+        videoId: videoId,
+        title: title
+    });
+    
     // Criar link da nossa página de reunião fake
     const meetingId = generateMeetingId();
     const meetLink = `${window.location.origin}/meet/${meetingId}?video=${encodeURIComponent(videoUrl)}`;
+    
+    console.log('🔗 Link da reunião criado:', meetLink);
     
     try {
         // Salvar reunião no banco de dados
