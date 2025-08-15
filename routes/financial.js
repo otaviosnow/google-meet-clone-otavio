@@ -2,23 +2,19 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 // Middleware de autenticação compatível com o servidor principal
 const authenticateToken = (req, res, next) => {
-    console.log('🔐 Middleware de autenticação - URL:', req.url, 'Método:', req.method);
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        console.log('❌ Token não fornecido');
         return res.status(401).json({ success: false, error: 'Token não fornecido' });
     }
 
     const jwt = require('jsonwebtoken');
     jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, decoded) => {
         if (err) {
-            console.log('❌ Token inválido:', err.message);
             return res.status(403).json({ success: false, error: 'Token inválido' });
         }
         req.user = { _id: decoded.userId };
-        console.log('✅ Token válido - Usuário:', decoded.userId);
         next();
     });
 };
@@ -70,6 +66,31 @@ const entryValidation = [
     .isFloat()
     .withMessage('Custo com ads deve ser um número válido')
 ];
+
+// GET /api/financial/goal - Obter meta atual
+router.get('/goal', authenticateToken, async (req, res) => {
+  try {
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    
+    // Buscar meta do mês atual
+    const goal = await FinancialGoal.findOne({ 
+      user: req.user._id, 
+      currentMonth 
+    });
+    
+    res.json({
+      monthlyGoal: goal ? goal.monthlyGoal : 0,
+      deadlineDate: goal ? goal.deadlineDate : null,
+      currentMonth
+    });
+    
+  } catch (error) {
+    console.error('Erro ao obter meta:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
 
 // GET /api/financial/summary - Obter resumo financeiro do mês atual
 router.get('/summary', authenticateToken, async (req, res) => {
@@ -134,7 +155,6 @@ router.get('/summary', authenticateToken, async (req, res) => {
 
 // POST /api/financial/goal - Definir meta mensal
 router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, async (req, res) => {
-  console.log('🎯 POST /api/financial/goal - Rota acessada com sucesso');
   try {
     const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
