@@ -6,6 +6,7 @@
     <title>Google Meet Fake - SaaS</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -421,9 +422,7 @@
                                     <div class="progress-chart">
                                         <h4><i class="fas fa-chart-area"></i> Progresso da Meta</h4>
                                         <div class="chart-container">
-                                            <div class="progress-bar">
-                                                <div class="progress-fill" id="progressFill"></div>
-                                            </div>
+                                            <canvas id="goalProgressChart" width="400" height="200"></canvas>
                                             <div class="chart-info">
                                                 <span id="progressText">0% da meta atingida</span>
                                             </div>
@@ -464,77 +463,79 @@
                                 <div class="data-entry">
                                     <h3><i class="fas fa-plus-circle"></i> Adicionar Dados</h3>
                                     
-                                    <!-- Entrada Rápida -->
-                                    <div class="quick-entry">
-                                        <h4><i class="fas fa-bolt"></i> Entrada Rápida (Hoje)</h4>
-                                        <div class="entry-form">
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label for="quickGrossRevenue">Faturamento Bruto (R$)</label>
-                                                    <input type="number" id="quickGrossRevenue" placeholder="0.00" step="0.01">
+                                    <div class="data-entry-grid">
+                                        <!-- Entrada Rápida -->
+                                        <div class="quick-entry">
+                                            <h4><i class="fas fa-bolt"></i> Entrada Rápida (Hoje)</h4>
+                                            <div class="entry-form">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="quickGrossRevenue">Faturamento Bruto (R$)</label>
+                                                        <input type="number" id="quickGrossRevenue" placeholder="0.00" step="0.01">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="quickChipCost">Custo com Chip (R$)</label>
+                                                        <input type="number" id="quickChipCost" placeholder="0.00" step="0.01">
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="quickAdditionalCost">Custo Adicional (R$)</label>
+                                                        <input type="number" id="quickAdditionalCost" placeholder="0.00" step="0.01">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="quickAdsCost">Custo com Ads (R$)</label>
+                                                        <input type="number" id="quickAdsCost" placeholder="0.00" step="0.01">
+                                                    </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="quickChipCost">Custo com Chip (R$)</label>
-                                                    <input type="number" id="quickChipCost" placeholder="0.00" step="0.01">
+                                                    <label for="quickNotes">Observações</label>
+                                                    <textarea id="quickNotes" placeholder="Adicione observações sobre o dia..."></textarea>
                                                 </div>
+                                                <button id="quickEntryBtn" class="btn btn-primary">
+                                                    <i class="fas fa-plus"></i> Adicionar Entrada Rápida
+                                                </button>
                                             </div>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label for="quickAdditionalCost">Custo Adicional (R$)</label>
-                                                    <input type="number" id="quickAdditionalCost" placeholder="0.00" step="0.01">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="quickAdsCost">Custo com Ads (R$)</label>
-                                                    <input type="number" id="quickAdsCost" placeholder="0.00" step="0.01">
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="quickNotes">Observações</label>
-                                                <textarea id="quickNotes" placeholder="Adicione observações sobre o dia..."></textarea>
-                                            </div>
-                                            <button id="quickEntryBtn" class="btn btn-primary">
-                                                <i class="fas fa-plus"></i> Adicionar Entrada Rápida
-                                            </button>
                                         </div>
-                                    </div>
 
-                                    <!-- Entrada Manual -->
-                                    <div class="manual-entry">
-                                        <h4><i class="fas fa-calendar-day"></i> Entrada Manual</h4>
-                                        <div class="entry-form">
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label for="manualDate">Data</label>
-                                                    <input type="date" id="manualDate" required>
+                                        <!-- Entrada Manual -->
+                                        <div class="manual-entry">
+                                            <h4><i class="fas fa-calendar-day"></i> Entrada Manual</h4>
+                                            <div class="entry-form">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="manualDate">Data</label>
+                                                        <input type="date" id="manualDate" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="manualGrossRevenue">Faturamento Bruto (R$)</label>
+                                                        <input type="number" id="manualGrossRevenue" placeholder="0.00" step="0.01">
+                                                    </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label for="manualGrossRevenue">Faturamento Bruto (R$)</label>
-                                                    <input type="number" id="manualGrossRevenue" placeholder="0.00" step="0.01">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="manualChipCost">Custo com Chip (R$)</label>
+                                                        <input type="number" id="manualChipCost" placeholder="0.00" step="0.01">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="manualAdditionalCost">Custo Adicional (R$)</label>
+                                                        <input type="number" id="manualAdditionalCost" placeholder="0.00" step="0.01">
+                                                    </div>
                                                 </div>
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="manualAdsCost">Custo com Ads (R$)</label>
+                                                        <input type="number" id="manualAdsCost" placeholder="0.00" step="0.01">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="manualNotes">Observações</label>
+                                                        <input type="text" id="manualNotes" placeholder="Observações...">
+                                                    </div>
+                                                </div>
+                                                <button id="manualEntryBtn" class="btn btn-outline">
+                                                    <i class="fas fa-plus"></i> Adicionar Entrada Manual
+                                                </button>
                                             </div>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label for="manualChipCost">Custo com Chip (R$)</label>
-                                                    <input type="number" id="manualChipCost" placeholder="0.00" step="0.01">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="manualAdditionalCost">Custo Adicional (R$)</label>
-                                                    <input type="number" id="manualAdditionalCost" placeholder="0.00" step="0.01">
-                                                </div>
-                                            </div>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label for="manualAdsCost">Custo com Ads (R$)</label>
-                                                    <input type="number" id="manualAdsCost" placeholder="0.00" step="0.01">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="manualNotes">Observações</label>
-                                                    <input type="text" id="manualNotes" placeholder="Observações...">
-                                                </div>
-                                            </div>
-                                            <button id="manualEntryBtn" class="btn btn-outline">
-                                                <i class="fas fa-plus"></i> Adicionar Entrada Manual
-                                            </button>
                                         </div>
                                     </div>
                                 </div>

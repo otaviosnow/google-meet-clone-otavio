@@ -614,6 +614,8 @@ function switchTab(tabName) {
                 const activeTab = document.querySelector('.tab-btn.active[data-tab]');
                 if (activeTab && activeTab.dataset.tab === 'modifications') {
                     loadModificationsHistory();
+                } else if (activeTab && activeTab.dataset.tab === 'history') {
+                    loadFinancialHistory();
                 }
             }, 100);
         }
@@ -1708,6 +1710,12 @@ async function addQuickEntry(e) {
             
             // Sincronizar todas as abas
             await syncAllFinancialData();
+            
+            // Atualizar histórico se estiver na aba de histórico
+            const activeTab = document.querySelector('.tab-btn.active[data-tab]');
+            if (activeTab && activeTab.dataset.tab === 'history') {
+                loadFinancialHistory();
+            }
         } else {
             const error = await response.json();
             showNotification(error.error, 'error');
@@ -1768,6 +1776,12 @@ async function addManualEntry(e) {
             
             // Sincronizar todas as abas
             await syncAllFinancialData();
+            
+            // Atualizar histórico se estiver na aba de histórico
+            const activeTab = document.querySelector('.tab-btn.active[data-tab]');
+            if (activeTab && activeTab.dataset.tab === 'history') {
+                loadFinancialHistory();
+            }
         } else {
             const error = await response.json();
             showNotification(error.error, 'error');
@@ -1827,17 +1841,76 @@ function updateFinancialDisplay(data) {
         todayProfitElement.textContent = `R$ ${todayProfit.toFixed(2).replace('.', ',')}`;
     }
     
-    // Atualizar barra de progresso
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    if (progressFill && progressText && data.monthlyGoal > 0) {
-        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
-        progressFill.style.width = `${Math.min(progress, 100)}%`;
-        progressText.textContent = `${Math.min(progress, 100).toFixed(1)}% da meta atingida`;
-    }
+    // Atualizar gráfico de progresso da meta
+    updateGoalProgressChart(data);
     
     // Atualizar tendências
     updateTrends(data);
+}
+
+// Atualizar gráfico de progresso da meta
+function updateGoalProgressChart(data) {
+    const canvas = document.getElementById('goalProgressChart');
+    const progressText = document.getElementById('progressText');
+    
+    if (!canvas) return;
+    
+    // Calcular progresso
+    const progress = data.monthlyGoal > 0 ? (data.totalProfit / data.monthlyGoal) * 100 : 0;
+    const progressPercent = Math.min(progress, 100);
+    
+    // Atualizar texto
+    if (progressText) {
+        progressText.textContent = `${progressPercent.toFixed(1)}% da meta atingida`;
+    }
+    
+    // Destruir gráfico existente se houver
+    if (window.goalProgressChart) {
+        window.goalProgressChart.destroy();
+    }
+    
+    // Criar dados para o gráfico
+    const chartData = {
+        labels: ['Meta', 'Atual'],
+        datasets: [{
+            data: [data.monthlyGoal || 0, data.totalProfit || 0],
+            backgroundColor: [
+                'rgba(59, 130, 246, 0.2)', // Azul claro para meta
+                'rgba(34, 197, 94, 0.8)'   // Verde para atual
+            ],
+            borderColor: [
+                'rgba(59, 130, 246, 1)',
+                'rgba(34, 197, 94, 1)'
+            ],
+            borderWidth: 2
+        }]
+    };
+    
+    // Configurações do gráfico
+    const config = {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: R$ ${context.parsed.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    };
+    
+    // Criar gráfico
+    window.goalProgressChart = new Chart(canvas, config);
 }
 
 // Atualizar tendências
@@ -1845,9 +1918,24 @@ function updateTrends(data) {
     // Crescimento
     const growthRate = document.getElementById('growthRate');
     if (growthRate) {
-        // Simular crescimento baseado nos dados
-        const growth = data.totalRevenue > 0 ? '+15%' : '0%';
-        growthRate.textContent = growth;
+        // Calcular crescimento real baseado nos dados
+        if (data.entries && data.entries.length > 1) {
+            const sortedEntries = data.entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const firstHalf = sortedEntries.slice(0, Math.ceil(sortedEntries.length / 2));
+            const secondHalf = sortedEntries.slice(Math.ceil(sortedEntries.length / 2));
+            
+            const firstHalfTotal = firstHalf.reduce((sum, entry) => sum + entry.netProfit, 0);
+            const secondHalfTotal = secondHalf.reduce((sum, entry) => sum + entry.netProfit, 0);
+            
+            if (firstHalfTotal > 0) {
+                const growth = ((secondHalfTotal - firstHalfTotal) / firstHalfTotal) * 100;
+                growthRate.textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(0)}%`;
+            } else {
+                growthRate.textContent = '0%';
+            }
+        } else {
+            growthRate.textContent = '0%';
+        }
     }
     
     // Frequência
@@ -1855,21 +1943,38 @@ function updateTrends(data) {
     if (frequencyRate) {
         const today = new Date();
         const currentDay = today.getDate();
-        const frequency = data.entries ? (data.entries.length / currentDay) * 100 : 0;
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const frequency = data.entries ? (data.entries.length / Math.min(currentDay, daysInMonth)) * 100 : 0;
         frequencyRate.textContent = `${Math.min(frequency, 100).toFixed(0)}%`;
     }
     
     // Eficiência
     const efficiencyRate = document.getElementById('efficiencyRate');
     if (efficiencyRate && data.monthlyGoal > 0) {
-        const efficiency = (data.totalRevenue / data.monthlyGoal) * 100;
+        const efficiency = (data.totalProfit / data.monthlyGoal) * 100;
         efficiencyRate.textContent = `${Math.min(efficiency, 100).toFixed(0)}%`;
     }
     
     // Projeção
     const projectionRate = document.getElementById('projectionRate');
     if (projectionRate) {
-        projectionRate.textContent = '+25%';
+        if (data.entries && data.entries.length > 0) {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const remainingDays = daysInMonth - currentDay;
+            
+            if (currentDay > 0) {
+                const dailyAverage = data.totalProfit / currentDay;
+                const projectedTotal = data.totalProfit + (dailyAverage * remainingDays);
+                const projection = data.monthlyGoal > 0 ? ((projectedTotal - data.monthlyGoal) / data.monthlyGoal) * 100 : 0;
+                projectionRate.textContent = `${projection >= 0 ? '+' : ''}${projection.toFixed(0)}%`;
+            } else {
+                projectionRate.textContent = '0%';
+            }
+        } else {
+            projectionRate.textContent = '0%';
+        }
     }
 }
 
@@ -2223,35 +2328,72 @@ async function loadFinancialHistory() {
 }
 
 function renderFinancialHistory(entries) {
-    const historyList = document.getElementById('historyList');
-    if (!historyList) return;
+    const historyTableBody = document.getElementById('historyTableBody');
+    if (!historyTableBody) return;
 
-    historyList.innerHTML = '';
+    historyTableBody.innerHTML = '';
 
     if (entries.length === 0) {
-        historyList.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #9ca3af;">
-                <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                <p>Nenhum histórico financeiro encontrado</p>
-            </div>
+        historyTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">
+                    <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5; display: block;"></i>
+                    <p>Nenhum histórico financeiro encontrado</p>
+                </td>
+            </tr>
         `;
         return;
     }
 
     entries.forEach(entry => {
-        const entryCard = document.createElement('div');
-        entryCard.className = 'entry-card';
-        entryCard.innerHTML = `
-            <div class="entry-date">${entry.date}</div>
-            <div class="entry-type">${entry.type}</div>
-            <div class="entry-gross-revenue">R$ ${entry.grossRevenue.toFixed(2)}</div>
-            <div class="entry-chip-cost">R$ ${entry.chipCost.toFixed(2)}</div>
-            <div class="entry-additional-cost">R$ ${entry.additionalCost.toFixed(2)}</div>
-            <div class="entry-ads-cost">R$ ${entry.adsCost.toFixed(2)}</div>
-            <div class="entry-notes">${entry.notes || ''}</div>
+        const row = document.createElement('tr');
+        const entryDate = new Date(entry.date);
+        const formattedDate = entryDate.toLocaleDateString('pt-BR');
+        
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>R$ ${entry.grossRevenue.toFixed(2)}</td>
+            <td>R$ ${entry.totalExpenses.toFixed(2)}</td>
+            <td>R$ ${entry.netProfit.toFixed(2)}</td>
+            <td>${entry.notes || '-'}</td>
+            <td>
+                <button class="btn btn-small btn-outline" onclick="deleteEntry('${entry.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
         `;
-        historyList.appendChild(entryCard);
+        historyTableBody.appendChild(row);
     });
+}
+
+// Função para deletar entrada
+async function deleteEntry(entryId) {
+    if (!confirm('Tem certeza que deseja deletar esta entrada?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry/${entryId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada deletada com sucesso!', 'success');
+            // Recarregar histórico
+            loadFinancialHistory();
+            // Sincronizar outras abas
+            await syncAllFinancialData();
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao deletar entrada:', error);
+        showNotification('Erro ao deletar entrada', 'error');
+    }
 }
 
 // Carregar configuração da meta
