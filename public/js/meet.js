@@ -9,7 +9,6 @@ let isMuted = true;
 let isVideoOn = false;
 let isCallStarted = false;
 let meetingId = '';
-let meetingData = null;
 
 // Elementos DOM
 const nameScreen = document.getElementById('nameScreen');
@@ -31,7 +30,6 @@ const meetingIdElement = document.getElementById('meetingId');
 
 // Tela 3: Chamada
 const vslVideo = document.getElementById('vslVideo');
-const vslIframe = document.getElementById('vslIframe');
 const webcamVideo = document.getElementById('webcamVideo');
 const userVideoPlaceholder = document.getElementById('userVideoPlaceholder');
 const muteBtn = document.getElementById('muteBtn');
@@ -48,95 +46,23 @@ const chatMessages = document.getElementById('chatMessages');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== INICIANDO GOOGLE MEET CLONE ===');
+    // Bloquear acesso via computador
+    detectAndBlockDesktop();
     
-    // Obter ID da reunião da URL
-    const pathParts = window.location.pathname.split('/');
-    meetingId = pathParts[pathParts.length - 1];
+    // Bloquear inspeção
+    blockInspection();
     
-    if (meetingId === 'demo') {
-        // Modo demo - usar vídeo padrão
-        meetingData = {
-            meetingId: 'demo',
-            title: 'Demo Meeting',
-            video: {
-                url: 'https://guiaalpha.fun/wp-content/uploads/2025/07/CRIATIVO-10.mp4'
-            }
-        };
-        initializeDemo();
-    } else {
-        // Carregar dados da reunião da API
-        loadMeetingData();
-    }
+    console.log('=== INICIANDO GOOGLE MEET CLONE - CALLX ===');
     
-    // Inicializar componentes
-    initializeNameScreen();
-    initializeDeviceScreen();
-    initializeCallScreen();
-    initializeChat();
-});
-
-// Função para carregar dados da reunião
-async function loadMeetingData() {
-    try {
-        console.log('🔄 Carregando dados da reunião:', meetingId);
-        
-        // Limpar localStorage para nova reunião
-        localStorage.removeItem('googleMeetInCall');
-        localStorage.removeItem('googleMeetEnded');
-        console.log('🧹 LocalStorage limpo para nova reunião');
-        
-        const response = await fetch(`/api/meetings/${meetingId}`);
-        
-        if (response.ok) {
-            const result = await response.json();
-            meetingData = result.meeting;
-            accessInfo = result.accessInfo;
-            
-            console.log('✅ Reunião carregada:', meetingData);
-            console.log('📊 Informações de acesso:', accessInfo);
-            
-            // Verificar se é o criador ou primeira pessoa adicional
-            if (accessInfo.isCreator) {
-                console.log('👑 Usuário é o criador da reunião');
-            } else if (accessInfo.isFirstAdditional) {
-                console.log('🎯 Usuário é a primeira pessoa adicional a acessar');
-            } else {
-                console.log('👤 Usuário é pessoa adicional já autorizada');
-            }
-            
-            startVSL();
-        } else if (response.status === 403) {
-            const errorData = await response.json();
-            showErrorScreen('Acesso Negado', errorData.error, 'fa-users-slash');
-        } else if (response.status === 404) {
-            showErrorScreen('Reunião Não Encontrada', 'A reunião solicitada não existe ou foi removida.', 'fa-exclamation-triangle');
-        } else {
-            showErrorScreen('Erro', 'Ocorreu um erro ao carregar a reunião.', 'fa-exclamation-circle');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erro ao carregar dados da reunião:', error);
-        showErrorScreen('Erro ao carregar reunião');
+    // Obter dados da reunião da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const meetingIdFromUrl = urlParams.get('meetingId');
+    const videoUrl = urlParams.get('video');
+    
+    if (meetingIdFromUrl) {
+        meetingId = meetingIdFromUrl;
+        meetingIdElement.textContent = meetingId;
     }
-}
-
-// Função para registrar entrada na reunião
-async function registerMeetingJoin() {
-    try {
-        await fetch(`/api/meetings/${meetingId}/join`, {
-            method: 'POST'
-        });
-        console.log('✅ Entrada na reunião registrada');
-    } catch (error) {
-        console.error('❌ Erro ao registrar entrada:', error);
-    }
-}
-
-// Função para inicializar modo demo
-function initializeDemo() {
-    console.log('🎬 Iniciando modo demo');
-    meetingIdElement.textContent = 'demo';
     
     // Verificar se já está na chamada ou encerrada
     const isInCall = localStorage.getItem('googleMeetInCall');
@@ -148,33 +74,43 @@ function initializeDemo() {
     } else if (isInCall === 'true') {
         console.log('🔄 Usuário já estava na chamada - restaurando...');
         showCallScreen();
-        startCall();
+        startCall(videoUrl);
     } else {
         console.log('🆕 Primeira vez - mostrando tela de nome');
         showNameScreen();
     }
-}
-
-// Função para mostrar tela de erro
-function showErrorScreen(title = 'Erro', message = 'Ocorreu um erro inesperado.', icon = 'fa-exclamation-circle') {
-    console.log('❌ Mostrando tela de erro:', title, message);
     
-    // Esconder todas as telas
-    hideAllScreens();
-    
-    // Mostrar tela de erro
-    endedScreen.style.display = 'flex'; // Assuming endedScreen is the error screen
-    
-    // Atualizar conteúdo da tela de erro
-    const errorTitle = endedScreen.querySelector('.error-title');
-    const errorMessage = endedScreen.querySelector('.error-message');
-    const errorIcon = endedScreen.querySelector('.error-icon i');
-    
-    if (errorTitle) errorTitle.textContent = title;
-    if (errorMessage) errorMessage.textContent = message;
-    if (errorIcon) {
-        errorIcon.className = `fas ${icon}`;
+    // Gerar ID da reunião se não vier da URL
+    if (!meetingIdFromUrl) {
+        generateMeetingId();
     }
+    
+    // Inicializar componentes
+    initializeNameScreen();
+    initializeDeviceScreen();
+    initializeCallScreen();
+    initializeChat();
+});
+
+// Função para gerar ID da reunião
+function generateMeetingId() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let id = '';
+    for (let i = 0; i < 3; i++) {
+        id += chars[Math.floor(Math.random() * chars.length)];
+    }
+    id += '-';
+    for (let i = 0; i < 3; i++) {
+        id += chars[Math.floor(Math.random() * chars.length)];
+    }
+    id += '-';
+    for (let i = 0; i < 3; i++) {
+        id += chars[Math.floor(Math.random() * chars.length)];
+    }
+    
+    meetingId = id;
+    meetingIdElement.textContent = id;
+    console.log('ID da reunião gerado:', id);
 }
 
 // Função para mostrar tela de nome
@@ -194,6 +130,16 @@ function showDeviceScreen() {
     deviceScreen.style.display = 'flex';
     callScreen.style.display = 'none';
     endedScreen.style.display = 'none';
+    
+    // Verificar se a câmera foi ativada anteriormente
+    const cameraWasEnabled = localStorage.getItem('cameraEnabled') === 'true';
+    if (cameraWasEnabled) {
+        console.log('📹 Câmera foi ativada anteriormente - marcando como ativa');
+        isCameraEnabled = true;
+        cameraBtn.classList.add('active');
+        cameraBtn.classList.remove('disabled');
+    }
+    
     console.log('📱 Mostrando tela de dispositivos');
 }
 
@@ -279,11 +225,14 @@ async function toggleCamera() {
             previewVideo.style.display = 'block';
             previewPlaceholder.style.display = 'none';
             
-            isCameraEnabled = true;
-            cameraBtn.classList.add('active');
-            cameraBtn.classList.remove('disabled');
-            
-            console.log('✅ Câmera ativada com sucesso');
+                    isCameraEnabled = true;
+        cameraBtn.classList.add('active');
+        cameraBtn.classList.remove('disabled');
+        
+        // Salvar que a câmera foi ativada para usar na próxima tela
+        localStorage.setItem('cameraEnabled', 'true');
+        
+        console.log('✅ Câmera ativada com sucesso');
             
         } else {
             console.log('📹 Desativando câmera...');
@@ -378,10 +327,10 @@ function joinCall() {
 }
 
 // Função para iniciar a chamada
-function startCall() {
+function startCall(videoUrl = null) {
     console.log('=== INICIANDO CHAMADA ===');
     
-    // Iniciar webcam automaticamente se estava ativa
+    // Iniciar webcam automaticamente se estava ativa na tela anterior
     if (isCameraEnabled) {
         console.log('📹 Iniciando webcam automaticamente...');
         startWebcam();
@@ -389,7 +338,7 @@ function startCall() {
     
     // Iniciar VSL automaticamente
     console.log('🎬 Iniciando VSL automaticamente...');
-    startVSL();
+    startVSL(videoUrl);
     
     isCallStarted = true;
     
@@ -397,82 +346,62 @@ function startCall() {
 }
 
 // Função para iniciar VSL
-function startVSL() {
-    console.log('🎬 Iniciando VSL...');
+function startVSL(videoUrl = null) {
+    console.log('=== INICIANDO VSL ===');
     
-    if (!meetingData || !meetingData.video) {
-        console.error('❌ Dados do vídeo não encontrados');
-        return;
-    }
+    // Configurar o vídeo VSL
+    vslVideo.loop = false; // Não repetir
+    vslVideo.muted = false; // Com som
+    vslVideo.volume = 1.0; // Volume máximo
     
-    const videoUrl = meetingData.video.url;
-    console.log('📹 URL do vídeo:', videoUrl);
-    
-    // Verificar se é um vídeo do YouTube
-    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-        const videoId = extractYouTubeId(videoUrl);
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
-        
-        console.log('🎥 Configurando vídeo do YouTube:', embedUrl);
-        
-        vslIframe.src = embedUrl;
-        vslIframe.style.display = 'block';
-        vslVideo.style.display = 'none';
-        
-        // Adicionar listener para detectar quando o vídeo termina
-        vslIframe.onload = function() {
-            console.log('✅ Iframe do YouTube carregado');
-            // Para YouTube, vamos usar um timer baseado no tempo estimado do vídeo
-            // Como não podemos detectar diretamente o fim do vídeo do YouTube via iframe,
-            // vamos usar um timeout de 20 minutos como fallback
-            setTimeout(() => {
-                console.log('⏰ Timeout do YouTube atingido - encerrando reunião');
-                endCallAndDeleteMeeting();
-            }, 20 * 60 * 1000); // 20 minutos
-        };
-        
-    } else {
-        // Vídeo local ou de outra fonte
-        console.log('🎥 Configurando vídeo local:', videoUrl);
-        
+    // Definir fonte do vídeo
+    if (videoUrl) {
+        console.log('🎬 Carregando vídeo da URL:', videoUrl);
         vslVideo.src = videoUrl;
-        vslVideo.style.display = 'block';
-        vslIframe.style.display = 'none';
-        
-        // Adicionar listener para detectar quando o vídeo termina
-        vslVideo.addEventListener('ended', function() {
-            console.log('🎬 Vídeo terminou - encerrando reunião');
-            endCallAndDeleteMeeting();
-        });
-        
-        // Adicionar listener para erros de vídeo
-        vslVideo.addEventListener('error', function(e) {
-            console.error('❌ Erro no vídeo:', e);
-            showErrorScreen('Erro no Vídeo', 'Não foi possível reproduzir o vídeo.', 'fa-video-slash');
-        });
-        
-        // Iniciar reprodução
-        vslVideo.play().catch(error => {
-            console.error('❌ Erro ao reproduzir vídeo:', error);
-            showErrorScreen('Erro de Reprodução', 'Não foi possível reproduzir o vídeo automaticamente.', 'fa-play-circle');
-        });
-    }
-    
-    // Verificar se já está na chamada ou encerrada
-    const isInCall = localStorage.getItem('googleMeetInCall');
-    const isEnded = localStorage.getItem('googleMeetEnded');
-    
-    if (isEnded === 'true') {
-        console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
-        showEndedScreen();
-    } else if (isInCall === 'true') {
-        console.log('🔄 Usuário já estava na chamada - restaurando...');
-        showCallScreen();
-        startCall();
     } else {
-        console.log('🆕 Primeira vez - mostrando tela de nome');
-        showNameScreen();
+        console.log('🎬 Usando vídeo padrão');
+        vslVideo.src = 'CRIATIVO 6.mp4';
     }
+    
+    vslVideo.addEventListener('loadstart', function() {
+        console.log('🔄 VSL: Iniciando carregamento');
+    });
+    
+    vslVideo.addEventListener('loadedmetadata', function() {
+        console.log('📊 VSL: Metadados carregados');
+        // Restaurar posição salva do vídeo
+        restoreVideoPosition();
+    });
+
+    vslVideo.addEventListener('canplay', function() {
+        console.log('▶️ VSL: Pode começar a reproduzir');
+    });
+    
+    vslVideo.addEventListener('play', function() {
+        console.log('▶️ VSL: Reprodução iniciada');
+    });
+
+    vslVideo.addEventListener('error', function(e) {
+        console.error('❌ VSL: Erro durante carregamento/reprodução:', e);
+    });
+    
+    // Listener para quando o vídeo termina
+    vslVideo.addEventListener('ended', function() {
+        console.log('🎬 VSL: Vídeo terminou - encerrando chamada automaticamente');
+        endCall();
+    });
+    
+    // Salvar posição do vídeo periodicamente
+    setInterval(function() {
+        if (!vslVideo.paused && !vslVideo.ended && vslVideo.currentTime > 0) {
+            saveVideoPosition();
+        }
+    }, 1000); // Salvar a cada segundo
+    
+    // Tentar reproduzir automaticamente
+    setTimeout(function() {
+        attemptAutoplay();
+    }, 500);
 }
 
 // Função para tentar autoplay
@@ -560,6 +489,8 @@ function stopWebcam() {
     console.log('Webcam desativada');
 }
 
+
+
 // Inicializar tela de chamada
 function initializeCallScreen() {
     // Botão de mudo
@@ -597,6 +528,11 @@ function endCall() {
     // Limpar localStorage e marcar como encerrada
     localStorage.removeItem('googleMeetInCall');
     localStorage.setItem('googleMeetEnded', 'true');
+    
+    // Limpar posição do vídeo quando a chamada terminar
+    localStorage.removeItem('videoPosition');
+    localStorage.removeItem('videoLastUpdate');
+    localStorage.removeItem('cameraEnabled');
     
     // Parar webcam
     stopWebcam();
@@ -665,7 +601,6 @@ function updateVideoButton() {
 // Inicializar chat
 function initializeChat() {
     let isChatOpen = false;
-    let chatMessages = [];
 
     // Botão de chat
     chatBtn.addEventListener('click', function() {
@@ -677,10 +612,25 @@ function initializeChat() {
         closeChat();
     });
 
-    // Enviar mensagem
-    chatSendBtn.addEventListener('click', function() {
-        sendMessage();
-    });
+    // Enviar mensagem - múltiplos eventos para garantir
+    if (chatSendBtn) {
+        console.log('✅ Botão de enviar encontrado:', chatSendBtn);
+        
+        chatSendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔵 Botão de enviar clicado!');
+            sendMessage();
+        });
+        
+        chatSendBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            console.log('🔵 Botão de enviar pressionado!');
+            sendMessage();
+        });
+    } else {
+        console.error('❌ Botão de enviar não encontrado!');
+    }
 
     // Enter para enviar
     chatInput.addEventListener('keypress', function(e) {
@@ -718,9 +668,13 @@ function initializeChat() {
     }
 
     function sendMessage() {
+        console.log('📤 Função sendMessage chamada');
         const messageText = chatInput.value.trim();
         
+        console.log('📝 Texto da mensagem:', messageText);
+        
         if (messageText === '') {
+            console.log('❌ Mensagem vazia, não enviando');
             return;
         }
         
@@ -732,19 +686,13 @@ function initializeChat() {
             own: true
         };
         
-        // Adicionar à lista
-        chatMessages.push(message);
-        
         // Exibir mensagem
         displayMessage(message);
         
         // Limpar input
         chatInput.value = '';
         
-        // Simular resposta
-        setTimeout(() => {
-            simulateResponse();
-        }, 1000);
+
         
         console.log('Mensagem enviada:', messageText);
     }
@@ -752,7 +700,17 @@ function initializeChat() {
     function displayMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.className = `message ${message.own ? 'own' : ''}`;
-        messageElement.textContent = message.text;
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = message.text;
+        
+        const messageTime = document.createElement('div');
+        messageTime.className = 'message-time';
+        messageTime.textContent = formatTime(message.timestamp);
+        
+        messageElement.appendChild(messageContent);
+        messageElement.appendChild(messageTime);
         
         chatMessages.appendChild(messageElement);
         
@@ -760,26 +718,45 @@ function initializeChat() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function simulateResponse() {
-        const responses = [
-            'Mensagem recebida!',
-            'Obrigado pela mensagem.',
-            'Entendi.',
-            'Perfeito!',
-            'Certo, vou verificar isso.'
-        ];
+
+
+    function formatTime(date) {
+        return date.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    }
+}
+
+// Função para salvar a posição atual do vídeo
+function saveVideoPosition() {
+    if (vslVideo && !isNaN(vslVideo.currentTime)) {
+        localStorage.setItem('videoPosition', vslVideo.currentTime.toString());
+        localStorage.setItem('videoLastUpdate', Date.now().toString());
+        console.log('💾 Posição do vídeo salva:', vslVideo.currentTime);
+    }
+}
+
+// Função para restaurar a posição do vídeo
+function restoreVideoPosition() {
+    const savedPosition = localStorage.getItem('videoPosition');
+    const lastUpdateTime = localStorage.getItem('videoLastUpdate');
+    
+    if (savedPosition && vslVideo && lastUpdateTime) {
+        const position = parseFloat(savedPosition);
+        const lastUpdate = parseInt(lastUpdateTime);
+        const currentTime = Date.now();
         
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        
-        const responseMessage = {
-            id: Date.now(),
-            text: randomResponse,
-            timestamp: new Date(),
-            own: false
-        };
-        
-        chatMessages.push(responseMessage);
-        displayMessage(responseMessage);
+        // Só restaura se a última atualização foi há menos de 30 segundos
+        // Isso evita que atualizações múltiplas restaurem posições antigas
+        if (!isNaN(position) && position > 0 && (currentTime - lastUpdate) < 30000) {
+            vslVideo.currentTime = position;
+            console.log('🔄 Posição do vídeo restaurada:', position);
+        } else {
+            console.log('⏭️ Posição muito antiga, começando do início');
+            localStorage.removeItem('videoPosition');
+            localStorage.removeItem('videoLastUpdate');
+        }
     }
 }
 
@@ -814,40 +791,98 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Função para encerrar chamada e deletar reunião
-async function endCallAndDeleteMeeting() {
-    console.log('🔚 Encerrando chamada e deletando reunião...');
+console.log('Google Meet Clone inicializado com sucesso!');
+
+// Função para detectar e bloquear acesso via computador
+function detectAndBlockDesktop() {
+    // Detectar se é desktop
+    const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     
-    try {
-        // Primeiro, marcar a reunião como encerrada
-        const endResponse = await fetch(`/api/meetings/${meetingId}/end-video`, {
-            method: 'POST'
-        });
-        
-        if (endResponse.ok) {
-            console.log('✅ Reunião marcada como encerrada');
-        } else {
-            console.error('❌ Erro ao encerrar reunião:', await endResponse.text());
-        }
-        
-        // Mostrar tela de encerramento
-        showEndedScreen();
-        
-        // Limpar localStorage
-        localStorage.removeItem('googleMeetInCall');
-        localStorage.setItem('googleMeetEnded', 'true');
-        
-    } catch (error) {
-        console.error('❌ Erro ao encerrar reunião:', error);
-        showErrorScreen('Erro', 'Erro ao encerrar a reunião.', 'fa-exclamation-circle');
+    if (isDesktop) {
+        // Redirecionar para o vídeo do YouTube
+        console.log('🚫 Acesso via desktop - redirecionando para YouTube');
+        window.location.href = 'https://www.youtube.com/watch?v=5rOTmG7ly9g';
+        return;
     }
+    
+    console.log('✅ Acesso via dispositivo móvel permitido');
 }
 
-// Função para extrair ID do YouTube
-function extractYouTubeId(url) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+// Função para bloquear inspeção
+function blockInspection() {
+    // Bloquear F12
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.shiftKey && e.key === 'J') || (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+    
+    // Bloquear clique direito
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+    
+    // Bloquear seleção de texto
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+    
+    // Bloquear arrastar elementos
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+    
+    // Bloquear DevTools via console
+    setInterval(function() {
+        const devtools = /./;
+        devtools.toString = function() {
+            this.opened = true;
+        }
+        console.log('%c', devtools);
+        console.clear();
+    }, 1000);
+    
+    // Bloquear inspeção via tamanho da janela
+    let devtools = { open: false, orientation: null };
+    setInterval(function() {
+        const threshold = 160;
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        
+        if (widthThreshold || heightThreshold) {
+            if (!devtools.open) {
+                devtools.open = true;
+                document.body.innerHTML = `
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100vh;
+                        background: #d32f2f;
+                        color: white;
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        padding: 20px;
+                    ">
+                        <div>
+                            <h1>🚫 Acesso Negado</h1>
+                            <p>Inspeção de código não é permitida.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            devtools.open = false;
+        }
+    }, 500);
+    
+    console.log('🔒 Proteções contra inspeção ativadas');
 }
-
-console.log('Google Meet Clone inicializado com sucesso!'); 

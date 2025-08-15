@@ -3,6 +3,22 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Proteções adicionais */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -591,6 +607,8 @@ body {
     cursor: pointer;
     color: #ffffff;
     transition: background-color 0.2s;
+    position: relative;
+    z-index: 10;
 }
 
 .chat-send:hover {
@@ -610,12 +628,26 @@ body {
     font-size: 14px;
     color: #333;
     word-wrap: break-word;
+    position: relative;
 }
 
 .message.own {
     background: #e3f2fd;
     margin-left: 20px;
 }
+
+.message-content {
+    margin-bottom: 2px;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #5f6368;
+    text-align: right;
+    margin-top: 2px;
+}
+
+
 
 /* Tela 4: Chamada Encerrada */
 #endedScreen {
@@ -650,148 +682,31 @@ body {
     line-height: 1.5;
 }
 
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
+.whatsapp-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-}
-
-.btn-primary {
-    background-color: #1a73e8;
+    gap: 12px;
+    background: #25d366;
     color: #ffffff;
+    text-decoration: none;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s;
 }
 
-.btn-primary:hover {
-    background-color: #1557b0;
+.whatsapp-btn:hover {
+    background: #128c7e;
 }
 
-/* ===== RESPONSIVIDADE COMPLETA - MEET ===== */
-
-/* Desktop Large (1200px+) */
-@media (min-width: 1200px) {
-    .meet-container {
-        max-width: 1400px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 70vh;
-    }
-    
-    .user-video {
-        width: 200px;
-        height: 120px;
-    }
+.whatsapp-btn svg {
+    width: 24px;
+    height: 24px;
 }
 
-/* Desktop Medium (992px - 1199px) */
-@media (max-width: 1199px) and (min-width: 992px) {
-    .meet-container {
-        max-width: 960px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 65vh;
-    }
-    
-    .user-video {
-        width: 180px;
-        height: 110px;
-    }
-}
-
-/* Tablet (768px - 991px) */
-@media (max-width: 991px) and (min-width: 768px) {
-    .meet-container {
-        max-width: 720px;
-        padding: 0 16px;
-    }
-    
-    .name-form {
-        padding: 0 24px;
-    }
-    
-    .device-setup {
-        padding: 24px;
-        gap: 32px;
-    }
-    
-    .preview-container {
-        height: 300px;
-    }
-    
-    .device-controls {
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .device-btn {
-        min-width: 250px;
-        padding: 14px 20px;
-    }
-    
-    .join-btn {
-        min-width: 300px;
-        padding: 16px 32px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 60vh;
-    }
-    
-    .user-video {
-        width: 140px;
-        height: 90px;
-        bottom: 120px;
-        right: 20px;
-    }
-    
-    .control-buttons {
-        gap: 16px;
-        padding: 16px 24px;
-    }
-    
-    .control-btn {
-        width: 52px;
-        height: 52px;
-    }
-    
-    .chat-popup {
-        width: 80vw;
-        height: 80vh;
-    }
-}
-
-/* Mobile Large (576px - 767px) */
-@media (max-width: 767px) and (min-width: 576px) {
-    .meet-container {
-        max-width: 540px;
-        padding: 0 12px;
-    }
-    
-    .name-form {
-        padding: 0 20px;
-    }
-    
-    .device-setup {
-        padding: 20px;
-        gap: 28px;
-    }
-    
-    .preview-container {
-        height: 250px;
-    }
-    
+/* Responsividade */
+@media (max-width: 768px) {
     .device-controls {
         flex-direction: column;
         gap: 12px;
@@ -799,17 +714,14 @@ body {
     
     .device-btn {
         min-width: 200px;
-        padding: 12px 18px;
     }
     
     .join-btn {
         min-width: 250px;
-        padding: 14px 28px;
     }
     
-    .vsl-video,
-    .vsl-iframe {
-        height: 55vh;
+    .preview-container {
+        height: 250px;
     }
     
     .user-video {
@@ -836,19 +748,9 @@ body {
     .call-header {
         padding: 12px 16px;
     }
-    
-    .chat-popup {
-        width: 90vw;
-        height: 75vh;
-    }
 }
 
-/* Mobile Small (320px - 575px) */
-@media (max-width: 575px) {
-    .meet-container {
-        padding: 0 8px;
-    }
-    
+@media (max-width: 480px) {
     .name-form {
         padding: 0 16px;
     }
@@ -862,26 +764,14 @@ body {
         height: 200px;
     }
     
-    .device-controls {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
     .device-btn {
         min-width: 150px;
         padding: 12px 16px;
-        font-size: 14px;
     }
     
     .join-btn {
         min-width: 200px;
         padding: 12px 24px;
-        font-size: 14px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 50vh;
     }
     
     .user-video {
@@ -901,14 +791,6 @@ body {
         height: 44px;
     }
     
-    .meet-header {
-        padding: 10px 12px;
-    }
-    
-    .call-header {
-        padding: 10px 12px;
-    }
-    
     .chat-popup {
         width: 95vw;
         height: 70vh;
@@ -917,141 +799,6 @@ body {
     
     .chat-header {
         padding: 12px 16px;
-    }
-    
-    .chat-messages {
-        padding: 12px;
-    }
-    
-    .chat-input {
-        padding: 10px 12px;
-        font-size: 14px;
-    }
-}
-
-/* Mobile Extra Small (320px e abaixo) */
-@media (max-width: 320px) {
-    .meet-container {
-        padding: 0 4px;
-    }
-    
-    .name-form {
-        padding: 0 12px;
-    }
-    
-    .device-setup {
-        padding: 12px;
-        gap: 20px;
-    }
-    
-    .preview-container {
-        height: 180px;
-    }
-    
-    .device-btn {
-        min-width: 120px;
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-    
-    .join-btn {
-        min-width: 160px;
-        padding: 10px 20px;
-        font-size: 13px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 45vh;
-    }
-    
-    .user-video {
-        width: 80px;
-        height: 50px;
-        bottom: 60px;
-        right: 8px;
-    }
-    
-    .control-buttons {
-        gap: 6px;
-        padding: 8px 12px;
-    }
-    
-    .control-btn {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .chat-popup {
-        width: 98vw;
-        height: 65vh;
-    }
-}
-
-/* Orientação Landscape em Mobile */
-@media (max-width: 767px) and (orientation: landscape) {
-    .hero {
-        padding: 20px 0;
-    }
-    
-    .name-form {
-        padding: 0 20px;
-    }
-    
-    .device-setup {
-        padding: 16px 20px;
-        gap: 20px;
-    }
-    
-    .preview-container {
-        height: 180px;
-    }
-    
-    .vsl-video,
-    .vsl-iframe {
-        height: 40vh;
-    }
-    
-    .user-video {
-        width: 100px;
-        height: 60px;
-        bottom: 60px;
-        right: 12px;
-    }
-    
-    .control-buttons {
-        padding: 8px 16px;
-    }
-    
-    .control-btn {
-        width: 40px;
-        height: 40px;
-    }
-}
-
-/* Ajustes para telas de alta resolução */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .btn,
-    .control-btn,
-    .device-btn {
-        border-radius: 8px;
-    }
-}
-
-/* Ajustes para dispositivos com tela de toque */
-@media (hover: none) and (pointer: coarse) {
-    .btn:hover,
-    .control-btn:hover,
-    .device-btn:hover {
-        transform: none;
-    }
-    
-    .btn:active,
-    .control-btn:active,
-    .device-btn:active {
-        transform: scale(0.98);
-    }
-}
     }
     
     .chat-messages {
@@ -1077,6 +824,11 @@ body {
     .ended-content p {
         font-size: 14px;
     }
+    
+    .whatsapp-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
 }
 
 /* Estilos específicos para iOS */
@@ -1091,4 +843,8 @@ body {
         -webkit-playsinline: true;
         -webkit-presentation-mode: inline;
     }
-} 
+}
+
+
+
+
