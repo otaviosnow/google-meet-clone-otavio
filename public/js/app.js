@@ -1718,7 +1718,17 @@ async function addQuickEntry(e) {
             }
         } else {
             const error = await response.json();
-            showNotification(error.error, 'error');
+            
+            // Se já existe uma entrada para esta data, oferecer opção de atualizar
+            if (error.error === 'Já existe uma entrada para esta data' && error.existingEntry) {
+                const shouldUpdate = confirm(`Já existe uma entrada para hoje. Deseja atualizar a entrada existente?\n\nEntrada atual:\n- Faturamento: R$ ${error.existingEntry.grossRevenue.toFixed(2)}\n- Custo com Chip: R$ ${error.existingEntry.chipCost.toFixed(2)}\n- Custo Adicional: R$ ${error.existingEntry.additionalCost.toFixed(2)}\n- Custo com Ads: R$ ${error.existingEntry.adsCost.toFixed(2)}`);
+                
+                if (shouldUpdate) {
+                    await updateExistingQuickEntry(error.existingEntry.id);
+                }
+            } else {
+                showNotification(error.error, 'error');
+            }
         }
     } catch (error) {
         console.error('Erro ao adicionar entrada rápida:', error);
@@ -1784,7 +1794,17 @@ async function addManualEntry(e) {
             }
         } else {
             const error = await response.json();
-            showNotification(error.error, 'error');
+            
+            // Se já existe uma entrada para esta data, oferecer opção de atualizar
+            if (error.error === 'Já existe uma entrada para esta data' && error.existingEntry) {
+                const shouldUpdate = confirm(`Já existe uma entrada para esta data. Deseja atualizar a entrada existente?\n\nEntrada atual:\n- Faturamento: R$ ${error.existingEntry.grossRevenue.toFixed(2)}\n- Custo com Chip: R$ ${error.existingEntry.chipCost.toFixed(2)}\n- Custo Adicional: R$ ${error.existingEntry.additionalCost.toFixed(2)}\n- Custo com Ads: R$ ${error.existingEntry.adsCost.toFixed(2)}`);
+                
+                if (shouldUpdate) {
+                    await updateExistingEntry(error.existingEntry.id);
+                }
+            } else {
+                showNotification(error.error, 'error');
+            }
         }
     } catch (error) {
         console.error('Erro ao adicionar entrada manual:', error);
@@ -2364,6 +2384,109 @@ function renderFinancialHistory(entries) {
         `;
         historyTableBody.appendChild(row);
     });
+}
+
+// Função para atualizar entrada rápida existente
+async function updateExistingQuickEntry(entryId) {
+    const grossRevenue = parseFloat(document.getElementById('quickGrossRevenue').value) || 0;
+    const chipCost = parseFloat(document.getElementById('quickChipCost').value) || 0;
+    const additionalCost = parseFloat(document.getElementById('quickAdditionalCost').value) || 0;
+    const adsCost = parseFloat(document.getElementById('quickAdsCost').value) || 0;
+    const notes = document.getElementById('quickNotes').value;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry/${entryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                grossRevenue,
+                chipCost,
+                additionalCost,
+                adsCost,
+                notes
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada rápida atualizada com sucesso!', 'success');
+            // Limpar campos
+            document.getElementById('quickGrossRevenue').value = '';
+            document.getElementById('quickChipCost').value = '';
+            document.getElementById('quickAdditionalCost').value = '';
+            document.getElementById('quickAdsCost').value = '';
+            document.getElementById('quickNotes').value = '';
+            
+            // Sincronizar todas as abas
+            await syncAllFinancialData();
+            
+            // Atualizar histórico se estiver na aba de histórico
+            const activeTab = document.querySelector('.tab-btn.active[data-tab]');
+            if (activeTab && activeTab.dataset.tab === 'history') {
+                loadFinancialHistory();
+            }
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar entrada rápida:', error);
+        showNotification('Erro ao atualizar entrada rápida', 'error');
+    }
+}
+
+// Função para atualizar entrada existente
+async function updateExistingEntry(entryId) {
+    const grossRevenue = parseFloat(document.getElementById('manualGrossRevenue').value) || 0;
+    const chipCost = parseFloat(document.getElementById('manualChipCost').value) || 0;
+    const additionalCost = parseFloat(document.getElementById('manualAdditionalCost').value) || 0;
+    const adsCost = parseFloat(document.getElementById('manualAdsCost').value) || 0;
+    const notes = document.getElementById('manualNotes').value;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/financial/entry/${entryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                grossRevenue,
+                chipCost,
+                additionalCost,
+                adsCost,
+                notes
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Entrada atualizada com sucesso!', 'success');
+            // Limpar campos
+            document.getElementById('manualDate').value = '';
+            document.getElementById('manualGrossRevenue').value = '';
+            document.getElementById('manualChipCost').value = '';
+            document.getElementById('manualAdditionalCost').value = '';
+            document.getElementById('manualAdsCost').value = '';
+            document.getElementById('manualNotes').value = '';
+            
+            // Sincronizar todas as abas
+            await syncAllFinancialData();
+            
+            // Atualizar histórico se estiver na aba de histórico
+            const activeTab = document.querySelector('.tab-btn.active[data-tab]');
+            if (activeTab && activeTab.dataset.tab === 'history') {
+                loadFinancialHistory();
+            }
+        } else {
+            const error = await response.json();
+            showNotification(error.error, 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar entrada:', error);
+        showNotification('Erro ao atualizar entrada', 'error');
+    }
 }
 
 // Função para deletar entrada

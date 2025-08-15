@@ -212,7 +212,16 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     
     if (existingEntry) {
       return res.status(400).json({
-        error: 'Já existe uma entrada para esta data'
+        error: 'Já existe uma entrada para esta data',
+        existingEntry: {
+          id: existingEntry._id,
+          date: existingEntry.date,
+          grossRevenue: existingEntry.grossRevenue,
+          chipCost: existingEntry.chipCost,
+          additionalCost: existingEntry.additionalCost,
+          adsCost: existingEntry.adsCost,
+          notes: existingEntry.notes
+        }
       });
     }
     
@@ -380,6 +389,95 @@ router.get('/history', authenticateToken, async (req, res) => {
     
   } catch (error) {
     console.error('Erro ao obter histórico financeiro:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// PUT /api/financial/entry/:id - Atualizar entrada
+router.put('/entry/:id', authenticateToken, entryValidation, handleValidationErrors, async (req, res) => {
+  try {
+    const { grossRevenue, chipCost, additionalCost, adsCost, notes } = req.body;
+    
+    const entry = await FinancialEntry.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+    
+    if (!entry) {
+      return res.status(404).json({
+        error: 'Entrada não encontrada'
+      });
+    }
+    
+    // Calcular valores anteriores
+    const startOfMonth = new Date(entry.date.getFullYear(), entry.date.getMonth(), 1);
+    const endOfMonth = new Date(entry.date.getFullYear(), entry.date.getMonth() + 1, 0);
+    
+    const existingEntries = await FinancialEntry.find({
+      user: req.user._id,
+      date: { $gte: startOfMonth, $lte: endOfMonth },
+      _id: { $ne: entry._id } // Excluir a entrada atual
+    });
+    
+    const previousTotalRevenue = existingEntries.reduce((sum, e) => sum + e.grossRevenue, 0) + entry.grossRevenue;
+    const previousTotalExpenses = existingEntries.reduce((sum, e) => sum + e.totalExpenses, 0) + entry.totalExpenses;
+    const previousTotalProfit = existingEntries.reduce((sum, e) => sum + e.netProfit, 0) + entry.netProfit;
+    
+    const previousValues = {
+      totalRevenue: previousTotalRevenue,
+      totalExpenses: previousTotalExpenses,
+      totalProfit: previousTotalProfit,
+      goalProgress: 0
+    };
+    
+    // Atualizar entrada
+    entry.grossRevenue = grossRevenue || 0;
+    entry.chipCost = chipCost || 0;
+    entry.additionalCost = additionalCost || 0;
+    entry.adsCost = adsCost || 0;
+    entry.notes = notes;
+    
+    await entry.save();
+    
+    // Calcular novos valores
+    const newTotalRevenue = existingEntries.reduce((sum, e) => sum + e.grossRevenue, 0) + entry.grossRevenue;
+    const newTotalExpenses = existingEntries.reduce((sum, e) => sum + e.totalExpenses, 0) + entry.totalExpenses;
+    const newTotalProfit = existingEntries.reduce((sum, e) => sum + e.netProfit, 0) + entry.netProfit;
+    
+    // Calcular progresso da meta
+    const currentMonth = entry.date.toISOString().slice(0, 7);
+    const goal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
+    const goalProgress = goal && goal.monthlyGoal > 0 ? Math.min((newTotalProfit / goal.monthlyGoal) * 100, 100) : 0;
+    
+    const newValues = {
+      totalRevenue: newTotalRevenue,
+      totalExpenses: newTotalExpenses,
+      totalProfit: newTotalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100
+    };
+    
+    // Criar histórico de atualização
+    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
+    
+    res.json({
+      message: 'Entrada atualizada com sucesso',
+      entry: {
+        id: entry._id,
+        date: entry.date,
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
+        notes: entry.notes
+      }
+    });
+    
+  } catch (error) {
+    console.error('Erro ao atualizar entrada:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
