@@ -50,17 +50,17 @@ const entryValidation = [
     .isISO8601()
     .withMessage('Data inválida'),
   body('grossRevenue')
-    .isFloat({ min: 0 })
-    .withMessage('Faturamento bruto deve ser um número positivo'),
+    .isFloat()
+    .withMessage('Faturamento bruto deve ser um número válido'),
   body('chipCost')
-    .isFloat({ min: 0 })
-    .withMessage('Custo com chip deve ser um número positivo'),
+    .isFloat()
+    .withMessage('Custo com chip deve ser um número válido'),
   body('additionalCost')
-    .isFloat({ min: 0 })
-    .withMessage('Custo adicional deve ser um número positivo'),
+    .isFloat()
+    .withMessage('Custo adicional deve ser um número válido'),
   body('adsCost')
-    .isFloat({ min: 0 })
-    .withMessage('Custo com ads deve ser um número positivo')
+    .isFloat()
+    .withMessage('Custo com ads deve ser um número válido')
 ];
 
 // GET /api/financial/summary - Obter resumo financeiro do mês atual

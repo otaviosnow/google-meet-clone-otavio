@@ -12,23 +12,19 @@ const financialEntrySchema = new mongoose.Schema({
   },
   grossRevenue: {
     type: Number,
-    default: 0,
-    min: [0, 'Faturamento bruto não pode ser negativo']
+    default: 0
   },
   chipCost: {
     type: Number,
-    default: 0,
-    min: [0, 'Custo com chip não pode ser negativo']
+    default: 0
   },
   additionalCost: {
     type: Number,
-    default: 0,
-    min: [0, 'Custo adicional não pode ser negativo']
+    default: 0
   },
   adsCost: {
     type: Number,
-    default: 0,
-    min: [0, 'Custo com ads não pode ser negativo']
+    default: 0
   },
   totalExpenses: {
     type: Number,
