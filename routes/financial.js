@@ -60,6 +60,7 @@ const goalValidation = [
 
 const entryValidation = [
   body('date')
+    .optional()
     .isISO8601()
     .withMessage('Data inválida'),
   body('grossRevenue')
@@ -253,7 +254,7 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       { user: req.user._id, currentMonth },
       { 
         monthlyGoal,
-        deadlineDate: new Date(deadlineDate)
+        deadlineDate: new Date(finalDeadlineDate)
       },
       { upsert: true, new: true }
     );
