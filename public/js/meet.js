@@ -46,9 +46,6 @@ const chatMessages = document.getElementById('chatMessages');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    // Bloquear acesso via computador
-    detectAndBlockDesktop();
-    
     // Bloquear inspeção
     blockInspection();
     
@@ -793,20 +790,7 @@ document.addEventListener('keydown', function(event) {
 
 console.log('Google Meet Clone inicializado com sucesso!');
 
-// Função para detectar e bloquear acesso via computador
-function detectAndBlockDesktop() {
-    // Detectar se é desktop
-    const isDesktop = !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    
-    if (isDesktop) {
-        // Redirecionar para o vídeo do YouTube
-        console.log('🚫 Acesso via desktop - redirecionando para YouTube');
-        window.location.href = 'https://www.youtube.com/watch?v=5rOTmG7ly9g';
-        return;
-    }
-    
-    console.log('✅ Acesso via dispositivo móvel permitido');
-}
+
 
 // Função para bloquear inspeção
 function blockInspection() {
