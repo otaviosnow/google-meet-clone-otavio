@@ -2000,115 +2000,211 @@ function updateTrends(data) {
 
 // Salvar meta mensal
 async function saveMonthlyGoal() {
+    console.log('🎯 [FRONTEND-META] Iniciando salvamento de meta');
+    
     const goal = parseFloat(document.getElementById('monthlyGoal').value);
-    const goalType = document.getElementById('goalType').value;
-    const goalDeadline = document.getElementById('goalDeadline').value;
-    const goalPriority = document.getElementById('goalPriority').value;
-    const goalDescription = document.getElementById('goalDescription').value;
+    const goalType = document.getElementById('goalType')?.value;
+    const goalDeadline = document.getElementById('goalDeadline')?.value;
+    const goalPriority = document.getElementById('goalPriority')?.value;
+    const goalDescription = document.getElementById('goalDescription')?.value;
+    
+    console.log('📝 [FRONTEND-META] Valores capturados:', {
+        goal,
+        goalType,
+        goalDeadline,
+        goalPriority,
+        goalDescription
+    });
     
     if (isNaN(goal) || goal < 0) {
+        console.log('❌ [FRONTEND-META] Meta inválida:', goal);
         showNotification('Meta deve ser um número positivo', 'error');
         return;
     }
     
+    const deadlineDate = goalDeadline || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
+    
+    console.log('📅 [FRONTEND-META] Data limite calculada:', deadlineDate);
+    
+    const requestBody = { 
+        monthlyGoal: goal,
+        deadlineDate: deadlineDate
+    };
+    
+    console.log('📤 [FRONTEND-META] Dados a serem enviados:', requestBody);
+    
     try {
+        console.log('🌐 [FRONTEND-META] Enviando requisição para:', `${API_BASE_URL}/financial/goal`);
+        
         const response = await fetch(`${API_BASE_URL}/financial/goal`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ 
-                monthlyGoal: goal,
-                deadlineDate: goalDeadline || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString()
-            })
+            body: JSON.stringify(requestBody)
         });
         
+        console.log('📥 [FRONTEND-META] Resposta recebida - Status:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ [FRONTEND-META] Meta salva com sucesso:', result);
             showNotification('Meta salva com sucesso!', 'success');
+            
+            console.log('🔄 [FRONTEND-META] Iniciando sincronização de dados');
             // Sincronizar dados em todas as abas
             await syncAllFinancialData();
+            console.log('✅ [FRONTEND-META] Sincronização concluída');
         } else {
             const error = await response.json();
+            console.log('❌ [FRONTEND-META] Erro na resposta:', error);
             showNotification(error.error, 'error');
         }
     } catch (error) {
-        console.error('Erro ao salvar meta:', error);
+        console.error('❌ [FRONTEND-META] Erro ao salvar meta:', error);
         showNotification('Erro ao salvar meta', 'error');
     }
 }
 
 // Função para sincronizar todos os dados financeiros entre abas
 async function syncAllFinancialData() {
+    console.log('🔄 [FRONTEND-SYNC] Iniciando sincronização de dados financeiros');
+    
     try {
+        console.log('🌐 [FRONTEND-SYNC] Buscando dados do resumo financeiro');
         const response = await fetch(`${API_BASE_URL}/financial/summary`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
             }
         });
         
+        console.log('📥 [FRONTEND-SYNC] Resposta recebida - Status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 [FRONTEND-SYNC] Dados recebidos:', {
+                monthlyGoal: data.monthlyGoal,
+                totalProfit: data.totalProfit,
+                totalRevenue: data.totalRevenue,
+                totalExpenses: data.totalExpenses,
+                daysRemaining: data.daysRemaining,
+                entriesCount: data.entries?.length || 0
+            });
             
             // Atualizar todas as abas com os dados sincronizados
+            console.log('🔄 [FRONTEND-SYNC] Atualizando todas as abas');
             updateAllTabsWithData(data);
             
             // Calcular projeções e métricas
+            console.log('📈 [FRONTEND-SYNC] Calculando projeções e métricas');
             calculateAllMetrics(data);
             
+            console.log('✅ [FRONTEND-SYNC] Sincronização concluída com sucesso');
         } else {
-            console.error('Erro ao carregar dados para sincronização');
+            console.error('❌ [FRONTEND-SYNC] Erro ao carregar dados para sincronização - Status:', response.status);
+            const error = await response.json();
+            console.error('❌ [FRONTEND-SYNC] Detalhes do erro:', error);
         }
     } catch (error) {
-        console.error('Erro na sincronização:', error);
+        console.error('❌ [FRONTEND-SYNC] Erro na sincronização:', error);
     }
 }
 
 // Atualizar todas as abas com dados sincronizados
 function updateAllTabsWithData(data) {
+    console.log('🔄 [FRONTEND-TABS] Iniciando atualização de todas as abas');
+    
     // Aba Configurar Metas
+    console.log('⚙️ [FRONTEND-TABS] Atualizando aba Configurar Metas');
     updateConfigTab(data);
     
     // Aba Resumo Geral
+    console.log('📊 [FRONTEND-TABS] Atualizando aba Resumo Geral');
     updateSummaryTab(data);
     
     // Aba Dashboard Financeiro
+    console.log('📈 [FRONTEND-TABS] Atualizando aba Dashboard Financeiro');
     updateDashboardTab(data);
     
     // Aba Histórico
+    console.log('📝 [FRONTEND-TABS] Atualizando aba Histórico');
     updateHistoryTab(data);
+    
+    console.log('✅ [FRONTEND-TABS] Atualização de todas as abas concluída');
 }
 
 // Atualizar aba de configuração
 function updateConfigTab(data) {
+    console.log('⚙️ [FRONTEND-CONFIG] Iniciando atualização da aba configuração');
+    console.log('⚙️ [FRONTEND-CONFIG] Dados recebidos:', {
+        monthlyGoal: data.monthlyGoal,
+        deadlineDate: data.deadlineDate
+    });
+    
     const monthlyGoalInput = document.getElementById('monthlyGoal');
     if (monthlyGoalInput) {
-        monthlyGoalInput.value = data.monthlyGoal || 0;
+        const monthlyGoalValue = data.monthlyGoal || 0;
+        monthlyGoalInput.value = monthlyGoalValue;
+        console.log('💰 [FRONTEND-CONFIG] Meta mensal atualizada no input:', monthlyGoalValue);
+    } else {
+        console.log('⚠️ [FRONTEND-CONFIG] Elemento monthlyGoal não encontrado');
     }
     
     // Carregar dados salvos da meta se existirem
     const goalDeadline = document.getElementById('goalDeadline');
     if (goalDeadline && data.deadlineDate) {
-        goalDeadline.value = new Date(data.deadlineDate).toISOString().split('T')[0];
+        const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+        goalDeadline.value = deadlineDate;
+        console.log('📅 [FRONTEND-CONFIG] Data limite atualizada:', deadlineDate);
+    } else {
+        console.log('⚠️ [FRONTEND-CONFIG] Elemento goalDeadline não encontrado ou data não disponível');
     }
+    
+    console.log('✅ [FRONTEND-CONFIG] Atualização da aba configuração concluída');
 }
 
 // Atualizar aba de resumo geral
 function updateSummaryTab(data) {
+    console.log('📊 [FRONTEND-RESUMO] Iniciando atualização do resumo geral');
+    console.log('📊 [FRONTEND-RESUMO] Dados recebidos:', {
+        monthlyGoal: data.monthlyGoal,
+        totalProfit: data.totalProfit,
+        totalRevenue: data.totalRevenue,
+        totalExpenses: data.totalExpenses,
+        daysRemaining: data.daysRemaining,
+        entriesCount: data.entries?.length || 0
+    });
+    
     // Meta mensal
     const monthlyGoalDisplay = document.getElementById('monthlyGoalDisplay');
     if (monthlyGoalDisplay) {
-        monthlyGoalDisplay.textContent = `R$ ${(data.monthlyGoal || 0).toFixed(2).replace('.', ',')}`;
+        const monthlyGoalValue = data.monthlyGoal || 0;
+        monthlyGoalDisplay.textContent = `R$ ${monthlyGoalValue.toFixed(2).replace('.', ',')}`;
+        console.log('💰 [FRONTEND-RESUMO] Meta mensal atualizada:', monthlyGoalValue);
+    } else {
+        console.log('⚠️ [FRONTEND-RESUMO] Elemento monthlyGoalDisplay não encontrado');
     }
     
     // Progresso da meta
     const goalProgressDisplay = document.getElementById('goalProgressDisplay');
     if (goalProgressDisplay && data.monthlyGoal > 0) {
         const progress = (data.totalProfit / data.monthlyGoal) * 100;
-        goalProgressDisplay.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
+        const progressPercent = Math.min(progress, 100);
+        goalProgressDisplay.textContent = `${progressPercent.toFixed(1)}%`;
+        
+        console.log('📈 [FRONTEND-RESUMO] Progresso calculado:', {
+            totalProfit: data.totalProfit,
+            monthlyGoal: data.monthlyGoal,
+            progress: progress,
+            progressPercent: progressPercent
+        });
         
         // Atualizar anel de progresso
+        console.log('🔄 [FRONTEND-RESUMO] Atualizando anel de progresso');
         updateProgressRing(progress);
+    } else {
+        console.log('⚠️ [FRONTEND-RESUMO] Elemento goalProgressDisplay não encontrado ou meta zero');
     }
     
     // Dias restantes
@@ -2117,21 +2213,35 @@ function updateSummaryTab(data) {
         if (data.daysRemaining !== undefined) {
             // Usar dados do backend se disponíveis
             daysRemaining.textContent = `${data.daysRemaining} dias`;
+            console.log('📅 [FRONTEND-RESUMO] Dias restantes (backend):', data.daysRemaining);
         } else {
             // Fallback para cálculo local
             const today = new Date();
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
             const remaining = daysInMonth - today.getDate();
             daysRemaining.textContent = `${remaining} dias`;
+            console.log('📅 [FRONTEND-RESUMO] Dias restantes (cálculo local):', {
+                today: today.getDate(),
+                daysInMonth,
+                remaining
+            });
         }
+    } else {
+        console.log('⚠️ [FRONTEND-RESUMO] Elemento daysRemaining não encontrado');
     }
     
     // Projeção mensal
     const monthlyProjection = document.getElementById('monthlyProjection');
     if (monthlyProjection) {
+        console.log('📊 [FRONTEND-RESUMO] Calculando projeção mensal');
         const projection = calculateMonthlyProjection(data);
         monthlyProjection.textContent = `R$ ${projection.toFixed(2).replace('.', ',')}`;
+        console.log('📈 [FRONTEND-RESUMO] Projeção mensal calculada:', projection);
+    } else {
+        console.log('⚠️ [FRONTEND-RESUMO] Elemento monthlyProjection não encontrado');
     }
+    
+    console.log('✅ [FRONTEND-RESUMO] Atualização do resumo geral concluída');
 }
 
 // Atualizar aba dashboard financeiro
