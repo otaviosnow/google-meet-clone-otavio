@@ -30,9 +30,21 @@ body {
 
 .header-content {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     padding: 20px 0;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #3b82f6;
+    letter-spacing: -0.5px;
 }
 
 .logo {
@@ -1767,6 +1779,15 @@ body {
         padding: 16px 0;
         flex-direction: column;
         gap: 16px;
+        justify-content: center;
+    }
+    
+    .header-logo {
+        order: 2;
+    }
+    
+    .nav {
+        order: 1;
     }
     
     .hero {
@@ -1911,6 +1932,15 @@ body {
         padding: 12px 0;
         flex-direction: column;
         gap: 12px;
+        justify-content: center;
+    }
+    
+    .header-logo {
+        order: 2;
+    }
+    
+    .nav {
+        order: 1;
     }
     
     .logo {
