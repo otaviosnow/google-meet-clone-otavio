@@ -69,7 +69,6 @@ const entryValidation = [
 
 // GET /api/financial/summary - Obter resumo financeiro do mês atual
 router.get('/summary', authenticateToken, async (req, res) => {
-  console.log('📊 GET /api/financial/summary - Usuário:', req.user._id);
   try {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
     
@@ -131,7 +130,6 @@ router.get('/summary', authenticateToken, async (req, res) => {
 
 // POST /api/financial/goal - Definir meta mensal
 router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, async (req, res) => {
-  console.log('🎯 POST /api/financial/goal - Usuário:', req.user._id, 'Dados:', req.body);
   try {
     const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -203,7 +201,6 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
 
 // POST /api/financial/entry - Adicionar entrada diária
 router.post('/entry', authenticateToken, entryValidation, handleValidationErrors, async (req, res) => {
-  console.log('💰 POST /api/financial/entry - Usuário:', req.user._id, 'Dados:', req.body);
   try {
     const { date, grossRevenue, chipCost, additionalCost, adsCost, notes } = req.body;
     
