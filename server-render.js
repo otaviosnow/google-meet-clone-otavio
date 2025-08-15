@@ -139,7 +139,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/users', userRoutes);
+
+// Debug middleware para rotas financeiras
+app.use('/api/financial', (req, res, next) => {
+    console.log('🔍 Debug - Rota financeira acessada:', req.method, req.url);
+    next();
+});
 app.use('/api/financial', financialRoutes);
+
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
