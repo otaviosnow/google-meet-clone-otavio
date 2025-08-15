@@ -418,23 +418,31 @@ async function handleForgotPassword(e) {
         const result = await response.json();
         
         if (response.ok) {
-            showNotification(result.message, 'success');
-            
-            // Em produção, o usuário receberia um email
-            // Por enquanto, vamos mostrar o token para teste
-            if (result.resetToken) {
-                showNotification(`Token para teste: ${result.resetToken}`, 'info');
-                showNotification('Em produção, este token seria enviado por email', 'info');
-            }
-            
-            // Limpar formulário
+            // Limpar formulário primeiro
             document.getElementById('forgotEmail').value = '';
             
-            // Voltar para o login após 3 segundos
+            // Mostrar notificações com delay para garantir que sejam exibidas
+            setTimeout(() => {
+                showNotification(result.message, 'success');
+                
+                // Em produção, o usuário receberia um email
+                // Por enquanto, vamos mostrar o token para teste
+                if (result.resetToken) {
+                    setTimeout(() => {
+                        showNotification(`Token para teste: ${result.resetToken}`, 'info');
+                    }, 500);
+                    
+                    setTimeout(() => {
+                        showNotification('Em produção, este token seria enviado por email', 'info');
+                    }, 1000);
+                }
+            }, 100);
+            
+            // Voltar para o login após 5 segundos (tempo suficiente para ler as notificações)
             setTimeout(() => {
                 hideAuthModal();
                 showAuthModal('login');
-            }, 3000);
+            }, 5000);
             
         } else {
             showNotification(result.error, 'error');
@@ -1224,8 +1232,12 @@ function showNotification(message, type = 'info') {
         border-radius: 8px;
         color: white;
         font-weight: 500;
-        z-index: 10000;
+        z-index: 99999;
         animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        min-width: 300px;
+        max-width: 400px;
+        word-wrap: break-word;
     `;
     
     if (type === 'success') {
