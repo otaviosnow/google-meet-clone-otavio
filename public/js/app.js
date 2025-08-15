@@ -1808,29 +1808,23 @@ function updateFinancialDisplay(data) {
         totalRevenueElement.textContent = `R$ ${(data.totalRevenue || 0).toFixed(2).replace('.', ',')}`;
     }
     
-    // Atualizar média diária
-    const dailyAverageElement = document.getElementById('dailyAverage');
-    if (dailyAverageElement) {
-        const today = new Date();
-        const currentDay = today.getDate();
-        const dailyAverage = currentDay > 0 ? (data.totalRevenue || 0) / currentDay : 0;
-        dailyAverageElement.textContent = `R$ ${dailyAverage.toFixed(2).replace('.', ',')}`;
+    // Atualizar lucro total
+    const totalProfitElement = document.getElementById('totalProfit');
+    if (totalProfitElement) {
+        totalProfitElement.textContent = `R$ ${(data.totalProfit || 0).toFixed(2).replace('.', ',')}`;
     }
     
-    // Atualizar melhor e pior dia
-    if (data.entries && data.entries.length > 0) {
-        const bestDay = Math.max(...data.entries.map(entry => entry.netProfit));
-        const worstDay = Math.min(...data.entries.map(entry => entry.netProfit));
+    // Atualizar lucro de hoje
+    const todayProfitElement = document.getElementById('todayProfit');
+    if (todayProfitElement && data.entries && data.entries.length > 0) {
+        const today = new Date();
+        const todayEntry = data.entries.find(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate.toDateString() === today.toDateString();
+        });
         
-        const bestDayElement = document.getElementById('bestDay');
-        if (bestDayElement) {
-            bestDayElement.textContent = `R$ ${bestDay.toFixed(2).replace('.', ',')}`;
-        }
-        
-        const worstDayElement = document.getElementById('worstDay');
-        if (worstDayElement) {
-            worstDayElement.textContent = `R$ ${worstDay.toFixed(2).replace('.', ',')}`;
-        }
+        const todayProfit = todayEntry ? todayEntry.netProfit : 0;
+        todayProfitElement.textContent = `R$ ${todayProfit.toFixed(2).replace('.', ',')}`;
     }
     
     // Atualizar barra de progresso
