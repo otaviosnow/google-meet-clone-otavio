@@ -1612,13 +1612,13 @@ function calculateMonthlyProjection(data) {
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     const daysRemaining = daysInMonth - currentDay;
     
-    // Calcular média diária atual
-    const currentRevenue = data.totalRevenue || 0;
+    // Calcular média diária atual (usando lucro em vez de receita)
+    const currentProfit = data.totalProfit || 0;
     const currentDays = Math.max(currentDay, 1); // Evitar divisão por zero
-    const currentDailyAverage = currentRevenue / currentDays;
+    const currentDailyAverage = currentProfit / currentDays;
     
     // Calcular projeção considerando diminuição nos últimos 10 dias
-    let projectedRevenue = currentRevenue;
+    let projectedProfit = currentProfit;
     
     if (daysRemaining > 0) {
         const last10DaysStart = daysInMonth - 9; // Últimos 10 dias do mês
@@ -1629,19 +1629,19 @@ function calculateMonthlyProjection(data) {
             const last10Days = Math.min(daysRemaining, 10);
             
             // Projeção normal + projeção com diminuição
-            projectedRevenue += (currentDailyAverage * normalDays);
-            projectedRevenue += (currentDailyAverage * last10Days * 0.75); // 25% de diminuição média
+            projectedProfit += (currentDailyAverage * normalDays);
+            projectedProfit += (currentDailyAverage * last10Days * 0.75); // 25% de diminuição média
         } else {
             // Já está nos últimos 10 dias
             const remainingLast10Days = Math.min(daysRemaining, daysInMonth - currentDay + 1);
-            projectedRevenue += (currentDailyAverage * remainingLast10Days * 0.75);
+            projectedProfit += (currentDailyAverage * remainingLast10Days * 0.75);
         }
     }
     
     // Atualizar display da projeção
     const projectionElement = document.getElementById('monthlyProjection');
     if (projectionElement) {
-        projectionElement.textContent = `R$ ${projectedRevenue.toFixed(2).replace('.', ',')}`;
+        projectionElement.textContent = `R$ ${projectedProfit.toFixed(2).replace('.', ',')}`;
     }
     
     // Calcular e atualizar dias restantes
@@ -1653,7 +1653,7 @@ function calculateMonthlyProjection(data) {
     // Atualizar média diária necessária para atingir a meta
     const monthlyGoal = parseFloat(document.getElementById('monthlyGoal')?.value || 0);
     if (monthlyGoal > 0) {
-        const remainingToGoal = monthlyGoal - currentRevenue;
+        const remainingToGoal = monthlyGoal - currentProfit;
         const dailyNeeded = remainingToGoal / daysRemaining;
         
         const dailyNeededElement = document.getElementById('dailyNeeded');
@@ -1662,7 +1662,7 @@ function calculateMonthlyProjection(data) {
         }
     }
     
-    return projectedRevenue;
+    return projectedProfit;
 }
 
 // Adicionar entrada rápida (hoje)
@@ -1823,7 +1823,7 @@ function updateFinancialDisplay(data) {
     // Atualizar progresso da meta
     const goalProgressDisplay = document.getElementById('goalProgressDisplay');
     if (goalProgressDisplay && data.monthlyGoal > 0) {
-        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        const progress = (data.totalProfit / data.monthlyGoal) * 100;
         goalProgressDisplay.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
         
         // Atualizar anel de progresso
@@ -2114,7 +2114,7 @@ function updateSummaryTab(data) {
     // Progresso da meta
     const goalProgressDisplay = document.getElementById('goalProgressDisplay');
     if (goalProgressDisplay && data.monthlyGoal > 0) {
-        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        const progress = (data.totalProfit / data.monthlyGoal) * 100;
         goalProgressDisplay.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
         
         // Atualizar anel de progresso
@@ -2198,7 +2198,7 @@ function calculateAllMetrics(data) {
         const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
         const daysRemaining = daysInMonth - today.getDate();
-        const remainingToGoal = data.monthlyGoal - data.totalRevenue;
+        const remainingToGoal = data.monthlyGoal - data.totalProfit;
         const dailyNeeded = daysRemaining > 0 ? remainingToGoal / daysRemaining : 0;
         
         const dailyNeededElement = document.getElementById('dailyNeeded');
@@ -2225,7 +2225,7 @@ function updateProgressBar(data) {
     const progressText = document.getElementById('progressText');
     
     if (progressFill && progressText && data.monthlyGoal > 0) {
-        const progress = (data.totalRevenue / data.monthlyGoal) * 100;
+        const progress = (data.totalProfit / data.monthlyGoal) * 100;
         progressFill.style.width = `${Math.min(progress, 100)}%`;
         progressText.textContent = `${Math.min(progress, 100).toFixed(1)}% da meta atingida`;
     }
@@ -2260,7 +2260,7 @@ function updateTrendsWithRealData(data) {
     // Eficiência baseada na meta real
     const efficiencyRate = document.getElementById('efficiencyRate');
     if (efficiencyRate && data.monthlyGoal > 0) {
-        const efficiency = (data.totalRevenue / data.monthlyGoal) * 100;
+        const efficiency = (data.totalProfit / data.monthlyGoal) * 100;
         efficiencyRate.textContent = `${Math.min(efficiency, 100).toFixed(0)}%`;
     }
     
@@ -2268,8 +2268,8 @@ function updateTrendsWithRealData(data) {
     const projectionRate = document.getElementById('projectionRate');
     if (projectionRate) {
         const projection = calculateMonthlyProjection(data);
-        const currentRevenue = data.totalRevenue || 0;
-        const growth = currentRevenue > 0 ? ((projection - currentRevenue) / currentRevenue) * 100 : 0;
+        const currentProfit = data.totalProfit || 0;
+        const growth = currentProfit > 0 ? ((projection - currentProfit) / currentProfit) * 100 : 0;
         projectionRate.textContent = `${growth >= 0 ? '+' : ''}${growth.toFixed(1)}%`;
     }
 }
