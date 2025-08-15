@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - CallX</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/analytics.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div class="analytics-container">
+        <!-- Header -->
+        <header class="analytics-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <a href="/" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar ao Dashboard
+                    </a>
+                    <h1 class="analytics-title">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics CallX
+                    </h1>
+                </div>
+                <div class="header-right">
+                    <div class="period-selector">
+                        <select id="periodSelect">
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 90 dias</option>
+                            <option value="365">Último ano</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-content">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Carregando analytics...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="analytics-content" id="analyticsContent" style="display: none;">
+            <!-- Stats Cards -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Usuários Ativos</p>
+                            <span class="stat-change positive" id="usersChange">+0%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalMeetings">0</h3>
+                            <p>Reuniões Criadas</p>
+                            <span class="stat-change positive" id="meetingsChange">+0%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalTokens">0</h3>
+                            <p>Tokens Consumidos</p>
+                            <span class="stat-change negative" id="tokensChange">-0%</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">R$ 0,00</h3>
+                            <p>Receita Total</p>
+                            <span class="stat-change positive" id="revenueChange">+0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="charts-grid">
+                    <!-- Revenue Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-area"></i> Receita por Período</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn active" data-chart="revenue" data-type="daily">Diário</button>
+                                <button class="chart-btn" data-chart="revenue" data-type="weekly">Semanal</button>
+                                <button class="chart-btn" data-chart="revenue" data-type="monthly">Mensal</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Users Growth Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-line"></i> Crescimento de Usuários</h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn active" data-chart="users" data-type="daily">Diário</button>
+                                <button class="chart-btn" data-chart="users" data-type="weekly">Semanal</button>
+                                <button class="chart-btn" data-chart="users" data-type="monthly">Mensal</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="usersChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Meetings Activity -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-bar"></i> Atividade de Reuniões</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="meetingsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Token Usage -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-pie"></i> Uso de Tokens</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tokensChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Top Users Section -->
+            <section class="top-users-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-trophy"></i> Top Usuários</h3>
+                    <button class="refresh-btn" id="refreshTopUsers">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar
+                    </button>
+                </div>
+                <div class="top-users-grid">
+                    <div class="top-users-card">
+                        <h4>Mais Reuniões</h4>
+                        <div id="topMeetingsUsers" class="top-users-list">
+                            <!-- Lista será preenchida via JavaScript -->
+                        </div>
+                    </div>
+                    <div class="top-users-card">
+                        <h4>Mais Tokens</h4>
+                        <div id="topTokensUsers" class="top-users-list">
+                            <!-- Lista será preenchida via JavaScript -->
+                        </div>
+                    </div>
+                    <div class="top-users-card">
+                        <h4>Usuários Recentes</h4>
+                        <div id="recentUsers" class="top-users-list">
+                            <!-- Lista será preenchida via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Performance Metrics -->
+            <section class="metrics-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Métricas de Performance</h3>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>Taxa de Conversão</h4>
+                            <span class="metric-value" id="conversionRate">0%</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-progress" id="conversionBar" style="width: 0%"></div>
+                        </div>
+                        <p class="metric-description">Usuários que criaram reuniões</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>Retenção de Usuários</h4>
+                            <span class="metric-value" id="retentionRate">0%</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-progress" id="retentionBar" style="width: 0%"></div>
+                        </div>
+                        <p class="metric-description">Usuários que retornaram</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>Média de Reuniões/Usuário</h4>
+                            <span class="metric-value" id="avgMeetingsPerUser">0</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-progress" id="avgMeetingsBar" style="width: 0%"></div>
+                        </div>
+                        <p class="metric-description">Reuniões por usuário</p>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h4>Valor Médio por Usuário</h4>
+                            <span class="metric-value" id="avgRevenuePerUser">R$ 0,00</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-progress" id="avgRevenueBar" style="width: 0%"></div>
+                        </div>
+                        <p class="metric-description">Receita por usuário</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/analytics.js"></script>
+</body>
+</html>

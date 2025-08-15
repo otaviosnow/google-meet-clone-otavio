@@ -591,6 +591,9 @@ function switchTab(tabName) {
             case 'profile':
                 loadProfileStats();
                 break;
+            case 'analytics':
+                window.location.href = '/analytics';
+                break;
         }
     }
 }
@@ -1129,6 +1132,14 @@ async function loadUserData() {
     
     // Atualizar estado do botão de criar reunião
     updateTokenButtonState();
+    
+    // Mostrar botão de analytics se for admin
+    if (currentUser.isAdmin) {
+        const analyticsMenuItem = document.getElementById('analyticsMenuItem');
+        if (analyticsMenuItem) {
+            analyticsMenuItem.style.display = 'block';
+        }
+    }
     
     // Mostrar dashboard
     showDashboard();

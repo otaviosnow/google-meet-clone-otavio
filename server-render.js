@@ -81,6 +81,7 @@ const financialRoutes = require('./routes/financial');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
+const analyticsRoutes = require('./routes/analytics');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -142,6 +143,7 @@ app.use('/api/financial', financialRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
+app.use('/api/analytics', analyticsRoutes);
 
 // ===== ROTAS DE PÁGINAS =====
 
@@ -179,6 +181,12 @@ app.get('/comprar-tokens', (req, res) => {
 app.get('/reset-password', (req, res) => {
     console.log('🔑 GET /reset-password - Página de reset de senha acessada');
     res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+
+// Rota para página de analytics
+app.get('/analytics', (req, res) => {
+    console.log('📊 GET /analytics - Página de analytics acessada');
+    res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
 });
 
 // ===== ARQUIVOS ESTÁTICOS =====
