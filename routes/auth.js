@@ -342,11 +342,14 @@ router.post('/reset-password', resetPasswordValidation, handleValidationErrors, 
 // GET /api/auth/me - Obter dados do usuário atual
 router.get('/me', async (req, res) => {
   try {
+    console.log('🔍 [AUTH-ME] Iniciando rota /me');
+    
     // Pegar token do header
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
+      console.log('❌ [AUTH-ME] Token não fornecido');
       return res.status(401).json({
         error: 'Token não fornecido'
       });
@@ -355,25 +358,42 @@ router.get('/me', async (req, res) => {
     // Verificar token
     const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('✅ [AUTH-ME] Token válido, userId:', decoded.userId);
     
     // Buscar usuário
     const user = await User.findById(decoded.userId).select('-password');
     
     if (!user) {
+      console.log('❌ [AUTH-ME] Usuário não encontrado');
       return res.status(401).json({
         error: 'Usuário não encontrado'
       });
     }
 
+    console.log('👤 [AUTH-ME] Usuário encontrado:');
+    console.log('   - ID:', user._id);
+    console.log('   - Nome:', user.name);
+    console.log('   - Email:', user.email);
+    console.log('   - Tokens (banco):', user.visionTokens);
+    console.log('   - Admin:', user.isAdmin);
+    console.log('   - Ativo:', user.isActive);
+
     if (!user.isActive) {
+      console.log('❌ [AUTH-ME] Usuário desativado');
       return res.status(401).json({
         error: 'Usuário desativado'
       });
     }
 
+    const publicData = user.toPublicJSON();
+    console.log('📤 [AUTH-ME] Dados públicos:');
+    console.log('   - Tokens (toPublicJSON):', publicData.visionTokens);
+
     res.json({
-      user: user.toPublicJSON()
+      user: publicData
     });
+    
+    console.log('✅ [AUTH-ME] Resposta enviada');
 
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
