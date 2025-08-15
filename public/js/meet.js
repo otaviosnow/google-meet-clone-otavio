@@ -46,9 +46,6 @@ const chatMessages = document.getElementById('chatMessages');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    // Bloquear inspeção
-    blockInspection();
-    
     console.log('=== INICIANDO GOOGLE MEET CLONE - CALLX ===');
     
     // Obter dados da reunião da URL
