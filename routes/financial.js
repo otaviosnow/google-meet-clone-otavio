@@ -28,6 +28,7 @@ const router = express.Router();
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('❌ [VALIDAÇÃO] Erros encontrados:', errors.array());
     return res.status(400).json({
       error: 'Dados inválidos',
       details: errors.array().map(err => ({
@@ -36,6 +37,7 @@ const handleValidationErrors = (req, res, next) => {
       }))
     });
   }
+  console.log('✅ [VALIDAÇÃO] Dados válidos');
   next();
 };
 
@@ -69,8 +71,10 @@ const entryValidation = [
 
 // GET /api/financial/goal - Obter meta atual
 router.get('/goal', authenticateToken, async (req, res) => {
+  console.log('🎯 [META] GET /goal - Usuário:', req.user._id);
   try {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    console.log('📅 [META] Mês atual:', currentMonth);
     
     // Buscar meta do mês atual
     const goal = await FinancialGoal.findOne({ 
@@ -78,14 +82,23 @@ router.get('/goal', authenticateToken, async (req, res) => {
       currentMonth 
     });
     
-    res.json({
+    console.log('📊 [META] Meta encontrada:', goal ? {
+      monthlyGoal: goal.monthlyGoal,
+      deadlineDate: goal.deadlineDate,
+      currentMonth: goal.currentMonth
+    } : 'Nenhuma meta encontrada');
+    
+    const response = {
       monthlyGoal: goal ? goal.monthlyGoal : 0,
       deadlineDate: goal ? goal.deadlineDate : null,
       currentMonth
-    });
+    };
+    
+    console.log('✅ [META] Resposta enviada:', response);
+    res.json(response);
     
   } catch (error) {
-    console.error('Erro ao obter meta:', error);
+    console.error('❌ [META] Erro ao obter meta:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
@@ -94,14 +107,21 @@ router.get('/goal', authenticateToken, async (req, res) => {
 
 // GET /api/financial/summary - Obter resumo financeiro do mês atual
 router.get('/summary', authenticateToken, async (req, res) => {
+  console.log('📊 [RESUMO] GET /summary - Usuário:', req.user._id);
   try {
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    console.log('📅 [RESUMO] Mês atual:', currentMonth);
     
     // Buscar meta do mês atual
     const goal = await FinancialGoal.findOne({ 
       user: req.user._id, 
       currentMonth 
     });
+    
+    console.log('🎯 [RESUMO] Meta encontrada:', goal ? {
+      monthlyGoal: goal.monthlyGoal,
+      deadlineDate: goal.deadlineDate
+    } : 'Nenhuma meta encontrada');
     
     // Buscar entradas do mês atual
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -114,6 +134,8 @@ router.get('/summary', authenticateToken, async (req, res) => {
         $lte: endOfMonth
       }
     });
+    
+    console.log('📝 [RESUMO] Entradas encontradas:', entries.length);
     
     // Calcular totais
     const totalRevenue = entries.reduce((sum, entry) => sum + entry.grossRevenue, 0);
@@ -134,7 +156,7 @@ router.get('/summary', authenticateToken, async (req, res) => {
       daysRemaining = Math.max(0, daysRemaining); // Não pode ser negativo
     }
     
-    res.json({
+    const response = {
       monthlyGoal,
       deadlineDate: goal ? goal.deadlineDate : null,
       daysRemaining,
@@ -143,10 +165,23 @@ router.get('/summary', authenticateToken, async (req, res) => {
       totalProfit,
       goalProgress: Math.round(goalProgress * 100) / 100,
       entriesCount: entries.length
+    };
+    
+    console.log('📊 [RESUMO] Valores calculados:', {
+      monthlyGoal,
+      totalRevenue,
+      totalExpenses,
+      totalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100,
+      daysRemaining,
+      entriesCount: entries.length
     });
     
+    console.log('✅ [RESUMO] Resposta enviada');
+    res.json(response);
+    
   } catch (error) {
-    console.error('Erro ao obter resumo financeiro:', error);
+    console.error('❌ [RESUMO] Erro ao obter resumo financeiro:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
@@ -155,12 +190,23 @@ router.get('/summary', authenticateToken, async (req, res) => {
 
 // POST /api/financial/goal - Definir meta mensal
 router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, async (req, res) => {
+  console.log('🎯 [META] POST /goal - Usuário:', req.user._id);
+  console.log('📝 [META] Dados recebidos:', req.body);
+  
   try {
     const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     
+    console.log('📅 [META] Mês atual:', currentMonth);
+    console.log('💰 [META] Meta mensal:', monthlyGoal);
+    console.log('📅 [META] Data limite:', deadlineDate);
+    
     // Buscar meta existente para calcular valores anteriores
     const existingGoal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
+    console.log('🔍 [META] Meta existente:', existingGoal ? {
+      monthlyGoal: existingGoal.monthlyGoal,
+      deadlineDate: existingGoal.deadlineDate
+    } : 'Nenhuma meta existente');
     
     // Calcular valores anteriores
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -175,6 +221,14 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
     const totalExpenses = entries.reduce((sum, entry) => sum + entry.totalExpenses, 0);
     const totalProfit = entries.reduce((sum, entry) => sum + entry.netProfit, 0);
     const goalProgress = existingGoal && existingGoal.monthlyGoal > 0 ? Math.min((totalProfit / existingGoal.monthlyGoal) * 100, 100) : 0;
+    
+    console.log('📊 [META] Valores atuais:', {
+      totalRevenue,
+      totalExpenses,
+      totalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100,
+      entriesCount: entries.length
+    });
     
     const previousValues = {
       totalRevenue,
@@ -193,6 +247,12 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       { upsert: true, new: true }
     );
     
+    console.log('💾 [META] Meta salva/criada:', {
+      monthlyGoal: goal.monthlyGoal,
+      currentMonth: goal.currentMonth,
+      deadlineDate: goal.deadlineDate
+    });
+    
     // Calcular novos valores
     const newGoalProgress = goal.monthlyGoal > 0 ? Math.min((totalProfit / goal.monthlyGoal) * 100, 100) : 0;
     
@@ -203,21 +263,28 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       goalProgress: Math.round(newGoalProgress * 100) / 100
     };
     
+    console.log('📈 [META] Novos valores calculados:', newValues);
+    
     // Criar histórico
     const action = existingGoal ? 'update' : 'create';
+    console.log('📝 [META] Criando histórico - Ação:', action);
     await FinancialHistory.createGoalHistory(req.user._id, goal, action, previousValues, newValues);
+    console.log('✅ [META] Histórico criado com sucesso');
     
-    res.json({
+    const response = {
       message: 'Meta salva com sucesso',
       goal: {
         monthlyGoal: goal.monthlyGoal,
         currentMonth: goal.currentMonth,
         deadlineDate: goal.deadlineDate
       }
-    });
+    };
+    
+    console.log('✅ [META] Resposta enviada:', response);
+    res.json(response);
     
   } catch (error) {
-    console.error('Erro ao salvar meta:', error);
+    console.error('❌ [META] Erro ao salvar meta:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
