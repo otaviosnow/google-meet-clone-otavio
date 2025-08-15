@@ -1238,13 +1238,13 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Remover após 3 segundos
+    // Remover após 5 segundos
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => {
             document.body.removeChild(notification);
         }, 300);
-    }, 3000);
+    }, 5000);
 }
 
 // Adicionar estilos de animação
