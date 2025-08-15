@@ -20,6 +20,7 @@ const authenticateToken = (req, res, next) => {
 };
 const FinancialGoal = require('../models/FinancialGoal');
 const FinancialEntry = require('../models/FinancialEntry');
+const FinancialHistory = require('../models/FinancialHistory');
 
 const router = express.Router();
 
@@ -133,6 +134,30 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
     const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     
+    // Buscar meta existente para calcular valores anteriores
+    const existingGoal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
+    
+    // Calcular valores anteriores
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+    
+    const entries = await FinancialEntry.find({
+      user: req.user._id,
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+    
+    const totalRevenue = entries.reduce((sum, entry) => sum + entry.grossRevenue, 0);
+    const totalExpenses = entries.reduce((sum, entry) => sum + entry.totalExpenses, 0);
+    const totalProfit = entries.reduce((sum, entry) => sum + entry.netProfit, 0);
+    const goalProgress = existingGoal && existingGoal.monthlyGoal > 0 ? Math.min((totalProfit / existingGoal.monthlyGoal) * 100, 100) : 0;
+    
+    const previousValues = {
+      totalRevenue,
+      totalExpenses,
+      totalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100
+    };
+    
     // Buscar ou criar meta do mês atual
     const goal = await FinancialGoal.findOneAndUpdate(
       { user: req.user._id, currentMonth },
@@ -143,11 +168,26 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       { upsert: true, new: true }
     );
     
+    // Calcular novos valores
+    const newGoalProgress = goal.monthlyGoal > 0 ? Math.min((totalProfit / goal.monthlyGoal) * 100, 100) : 0;
+    
+    const newValues = {
+      totalRevenue,
+      totalExpenses,
+      totalProfit,
+      goalProgress: Math.round(newGoalProgress * 100) / 100
+    };
+    
+    // Criar histórico
+    const action = existingGoal ? 'update' : 'create';
+    await FinancialHistory.createGoalHistory(req.user._id, goal, action, previousValues, newValues);
+    
     res.json({
       message: 'Meta salva com sucesso',
       goal: {
         monthlyGoal: goal.monthlyGoal,
-        currentMonth: goal.currentMonth
+        currentMonth: goal.currentMonth,
+        deadlineDate: goal.deadlineDate
       }
     });
     
@@ -176,6 +216,26 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
       });
     }
     
+    // Calcular valores anteriores
+    const startOfMonth = new Date(new Date(date).getFullYear(), new Date(date).getMonth(), 1);
+    const endOfMonth = new Date(new Date(date).getFullYear(), new Date(date).getMonth() + 1, 0);
+    
+    const existingEntries = await FinancialEntry.find({
+      user: req.user._id,
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+    
+    const previousTotalRevenue = existingEntries.reduce((sum, entry) => sum + entry.grossRevenue, 0);
+    const previousTotalExpenses = existingEntries.reduce((sum, entry) => sum + entry.totalExpenses, 0);
+    const previousTotalProfit = existingEntries.reduce((sum, entry) => sum + entry.netProfit, 0);
+    
+    const previousValues = {
+      totalRevenue: previousTotalRevenue,
+      totalExpenses: previousTotalExpenses,
+      totalProfit: previousTotalProfit,
+      goalProgress: 0 // Será calculado após salvar
+    };
+    
     // Criar nova entrada
     const entry = new FinancialEntry({
       user: req.user._id,
@@ -188,6 +248,26 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     });
     
     await entry.save();
+    
+    // Calcular novos valores
+    const newTotalRevenue = previousTotalRevenue + entry.grossRevenue;
+    const newTotalExpenses = previousTotalExpenses + entry.totalExpenses;
+    const newTotalProfit = previousTotalProfit + entry.netProfit;
+    
+    // Calcular progresso da meta
+    const currentMonth = new Date(date).toISOString().slice(0, 7);
+    const goal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
+    const goalProgress = goal && goal.monthlyGoal > 0 ? Math.min((newTotalProfit / goal.monthlyGoal) * 100, 100) : 0;
+    
+    const newValues = {
+      totalRevenue: newTotalRevenue,
+      totalExpenses: newTotalExpenses,
+      totalProfit: newTotalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100
+    };
+    
+    // Criar histórico
+    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
     
     res.status(201).json({
       message: 'Entrada adicionada com sucesso',
@@ -326,6 +406,49 @@ router.delete('/entry/:id', authenticateToken, async (req, res) => {
     
   } catch (error) {
     console.error('Erro ao deletar entrada:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// GET /api/financial/modifications - Listar histórico de modificações
+router.get('/modifications', authenticateToken, async (req, res) => {
+  try {
+    const { page = 1, limit = 20, type, action } = req.query;
+    const skip = (page - 1) * limit;
+    
+    let query = { user: req.user._id };
+    
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+    
+    if (action && action !== 'all') {
+      query.action = action;
+    }
+    
+    const modifications = await FinancialHistory.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('relatedEntry', 'date grossRevenue netProfit')
+      .populate('relatedGoal', 'monthlyGoal deadlineDate');
+    
+    const total = await FinancialHistory.countDocuments(query);
+    
+    res.json({
+      modifications: modifications.map(mod => mod.toPublicJSON()),
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Erro ao listar modificações:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });

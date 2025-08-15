@@ -186,8 +186,16 @@ function initializeEventListeners() {
         button.addEventListener('click', () => {
             const tabName = button.dataset.tab;
             switchGoalsTab(tabName);
+            
+            // Carregar histórico de modificações se for a aba de modificações
+            if (tabName === 'modifications') {
+                loadModificationsHistory();
+            }
         });
     });
+    
+    // Inicializar filtros de modificações
+    initializeModificationFilters();
     
     // Videos
     addVideoBtn.addEventListener('click', () => showModal(addVideoModal));
@@ -597,6 +605,17 @@ function switchTab(tabName) {
             case 'admin':
                 showAdminTab();
                 break;
+        }
+        
+        // Carregar histórico de modificações se estiver na aba de metas
+        if (tabName === 'goals') {
+            // Aguardar um pouco para garantir que a aba específica seja carregada
+            setTimeout(() => {
+                const activeTab = document.querySelector('.tab-btn.active[data-tab]');
+                if (activeTab && activeTab.dataset.tab === 'modifications') {
+                    loadModificationsHistory();
+                }
+            }, 100);
         }
     }
 }
@@ -2332,5 +2351,184 @@ async function handleAvatarChange(event) {
             }
         };
         reader.readAsDataURL(file);
+    }
+}
+
+// ===== SISTEMA DE HISTÓRICO DE MODIFICAÇÕES =====
+
+// Carregar histórico de modificações
+async function loadModificationsHistory(page = 1, type = 'all', action = 'all') {
+    try {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: '10',
+            type: type,
+            action: action
+        });
+        
+        const response = await fetch(`${API_BASE_URL}/financial/modifications?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            renderModificationsList(data.modifications);
+            renderModificationsPagination(data.pagination);
+        } else {
+            console.error('Erro ao carregar histórico de modificações');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar histórico de modificações:', error);
+    }
+}
+
+// Renderizar lista de modificações
+function renderModificationsList(modifications) {
+    const modificationsList = document.getElementById('modificationsList');
+    if (!modificationsList) return;
+    
+    if (modifications.length === 0) {
+        modificationsList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-edit" style="font-size: 48px; color: #9ca3af; margin-bottom: 16px;"></i>
+                <h4>Nenhuma modificação encontrada</h4>
+                <p>As modificações aparecerão aqui conforme você adicionar dados financeiros ou configurar metas.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    modificationsList.innerHTML = modifications.map(modification => `
+        <div class="modification-item">
+            <div class="modification-header">
+                <div>
+                    <div class="modification-title">${modification.description}</div>
+                    <span class="modification-type ${modification.type}">${getModificationTypeLabel(modification.type)}</span>
+                </div>
+                <div class="modification-time">${formatDate(modification.createdAt)}</div>
+            </div>
+            
+            <div class="modification-description">
+                ${getModificationDetails(modification)}
+            </div>
+            
+            ${modification.entryData ? `
+                <div class="modification-details">
+                    <div class="modification-detail">
+                        <h5>Receita Bruta</h5>
+                        <p>R$ ${modification.entryData.grossRevenue.toFixed(2)}</p>
+                    </div>
+                    <div class="modification-detail">
+                        <h5>Despesas Totais</h5>
+                        <p>R$ ${modification.entryData.totalExpenses.toFixed(2)}</p>
+                    </div>
+                    <div class="modification-detail">
+                        <h5>Lucro Líquido</h5>
+                        <p>R$ ${modification.entryData.netProfit.toFixed(2)}</p>
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${modification.goalData ? `
+                <div class="modification-details">
+                    <div class="modification-detail">
+                        <h5>Meta Definida</h5>
+                        <p>R$ ${modification.goalData.targetAmount.toFixed(2)}</p>
+                    </div>
+                    <div class="modification-detail">
+                        <h5>Data Limite</h5>
+                        <p>${formatDate(modification.goalData.deadlineDate)}</p>
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div class="modification-values">
+                <div class="value-group">
+                    <div class="value-label">Antes</div>
+                    <div class="value-amount">R$ ${modification.previousValues.totalProfit.toFixed(2)}</div>
+                </div>
+                <div class="value-group">
+                    <div class="value-label">Depois</div>
+                    <div class="value-amount">R$ ${modification.newValues.totalProfit.toFixed(2)}</div>
+                </div>
+                <div class="value-group">
+                    <div class="value-label">Mudança</div>
+                    <div class="value-change ${modification.newValues.totalProfit >= modification.previousValues.totalProfit ? '' : 'negative'}">
+                        ${modification.newValues.totalProfit >= modification.previousValues.totalProfit ? '+' : ''}R$ ${(modification.newValues.totalProfit - modification.previousValues.totalProfit).toFixed(2)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Renderizar paginação das modificações
+function renderModificationsPagination(pagination) {
+    const paginationContainer = document.getElementById('modificationsPagination');
+    if (!paginationContainer) return;
+    
+    if (pagination.pages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // Botão anterior
+    if (pagination.page > 1) {
+        paginationHTML += `<button class="pagination-btn" onclick="loadModificationsHistory(${pagination.page - 1})">Anterior</button>`;
+    }
+    
+    // Páginas
+    const startPage = Math.max(1, pagination.page - 2);
+    const endPage = Math.min(pagination.pages, pagination.page + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `<button class="pagination-btn ${i === pagination.page ? 'active' : ''}" onclick="loadModificationsHistory(${i})">${i}</button>`;
+    }
+    
+    // Botão próximo
+    if (pagination.page < pagination.pages) {
+        paginationHTML += `<button class="pagination-btn" onclick="loadModificationsHistory(${pagination.page + 1})">Próximo</button>`;
+    }
+    
+    // Informações
+    paginationHTML += `<div class="pagination-info">Página ${pagination.page} de ${pagination.pages} (${pagination.total} itens)</div>`;
+    
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+// Obter label do tipo de modificação
+function getModificationTypeLabel(type) {
+    const labels = {
+        'entry': 'Entrada',
+        'goal_created': 'Meta Criada',
+        'goal_update': 'Meta Atualizada',
+        'goal_deleted': 'Meta Deletada'
+    };
+    return labels[type] || type;
+}
+
+// Obter detalhes da modificação
+function getModificationDetails(modification) {
+    if (modification.type === 'entry') {
+        return `Adicionada entrada financeira para ${formatDate(modification.entryData.date)}`;
+    } else if (modification.type.startsWith('goal_')) {
+        return `Meta ${modification.action === 'create' ? 'criada' : modification.action === 'update' ? 'atualizada' : 'deletada'} para o período`;
+    }
+    return '';
+}
+
+// Inicializar filtros de modificações
+function initializeModificationFilters() {
+    const applyFiltersBtn = document.getElementById('applyModificationFiltersBtn');
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+            const type = document.getElementById('modificationTypeFilter').value;
+            const action = document.getElementById('modificationActionFilter').value;
+            loadModificationsHistory(1, type, action);
+        });
     }
 } 
