@@ -860,8 +860,8 @@ async function loadMeetings() {
         });
         
         if (response.ok) {
-            const data = await response.json();
-            renderMeetings(data.meetings);
+            const meetings = await response.json();
+            renderMeetings(meetings);
             loadVideoOptions();
         }
     } catch (error) {
@@ -870,7 +870,18 @@ async function loadMeetings() {
 }
 
 function renderMeetings(meetings) {
+    if (!meetingsList) {
+        console.warn('Elemento meetingsList não encontrado');
+        return;
+    }
+    
     meetingsList.innerHTML = '';
+    
+    // Verificar se meetings é válido
+    if (!meetings || !Array.isArray(meetings)) {
+        console.warn('Dados de reuniões inválidos:', meetings);
+        meetings = [];
+    }
     
     if (meetings.length === 0) {
         meetingsList.innerHTML = `
@@ -937,6 +948,12 @@ async function loadVideoOptions() {
         
         if (response.ok) {
             const data = await response.json();
+            
+            if (!meetingVideo) {
+                console.warn('Elemento meetingVideo não encontrado');
+                return;
+            }
+            
             meetingVideo.innerHTML = '<option value="">Selecione um vídeo</option>';
             
             if (data.videos.length === 0) {
@@ -1859,9 +1876,19 @@ async function addDailyEntry() {
 
 // Funções de histórico financeiro
 async function loadFinancialHistory() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const type = document.getElementById('historyType').value;
+    const startDateElement = document.getElementById('startDate');
+    const endDateElement = document.getElementById('endDate');
+    const typeElement = document.getElementById('historyType');
+    
+    // Verificar se os elementos existem antes de acessar
+    if (!startDateElement || !endDateElement || !typeElement) {
+        console.warn('Elementos de histórico financeiro não encontrados');
+        return;
+    }
+    
+    const startDate = startDateElement.value;
+    const endDate = endDateElement.value;
+    const type = typeElement.value;
     
     try {
         const response = await fetch(`${API_BASE_URL}/financial/history?startDate=${startDate}&endDate=${endDate}&type=${type}`, {
@@ -1934,6 +1961,7 @@ async function loadGoalConfig() {
             const goalPriority = document.getElementById('goalPriority');
             const goalDescription = document.getElementById('goalDescription');
             
+            // Verificar se os elementos existem antes de acessar
             if (monthlyGoalInput) monthlyGoalInput.value = data.monthlyGoal || 0;
             if (goalType) goalType.value = data.goalType || 'revenue';
             if (goalDeadline) goalDeadline.value = data.goalDeadline || '';
