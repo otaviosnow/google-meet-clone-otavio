@@ -178,17 +178,17 @@ app.get('/reset-password', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
 });
 
-// Rota para painel admin
+// ===== ARQUIVOS ESTÁTICOS =====
+app.use(express.static('public'));
+
+// Servir arquivos estáticos do admin (ANTES das rotas gerais)
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
+// Rota para painel admin (DEPOIS dos arquivos estáticos)
 app.get('/admin', (req, res) => {
     console.log('⚙️ GET /admin - Painel admin acessado');
     res.sendFile(path.join(__dirname, 'admin', 'index.html'));
 });
-
-// Servir arquivos estáticos do admin
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
-
-// ===== ARQUIVOS ESTÁTICOS =====
-app.use(express.static('public'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
