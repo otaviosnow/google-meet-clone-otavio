@@ -1039,9 +1039,6 @@ async function handleCreateMeeting(e) {
             // Copiar link para clipboard
             copyMeetingLink(meetLink);
             
-            // Abrir reunião em nova aba
-            window.open(meetLink, '_blank');
-            
             // Recarregar reuniões
             loadMeetings();
         } else {
