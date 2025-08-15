@@ -117,8 +117,8 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
 
-        // Buscar usuário no banco
-        const user = await User.findOne({ email });
+        // Buscar usuário no banco (incluindo a senha)
+        const user = await User.findOne({ email }).select('+password');
         
         if (!user) {
             console.log('❌ Login rejeitado - Usuário não encontrado:', email);
