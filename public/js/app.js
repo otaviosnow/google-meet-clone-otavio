@@ -1885,7 +1885,7 @@ function updateGoalProgressChart(data) {
     }
     
     // Destruir gráfico existente se houver
-    if (window.goalProgressChart) {
+    if (window.goalProgressChart && typeof window.goalProgressChart.destroy === 'function') {
         window.goalProgressChart.destroy();
     }
     
