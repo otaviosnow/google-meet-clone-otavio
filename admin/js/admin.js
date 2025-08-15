@@ -54,7 +54,7 @@ const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 const notification = document.getElementById('notification');
 
 // Emails autorizados para admin
-const ADMIN_EMAILS = ['tavinmktdigital@gmail.com', 'teste2@gmail.com', 'teste90@gmail.com'];
+const ADMIN_EMAILS = ['tavinmktdigital@gmail.com', 'teste2@gmail.com', 'teste90@gmail.com', 'admin@callx.com'];
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
