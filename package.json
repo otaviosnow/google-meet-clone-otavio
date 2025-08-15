@@ -30,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.5.0",
     "multer": "^1.4.5-lts.1",
+    "pagarme": "^4.35.2",
     "qrcode": "^1.5.4",
     "uuid": "^9.0.0"
   },

@@ -87,23 +87,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para gerar QR Code PIX
     async function generatePixQRCode(quantity, total) {
         try {
-            // Dados do PIX (exemplo - você pode integrar com API real)
-            const pixData = {
-                merchantName: 'CallX',
-                merchantCity: 'SAO PAULO',
-                amount: total,
-                transactionId: generateTransactionId(),
-                description: `${quantity} tokens CallX`
-            };
+            // Mostrar loading
+            qrCodeContainer.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #3b82f6; margin-bottom: 16px;"></i>
+                    <p style="color: #9ca3af;">Gerando QR Code PIX...</p>
+                </div>
+            `;
 
-            // Gerar código PIX (formato EMV QR Code)
-            const pixCode = generatePixCode(pixData);
-            
+            // Obter token de autenticação
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                throw new Error('Usuário não autenticado');
+            }
+
+            // Chamar API do Pagar.me
+            const response = await fetch('/api/payments/pix', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    quantity: quantity,
+                    amount: total
+                })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error || 'Erro ao gerar pagamento');
+            }
+
             // Atualizar campo do código PIX
-            document.getElementById('pixCode').value = pixCode;
+            document.getElementById('pixCode').value = result.data.pixQrCode;
             
             // Gerar QR Code usando a biblioteca qrcode
-            const qrCodeDataURL = await QRCode.toDataURL(pixCode, {
+            const qrCodeDataURL = await QRCode.toDataURL(result.data.pixQrCode, {
                 width: 200,
                 height: 200,
                 margin: 2,
@@ -116,36 +137,66 @@ document.addEventListener('DOMContentLoaded', function() {
             // Exibir QR Code
             qrCodeContainer.innerHTML = `<img src="${qrCodeDataURL}" alt="QR Code PIX" style="width: 200px; height: 200px;">`;
             
+            // Iniciar verificação de status
+            startPaymentStatusCheck(result.data.transactionId);
+            
         } catch (error) {
             console.error('Erro ao gerar QR Code:', error);
             qrCodeContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #ef4444;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
                     <p>Erro ao gerar QR Code</p>
-                    <small>Use o código PIX abaixo</small>
+                    <small>${error.message}</small>
                 </div>
             `;
         }
     }
 
-    // Função para gerar código PIX (formato EMV)
-    function generatePixCode(data) {
-        // Este é um exemplo simplificado
-        // Em produção, você deve usar uma API real de PIX
-        const pixCode = `00020126580014br.gov.bcb.pix0136${data.transactionId}520400005303986540${data.amount.toFixed(2)}5802BR5913${data.merchantName}6008${data.merchantCity}62070503***6304${generateCRC16(data.transactionId)}`;
-        return pixCode;
+    // Função para verificar status do pagamento
+    function startPaymentStatusCheck(transactionId) {
+        const checkInterval = setInterval(async () => {
+            try {
+                const authToken = localStorage.getItem('authToken');
+                const response = await fetch(`/api/payments/status/${transactionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data.status === 'paid') {
+                    // Pagamento confirmado
+                    clearInterval(checkInterval);
+                    
+                    // Mostrar sucesso
+                    qrCodeContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #22c55e;">
+                            <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p style="color: #22c55e; font-weight: 600;">Pagamento Confirmado!</p>
+                            <small style="color: #9ca3af;">Tokens creditados automaticamente</small>
+                        </div>
+                    `;
+
+                    // Fechar modal após 3 segundos
+                    setTimeout(() => {
+                        pixModal.style.display = 'none';
+                        // Recarregar página para atualizar tokens
+                        window.location.reload();
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+            }
+        }, 5000); // Verificar a cada 5 segundos
+
+        // Parar verificação após 1 hora
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 3600000);
     }
 
-    // Função para gerar ID de transação
-    function generateTransactionId() {
-        return 'CALLX' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
-    }
 
-    // Função para gerar CRC16 (simplificado)
-    function generateCRC16(data) {
-        // Implementação simplificada do CRC16
-        return 'ABCD'; // Em produção, implemente o cálculo real
-    }
 
     // Event listeners para o modal PIX
     closePixModal.addEventListener('click', function() {
