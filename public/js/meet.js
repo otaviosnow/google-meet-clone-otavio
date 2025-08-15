@@ -346,6 +346,12 @@ function startCall(videoUrl = null) {
 function startVSL(videoUrl = null) {
     console.log('=== INICIANDO VSL ===');
     
+    // Mostrar o vídeo
+    vslVideo.style.display = 'block';
+    vslVideo.style.width = '100%';
+    vslVideo.style.height = '100%';
+    vslVideo.style.objectFit = 'cover';
+    
     // Configurar o vídeo VSL
     vslVideo.loop = false; // Não repetir
     vslVideo.muted = false; // Com som
