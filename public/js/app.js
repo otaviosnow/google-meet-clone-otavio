@@ -1017,7 +1017,6 @@ async function handleCreateMeeting(e) {
         const result = await response.json();
         
         if (response.ok) {
-            const result = await response.json();
             
             // Atualizar o contador de tokens
             if (result.tokensRemaining !== undefined) {
