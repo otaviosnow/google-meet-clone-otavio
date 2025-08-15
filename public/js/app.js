@@ -2020,10 +2020,7 @@ async function saveMonthlyGoal() {
             },
             body: JSON.stringify({ 
                 monthlyGoal: goal,
-                goalType,
-                goalDeadline,
-                goalPriority,
-                goalDescription
+                deadlineDate: goalDeadline || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString()
             })
         });
         
@@ -2090,16 +2087,9 @@ function updateConfigTab(data) {
     }
     
     // Carregar dados salvos da meta se existirem
-    if (data.goalData) {
-        const goalType = document.getElementById('goalType');
-        const goalDeadline = document.getElementById('goalDeadline');
-        const goalPriority = document.getElementById('goalPriority');
-        const goalDescription = document.getElementById('goalDescription');
-        
-        if (goalType) goalType.value = data.goalData.goalType || 'revenue';
-        if (goalDeadline) goalDeadline.value = data.goalData.goalDeadline || '';
-        if (goalPriority) goalPriority.value = data.goalData.goalPriority || 'medium';
-        if (goalDescription) goalDescription.value = data.goalData.goalDescription || '';
+    const goalDeadline = document.getElementById('goalDeadline');
+    if (goalDeadline && data.deadlineDate) {
+        goalDeadline.value = new Date(data.deadlineDate).toISOString().split('T')[0];
     }
 }
 
@@ -2533,17 +2523,13 @@ async function loadGoalConfig() {
             
             // Preencher campos com dados salvos
             const monthlyGoalInput = document.getElementById('monthlyGoal');
-            const goalType = document.getElementById('goalType');
             const goalDeadline = document.getElementById('goalDeadline');
-            const goalPriority = document.getElementById('goalPriority');
-            const goalDescription = document.getElementById('goalDescription');
             
             // Verificar se os elementos existem antes de acessar
             if (monthlyGoalInput) monthlyGoalInput.value = data.monthlyGoal || 0;
-            if (goalType) goalType.value = data.goalType || 'revenue';
-            if (goalDeadline) goalDeadline.value = data.goalDeadline || '';
-            if (goalPriority) goalPriority.value = data.goalPriority || 'medium';
-            if (goalDescription) goalDescription.value = data.goalDescription || '';
+            if (goalDeadline && data.deadlineDate) {
+                goalDeadline.value = new Date(data.deadlineDate).toISOString().split('T')[0];
+            }
         }
     } catch (error) {
         console.error('Erro ao carregar configuração da meta:', error);
@@ -2677,15 +2663,15 @@ function renderModificationsList(modifications) {
                 <div class="modification-details">
                     <div class="modification-detail">
                         <h5>Receita Bruta</h5>
-                        <p>R$ ${modification.entryData.grossRevenue.toFixed(2)}</p>
+                        <p>R$ ${(modification.entryData.grossRevenue || 0).toFixed(2)}</p>
                     </div>
                     <div class="modification-detail">
                         <h5>Despesas Totais</h5>
-                        <p>R$ ${modification.entryData.totalExpenses.toFixed(2)}</p>
+                        <p>R$ ${(modification.entryData.totalExpenses || 0).toFixed(2)}</p>
                     </div>
                     <div class="modification-detail">
                         <h5>Lucro Líquido</h5>
-                        <p>R$ ${modification.entryData.netProfit.toFixed(2)}</p>
+                        <p>R$ ${(modification.entryData.netProfit || 0).toFixed(2)}</p>
                     </div>
                 </div>
             ` : ''}
@@ -2694,11 +2680,11 @@ function renderModificationsList(modifications) {
                 <div class="modification-details">
                     <div class="modification-detail">
                         <h5>Meta Definida</h5>
-                        <p>R$ ${modification.goalData.targetAmount.toFixed(2)}</p>
+                        <p>R$ ${(modification.goalData.targetAmount || 0).toFixed(2)}</p>
                     </div>
                     <div class="modification-detail">
                         <h5>Data Limite</h5>
-                        <p>${formatDate(modification.goalData.deadlineDate)}</p>
+                        <p>${modification.goalData.deadlineDate ? formatDate(modification.goalData.deadlineDate) : 'Não definida'}</p>
                     </div>
                 </div>
             ` : ''}

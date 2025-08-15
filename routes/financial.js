@@ -708,24 +708,82 @@ router.put('/entry/:id', authenticateToken, entryValidation, handleValidationErr
 
 // DELETE /api/financial/entry/:id - Deletar entrada
 router.delete('/entry/:id', authenticateToken, async (req, res) => {
+  console.log('🗑️ [DELETAR] DELETE /entry/:id - Usuário:', req.user._id, 'ID:', req.params.id);
+  
   try {
-    const entry = await FinancialEntry.findOneAndDelete({
+    const entry = await FinancialEntry.findOne({
       _id: req.params.id,
       user: req.user._id
     });
     
     if (!entry) {
+      console.log('❌ [DELETAR] Entrada não encontrada - ID:', req.params.id);
       return res.status(404).json({
         error: 'Entrada não encontrada'
       });
     }
+    
+    console.log('✅ [DELETAR] Entrada encontrada:', {
+      id: entry._id,
+      date: entry.date,
+      grossRevenue: entry.grossRevenue,
+      netProfit: entry.netProfit
+    });
+    
+    // Calcular valores anteriores (incluindo a entrada que será deletada)
+    const startOfMonth = new Date(entry.date.getFullYear(), entry.date.getMonth(), 1);
+    const endOfMonth = new Date(entry.date.getFullYear(), entry.date.getMonth() + 1, 0);
+    
+    const existingEntries = await FinancialEntry.find({
+      user: req.user._id,
+      date: { $gte: startOfMonth, $lte: endOfMonth }
+    });
+    
+    const previousTotalRevenue = existingEntries.reduce((sum, e) => sum + e.grossRevenue, 0);
+    const previousTotalExpenses = existingEntries.reduce((sum, e) => sum + e.totalExpenses, 0);
+    const previousTotalProfit = existingEntries.reduce((sum, e) => sum + e.netProfit, 0);
+    
+    const previousValues = {
+      totalRevenue: previousTotalRevenue,
+      totalExpenses: previousTotalExpenses,
+      totalProfit: previousTotalProfit,
+      goalProgress: 0
+    };
+    
+    // Deletar entrada
+    await FinancialEntry.findByIdAndDelete(entry._id);
+    console.log('✅ [DELETAR] Entrada deletada com sucesso');
+    
+    // Calcular novos valores (sem a entrada deletada)
+    const newTotalRevenue = previousTotalRevenue - entry.grossRevenue;
+    const newTotalExpenses = previousTotalExpenses - entry.totalExpenses;
+    const newTotalProfit = previousTotalProfit - entry.netProfit;
+    
+    // Calcular progresso da meta
+    const currentMonth = entry.date.toISOString().slice(0, 7);
+    const goal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
+    const goalProgress = goal && goal.monthlyGoal > 0 ? Math.min((newTotalProfit / goal.monthlyGoal) * 100, 100) : 0;
+    
+    const newValues = {
+      totalRevenue: newTotalRevenue,
+      totalExpenses: newTotalExpenses,
+      totalProfit: newTotalProfit,
+      goalProgress: Math.round(goalProgress * 100) / 100
+    };
+    
+    console.log('📈 [DELETAR] Valores após deleção:', newValues);
+    
+    // Criar histórico da deleção
+    console.log('📝 [DELETAR] Criando histórico da deleção');
+    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
+    console.log('✅ [DELETAR] Histórico criado com sucesso');
     
     res.json({
       message: 'Entrada deletada com sucesso'
     });
     
   } catch (error) {
-    console.error('Erro ao deletar entrada:', error);
+    console.error('❌ [DELETAR] Erro ao deletar entrada:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
