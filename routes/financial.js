@@ -26,6 +26,12 @@ const router = express.Router();
 
 // Middleware para verificar erros de validação
 const handleValidationErrors = (req, res, next) => {
+  console.log('🔍 [VALIDAÇÃO] Verificando dados:', {
+    body: req.body,
+    url: req.url,
+    method: req.method
+  });
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log('❌ [VALIDAÇÃO] Erros encontrados:', errors.array());
