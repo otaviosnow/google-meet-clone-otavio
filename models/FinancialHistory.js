@@ -131,43 +131,85 @@ financialHistorySchema.index({ user: 1, action: 1 });
 
 // Método para criar histórico de entrada financeira
 financialHistorySchema.statics.createEntryHistory = async function(userId, entry, previousValues, newValues) {
+    console.log('📝 [HISTORY] Criando histórico de entrada - Dados recebidos:', {
+        userId,
+        entry: {
+            grossRevenue: entry?.grossRevenue,
+            chipCost: entry?.chipCost,
+            additionalCost: entry?.additionalCost,
+            adsCost: entry?.adsCost,
+            totalExpenses: entry?.totalExpenses,
+            netProfit: entry?.netProfit,
+            date: entry?.date,
+            _id: entry?._id
+        },
+        previousValues,
+        newValues
+    });
+    
+    const grossRevenue = entry?.grossRevenue || 0;
+    const description = `Adicionada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+    
+    console.log('📝 [HISTORY] Descrição gerada:', description);
+    
     const history = new this({
         user: userId,
         type: 'entry',
         action: 'add',
-        description: `Adicionada entrada financeira: R$ ${entry.grossRevenue.toFixed(2)} de receita bruta`,
+        description,
         entryData: {
-            grossRevenue: entry.grossRevenue,
-            chipCost: entry.chipCost,
-            additionalCost: entry.additionalCost,
-            adsCost: entry.adsCost,
-            totalExpenses: entry.totalExpenses,
-            netProfit: entry.netProfit,
-            date: entry.date
+            grossRevenue: grossRevenue,
+            chipCost: entry?.chipCost || 0,
+            additionalCost: entry?.additionalCost || 0,
+            adsCost: entry?.adsCost || 0,
+            totalExpenses: entry?.totalExpenses || 0,
+            netProfit: entry?.netProfit || 0,
+            date: entry?.date || new Date()
         },
-        previousValues,
-        newValues,
-        relatedEntry: entry._id
+        previousValues: previousValues || {},
+        newValues: newValues || {},
+        relatedEntry: entry?._id
     });
     
-    return await history.save();
+    console.log('📝 [HISTORY] Histórico criado, salvando...');
+    const savedHistory = await history.save();
+    console.log('✅ [HISTORY] Histórico salvo com sucesso:', savedHistory._id);
+    
+    return savedHistory;
 };
 
 // Método para criar histórico de atualização de meta
 financialHistorySchema.statics.createGoalHistory = async function(userId, goal, action, previousValues, newValues) {
+    console.log('📝 [HISTORY] Criando histórico de meta - Dados recebidos:', {
+        userId,
+        goal: {
+            targetAmount: goal?.targetAmount,
+            deadlineDate: goal?.deadlineDate,
+            description: goal?.description,
+            _id: goal?._id
+        },
+        action,
+        previousValues,
+        newValues
+    });
+    
     let description = '';
+    const targetAmount = goal?.targetAmount || 0;
+    const deadlineDate = goal?.deadlineDate;
     
     switch(action) {
         case 'create':
-            description = `Meta criada: R$ ${goal.targetAmount.toFixed(2)} até ${goal.deadlineDate.toLocaleDateString('pt-BR')}`;
+            description = `Meta criada: R$ ${targetAmount.toFixed(2)}${deadlineDate ? ` até ${new Date(deadlineDate).toLocaleDateString('pt-BR')}` : ''}`;
             break;
         case 'update':
-            description = `Meta atualizada: R$ ${goal.targetAmount.toFixed(2)} até ${goal.deadlineDate.toLocaleDateString('pt-BR')}`;
+            description = `Meta atualizada: R$ ${targetAmount.toFixed(2)}${deadlineDate ? ` até ${new Date(deadlineDate).toLocaleDateString('pt-BR')}` : ''}`;
             break;
         case 'delete':
-            description = `Meta deletada: R$ ${goal.targetAmount.toFixed(2)}`;
+            description = `Meta deletada: R$ ${targetAmount.toFixed(2)}`;
             break;
     }
+    
+    console.log('📝 [HISTORY] Descrição gerada:', description);
     
     const history = new this({
         user: userId,
@@ -175,16 +217,20 @@ financialHistorySchema.statics.createGoalHistory = async function(userId, goal, 
         action,
         description,
         goalData: {
-            targetAmount: goal.targetAmount,
-            deadlineDate: goal.deadlineDate,
-            description: goal.description
+            targetAmount: targetAmount,
+            deadlineDate: deadlineDate,
+            description: goal?.description || ''
         },
-        previousValues,
-        newValues,
-        relatedGoal: goal._id
+        previousValues: previousValues || {},
+        newValues: newValues || {},
+        relatedGoal: goal?._id
     });
     
-    return await history.save();
+    console.log('📝 [HISTORY] Histórico criado, salvando...');
+    const savedHistory = await history.save();
+    console.log('✅ [HISTORY] Histórico salvo com sucesso:', savedHistory._id);
+    
+    return savedHistory;
 };
 
 // Método para retornar dados públicos do histórico
