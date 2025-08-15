@@ -1029,7 +1029,7 @@ async function handleCreateMeeting(e) {
             createMeetingForm.reset();
             
             // Copiar link para clipboard
-            copyToClipboard(meetLink);
+            copyMeetingLink(meetLink);
             
             // Abrir reunião em nova aba
             window.open(meetLink, '_blank');
@@ -1116,6 +1116,11 @@ async function loadUserData() {
     
     // Carregar dados financeiros
     loadFinancialData();
+    
+    // Carregar avatar salvo
+    if (currentUser.avatar && avatarPreview) {
+        avatarPreview.src = currentUser.avatar;
+    }
     
     // Atualizar estado do botão de criar reunião
     updateTokenButtonState();
@@ -1994,7 +1999,7 @@ function initializeAvatar() {
 }
 
 // Manipular mudança de avatar
-function handleAvatarChange(event) {
+async function handleAvatarChange(event) {
     const file = event.target.files[0];
     if (file) {
         if (file.size > 5 * 1024 * 1024) { // 5MB
@@ -2003,11 +2008,34 @@ function handleAvatarChange(event) {
         }
         
         const reader = new FileReader();
-        reader.onload = function(e) {
-            avatarPreview.src = e.target.result;
+        reader.onload = async function(e) {
+            const avatarData = e.target.result;
+            avatarPreview.src = avatarData;
+            
+            // Salvar avatar no banco de dados
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/avatar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ avatar: avatarData })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    currentUser.avatar = avatarData;
+                    showNotification('Foto de perfil salva com sucesso!', 'success');
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Erro ao salvar foto', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar avatar:', error);
+                showNotification('Erro ao salvar foto de perfil', 'error');
+            }
         };
         reader.readAsDataURL(file);
-        
-        showNotification('Foto de perfil atualizada!', 'success');
     }
 } 

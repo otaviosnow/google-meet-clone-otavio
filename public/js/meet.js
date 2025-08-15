@@ -458,8 +458,21 @@ function startVSL() {
         });
     }
     
-    // Mostrar tela da chamada
-    showCallScreen();
+    // Verificar se já está na chamada ou encerrada
+    const isInCall = localStorage.getItem('googleMeetInCall');
+    const isEnded = localStorage.getItem('googleMeetEnded');
+    
+    if (isEnded === 'true') {
+        console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
+        showEndedScreen();
+    } else if (isInCall === 'true') {
+        console.log('🔄 Usuário já estava na chamada - restaurando...');
+        showCallScreen();
+        startCall();
+    } else {
+        console.log('🆕 Primeira vez - mostrando tela de nome');
+        showNameScreen();
+    }
 }
 
 // Função para tentar autoplay

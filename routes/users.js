@@ -61,6 +61,49 @@ router.get('/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// PUT /api/users/avatar - Atualizar avatar do usuário
+router.put('/avatar', authenticateToken, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    
+    if (!avatar) {
+      return res.status(400).json({
+        error: 'Avatar é obrigatório'
+      });
+    }
+    
+    // Verificar se é uma data URL válida
+    if (!avatar.startsWith('data:image/')) {
+      return res.status(400).json({
+        error: 'Formato de imagem inválido'
+      });
+    }
+    
+    // Buscar usuário atual
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
+    }
+    
+    // Atualizar avatar
+    user.avatar = avatar;
+    await user.save();
+    
+    res.json({
+      message: 'Avatar atualizado com sucesso',
+      avatar: user.avatar
+    });
+    
+  } catch (error) {
+    console.error('Erro ao atualizar avatar:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 // PUT /api/users/profile - Atualizar perfil do usuário
 router.put('/profile', authenticateToken, updateProfileValidation, handleValidationErrors, async (req, res) => {
   try {
