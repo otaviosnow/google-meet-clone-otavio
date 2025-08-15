@@ -1,8 +1,31 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const { generateToken } = require('../middleware/auth');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+
+// Middleware de autenticação compatível com o servidor principal
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ success: false, error: 'Token não fornecido' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ success: false, error: 'Token inválido' });
+        }
+        req.user = { _id: decoded.userId };
+        next();
+    });
+};
+
+// Função para gerar token JWT
+const generateToken = (userId) => {
+    return jwt.sign({ userId }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+};
 
 const router = express.Router();
 
