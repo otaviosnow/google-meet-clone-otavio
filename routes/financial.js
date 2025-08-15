@@ -49,12 +49,18 @@ const entryValidation = [
   body('date')
     .isISO8601()
     .withMessage('Data inválida'),
-  body('revenue')
+  body('grossRevenue')
     .isFloat({ min: 0 })
-    .withMessage('Faturamento deve ser um número positivo'),
-  body('expenses')
+    .withMessage('Faturamento bruto deve ser um número positivo'),
+  body('chipCost')
     .isFloat({ min: 0 })
-    .withMessage('Gastos devem ser um número positivo')
+    .withMessage('Custo com chip deve ser um número positivo'),
+  body('additionalCost')
+    .isFloat({ min: 0 })
+    .withMessage('Custo adicional deve ser um número positivo'),
+  body('adsCost')
+    .isFloat({ min: 0 })
+    .withMessage('Custo com ads deve ser um número positivo')
 ];
 
 // GET /api/financial/summary - Obter resumo financeiro do mês atual
@@ -81,9 +87,9 @@ router.get('/summary', authenticateToken, async (req, res) => {
     });
     
     // Calcular totais
-    const totalRevenue = entries.reduce((sum, entry) => sum + entry.revenue, 0);
-    const totalExpenses = entries.reduce((sum, entry) => sum + entry.expenses, 0);
-    const totalProfit = totalRevenue - totalExpenses;
+    const totalRevenue = entries.reduce((sum, entry) => sum + entry.grossRevenue, 0);
+    const totalExpenses = entries.reduce((sum, entry) => sum + entry.totalExpenses, 0);
+    const totalProfit = entries.reduce((sum, entry) => sum + entry.netProfit, 0);
     
     // Calcular progresso da meta
     const monthlyGoal = goal ? goal.monthlyGoal : 0;
@@ -138,7 +144,7 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
 // POST /api/financial/entry - Adicionar entrada diária
 router.post('/entry', authenticateToken, entryValidation, handleValidationErrors, async (req, res) => {
   try {
-    const { date, revenue, expenses, notes } = req.body;
+    const { date, grossRevenue, chipCost, additionalCost, adsCost, notes } = req.body;
     
     // Verificar se já existe entrada para esta data
     const existingEntry = await FinancialEntry.findOne({
@@ -156,8 +162,10 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     const entry = new FinancialEntry({
       user: req.user._id,
       date: new Date(date),
-      revenue,
-      expenses,
+      grossRevenue: grossRevenue || 0,
+      chipCost: chipCost || 0,
+      additionalCost: additionalCost || 0,
+      adsCost: adsCost || 0,
       notes
     });
     
@@ -168,9 +176,13 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
       entry: {
         id: entry._id,
         date: entry.date,
-        revenue: entry.revenue,
-        expenses: entry.expenses,
-        profit: entry.profit
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
+        notes: entry.notes
       }
     });
     
@@ -211,15 +223,65 @@ router.get('/entries', authenticateToken, async (req, res) => {
       entries: entries.map(entry => ({
         id: entry._id,
         date: entry.date,
-        revenue: entry.revenue,
-        expenses: entry.expenses,
-        profit: entry.profit,
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
         notes: entry.notes
       }))
     });
     
   } catch (error) {
     console.error('Erro ao listar entradas:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// GET /api/financial/history - Obter histórico financeiro
+router.get('/history', authenticateToken, async (req, res) => {
+  try {
+    const { startDate, endDate, type } = req.query;
+    
+    let query = { user: req.user._id };
+    
+    if (startDate && endDate) {
+      query.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+    
+    if (type && type !== 'all') {
+      // Filtrar por tipo se especificado
+      if (type === 'revenue') {
+        query.grossRevenue = { $gt: 0 };
+      } else if (type === 'expenses') {
+        query.totalExpenses = { $gt: 0 };
+      }
+    }
+    
+    const entries = await FinancialEntry.find(query).sort({ date: -1 });
+    
+    res.json({
+      entries: entries.map(entry => ({
+        id: entry._id,
+        date: entry.date,
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
+        notes: entry.notes
+      }))
+    });
+    
+  } catch (error) {
+    console.error('Erro ao obter histórico financeiro:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
