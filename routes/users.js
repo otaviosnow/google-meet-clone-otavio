@@ -255,4 +255,108 @@ router.get('/stats', authenticateToken, async (req, res) => {
   }
 });
 
+// ===== ROTAS ADMIN =====
+
+// Middleware para verificar se é admin
+const requireAdmin = async (req, res, next) => {
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403).json({
+        error: 'Acesso negado - Apenas administradores'
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
+// GET /api/users/admin - Listar todos os usuários (admin)
+router.get('/admin', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('👑 [USERS-ADMIN] Listando usuários...');
+    
+    const users = await User.find({}).select('-password');
+    
+    console.log(`✅ [USERS-ADMIN] ${users.length} usuários encontrados`);
+    
+    res.json({
+      users: users.map(user => user.toPublicJSON())
+    });
+
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// POST /api/users/admin/:userId/ban - Banir usuário (admin)
+router.post('/admin/:userId/ban', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('🚫 [USERS-ADMIN] Banindo usuário...');
+    
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      console.log('❌ [USERS-ADMIN] Usuário não encontrado');
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
+    }
+    
+    user.isActive = false;
+    user.isBanned = true;
+    await user.save();
+    
+    console.log('✅ [USERS-ADMIN] Usuário banido:', user.email);
+    
+    res.json({
+      message: 'Usuário banido com sucesso',
+      user: user.toPublicJSON()
+    });
+
+  } catch (error) {
+    console.error('Erro ao banir usuário:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// DELETE /api/users/admin/:userId - Deletar usuário (admin)
+router.delete('/admin/:userId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('🗑️ [USERS-ADMIN] Deletando usuário...');
+    
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      console.log('❌ [USERS-ADMIN] Usuário não encontrado');
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
+    }
+    
+    await User.findByIdAndDelete(userId);
+    
+    console.log('✅ [USERS-ADMIN] Usuário deletado:', user.email);
+    
+    res.json({
+      message: 'Usuário deletado com sucesso'
+    });
+
+  } catch (error) {
+    console.error('Erro ao deletar usuário:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 module.exports = router; 
