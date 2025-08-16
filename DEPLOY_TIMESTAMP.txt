@@ -1,1 +1,6 @@
-Deploy forçado em: Fri Aug 15 23:34:12 -03 2025
+Deploy iniciado em: 2024-12-19 15:30:00
+Versão: a1736fc
+Correções:
+- Sistema de histórico financeiro corrigido
+- Atualização de entradas existentes implementada
+- Logs detalhados adicionados para debugging
