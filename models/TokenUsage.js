@@ -14,7 +14,7 @@ const tokenUsageSchema = new mongoose.Schema({
     tokensUsed: {
         type: Number,
         required: true,
-        default: 2 // Cada reunião consome 2 tokens
+        default: 1 // Cada reunião consome 1 token
     },
     action: {
         type: String,
