@@ -43,7 +43,7 @@ router.post('/', authenticateToken, async (req, res) => {
         await meeting.save();
 
         // Descontar 2 tokens do usuário
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (user.visionTokens < 2) {
             return res.status(400).json({ error: 'Tokens insuficientes. Você precisa de 2 tokens para criar uma reunião.' });
         }
@@ -52,14 +52,22 @@ router.post('/', authenticateToken, async (req, res) => {
         await user.save();
 
         // Registrar uso de tokens
+        console.log('📝 [MEETING] Registrando uso de tokens...');
+        console.log('   - User ID:', req.user._id);
+        console.log('   - Meeting ID:', meeting._id);
+        console.log('   - Tokens to use:', 2);
+        
         const tokenUsage = new TokenUsage({
-            user: req.user.id,
+            user: req.user._id,
             meeting: meeting._id,
             tokensUsed: 2,
             action: 'meeting_created',
             description: `Criação da reunião: ${title}`
         });
+        
+        console.log('📝 [MEETING] TokenUsage criado, salvando...');
         await tokenUsage.save();
+        console.log('✅ [MEETING] TokenUsage salvo com sucesso - ID:', tokenUsage._id);
 
         console.log(`✅ Reunião criada: ${meetingId} - Tokens descontados: ${user.visionTokens + 2} → ${user.visionTokens}`);
 
