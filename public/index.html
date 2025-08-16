@@ -197,6 +197,10 @@
                             <i class="fas fa-user"></i>
                             Perfil
                         </button>
+                        <button class="menu-item" data-tab="integration">
+                            <i class="fas fa-link"></i>
+                            Integração
+                        </button>
                     </nav>
                     <div class="header-right">
                         <div class="token-section">
@@ -883,6 +887,114 @@
                     Criar Reunião
                 </button>
                 <span class="token-cost">-2 tokens</span>
+            </form>
+        </div>
+    </div>
+
+    <!-- Integration Tab Content -->
+    <div id="integrationTab" class="tab-content" style="display: none;">
+        <div class="container">
+            <div class="tab-header">
+                <h2><i class="fas fa-link"></i> Integração Externa</h2>
+                <p>Gerencie seus tokens de integração para conectar o CallX aos seus sites externos</p>
+            </div>
+
+            <div class="integration-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalTokens">0</h3>
+                        <p>Tokens Ativos</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalIntegrations">0</h3>
+                        <p>Reuniões via Integração</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="activeWebsites">0</h3>
+                        <p>Sites Conectados</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="integration-actions">
+                <button id="createTokenBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Criar Novo Token
+                </button>
+                <button id="refreshTokensBtn" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> Atualizar
+                </button>
+            </div>
+
+            <div class="tokens-list" id="tokensList">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando tokens de integração...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Integration Token Modal -->
+    <div id="createTokenModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Criar Token de Integração</h2>
+                <button class="modal-close" id="closeTokenModal">&times;</button>
+            </div>
+            
+            <form id="createTokenForm" class="token-form">
+                <div class="form-group">
+                    <label for="tokenName">Nome da Integração</label>
+                    <input type="text" id="tokenName" name="name" placeholder="Ex: Meu Site Principal" required>
+                    <small>Nome para identificar esta integração</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tokenDescription">Descrição</label>
+                    <textarea id="tokenDescription" name="description" placeholder="Descreva para que será usado este token" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tokenWebsite">Website</label>
+                    <input type="url" id="tokenWebsite" name="website" placeholder="https://meusite.com" required>
+                    <small>URL do site onde será usado este token</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tokenVideos">Vídeos Disponíveis</label>
+                    <div id="tokenVideosList" class="videos-checkbox-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Carregando seus vídeos...</p>
+                        </div>
+                    </div>
+                    <small>Selecione quais vídeos estarão disponíveis para esta integração</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tokenDefaultVideo">Vídeo Padrão</label>
+                    <select id="tokenDefaultVideo" name="defaultVideo">
+                        <option value="">Selecione um vídeo padrão</option>
+                    </select>
+                    <small>Vídeo que será usado quando nenhum for especificado</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-key"></i> Criar Token
+                </button>
             </form>
         </div>
     </div>

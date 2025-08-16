@@ -260,6 +260,9 @@ function initializeEventListeners() {
         });
     }
     
+    // Integration System
+    initializeIntegration();
+    
     // Click outside modal to close
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
@@ -630,6 +633,13 @@ function switchTab(tabName) {
         return;
     }
     
+    if (tabName === 'integration') {
+        console.log('🔗 [SWITCH-TAB] Mostrando aba de integração...');
+        selectedMenuItem.classList.add('active');
+        showIntegrationTab();
+        return;
+    }
+    
     // Para outras abas, verificar se o conteúdo existe
     if (selectedMenuItem && selectedTabContent) {
         selectedMenuItem.classList.add('active');
@@ -690,6 +700,28 @@ function showAdminTab() {
         document.getElementById('adminAuth').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         loadAdminData();
+    }
+}
+
+// Função para mostrar aba de integração
+function showIntegrationTab() {
+    console.log('🔗 [INTEGRATION] Mostrando aba de integração...');
+    
+    // Esconder todas as abas
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Mostrar aba de integração
+    const integrationTab = document.getElementById('integrationTab');
+    if (integrationTab) {
+        integrationTab.style.display = 'block';
+        console.log('✅ [INTEGRATION] Aba de integração exibida');
+        
+        // Carregar tokens de integração
+        loadIntegrationTokens();
+    } else {
+        console.error('❌ [INTEGRATION] Aba de integração não encontrada');
     }
 }
 
@@ -3406,5 +3438,331 @@ function initializeModificationFilters() {
             const action = document.getElementById('modificationActionFilter').value;
             loadModificationsHistory(1, type, action);
         });
+    }
+}
+
+// ===== SISTEMA DE INTEGRAÇÃO =====
+
+// Inicializar sistema de integração
+function initializeIntegration() {
+    const createTokenBtn = document.getElementById('createTokenBtn');
+    const refreshTokensBtn = document.getElementById('refreshTokensBtn');
+    const closeTokenModal = document.getElementById('closeTokenModal');
+    const createTokenForm = document.getElementById('createTokenForm');
+    
+    if (createTokenBtn) {
+        createTokenBtn.addEventListener('click', () => {
+            showModal(document.getElementById('createTokenModal'));
+            loadVideosForToken();
+        });
+    }
+    
+    if (refreshTokensBtn) {
+        refreshTokensBtn.addEventListener('click', loadIntegrationTokens);
+    }
+    
+    if (closeTokenModal) {
+        closeTokenModal.addEventListener('click', () => {
+            hideModal(document.getElementById('createTokenModal'));
+        });
+    }
+    
+    if (createTokenForm) {
+        createTokenForm.addEventListener('submit', handleCreateToken);
+    }
+}
+
+// Carregar tokens de integração
+async function loadIntegrationTokens() {
+    try {
+        console.log('🔗 [INTEGRATION] Carregando tokens de integração...');
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao carregar tokens');
+        }
+        
+        const tokens = await response.json();
+        console.log('🔗 [INTEGRATION] Tokens carregados:', tokens);
+        
+        renderIntegrationTokens(tokens);
+        updateIntegrationStats(tokens);
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao carregar tokens:', error);
+        showNotification('Erro ao carregar tokens de integração', 'error');
+    }
+}
+
+// Renderizar tokens de integração
+function renderIntegrationTokens(tokens) {
+    const tokensList = document.getElementById('tokensList');
+    if (!tokensList) return;
+    
+    if (tokens.length === 0) {
+        tokensList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-key" style="font-size: 48px; color: #9ca3af; margin-bottom: 16px;"></i>
+                <h3>Nenhum token de integração</h3>
+                <p>Crie seu primeiro token para integrar o CallX aos seus sites externos</p>
+                <button class="btn btn-primary" onclick="document.getElementById('createTokenBtn').click()">
+                    <i class="fas fa-plus"></i> Criar Primeiro Token
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    tokensList.innerHTML = tokens.map(token => `
+        <div class="token-card">
+            <div class="token-header">
+                <div class="token-info">
+                    <h3>${token.name}</h3>
+                    <p>${token.description || 'Sem descrição'}</p>
+                </div>
+                <div class="token-status ${token.isActive ? 'active' : 'inactive'}">
+                    <i class="fas fa-${token.isActive ? 'check' : 'times'}"></i>
+                    ${token.isActive ? 'Ativo' : 'Inativo'}
+                </div>
+            </div>
+            
+            <div class="token-details">
+                <div class="token-detail">
+                    <label>Website</label>
+                    <span>${token.website || 'Não definido'}</span>
+                </div>
+                <div class="token-detail">
+                    <label>Vídeos Configurados</label>
+                    <span>${token.videos ? token.videos.length : 0}</span>
+                </div>
+                <div class="token-detail">
+                    <label>Usos</label>
+                    <span>${token.usageCount || 0}</span>
+                </div>
+                <div class="token-detail">
+                    <label>Último Uso</label>
+                    <span>${token.lastUsed ? formatDate(token.lastUsed) : 'Nunca'}</span>
+                </div>
+            </div>
+            
+            <div class="token-token">${token.token}</div>
+            
+            <div class="token-actions">
+                <button class="btn btn-secondary" onclick="copyToken('${token.token}')">
+                    <i class="fas fa-copy"></i> Copiar Token
+                </button>
+                <button class="btn btn-secondary" onclick="toggleTokenStatus('${token._id}', ${token.isActive})">
+                    <i class="fas fa-${token.isActive ? 'pause' : 'play'}"></i> ${token.isActive ? 'Desativar' : 'Ativar'}
+                </button>
+                <button class="btn btn-danger" onclick="deleteToken('${token._id}')">
+                    <i class="fas fa-trash"></i> Deletar
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Atualizar estatísticas de integração
+function updateIntegrationStats(tokens) {
+    const totalTokens = document.getElementById('totalTokens');
+    const totalIntegrations = document.getElementById('totalIntegrations');
+    const activeWebsites = document.getElementById('activeWebsites');
+    
+    if (totalTokens) {
+        totalTokens.textContent = tokens.filter(t => t.isActive).length;
+    }
+    
+    if (totalIntegrations) {
+        const totalUsage = tokens.reduce((sum, token) => sum + (token.usageCount || 0), 0);
+        totalIntegrations.textContent = totalUsage;
+    }
+    
+    if (activeWebsites) {
+        const uniqueWebsites = new Set(tokens.filter(t => t.isActive && t.website).map(t => t.website));
+        activeWebsites.textContent = uniqueWebsites.size;
+    }
+}
+
+// Carregar vídeos para seleção no token
+async function loadVideosForToken() {
+    try {
+        console.log('🎬 [INTEGRATION] Carregando vídeos para token...');
+        
+        const response = await fetch(`${API_BASE_URL}/videos`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao carregar vídeos');
+        }
+        
+        const videos = await response.json();
+        console.log('🎬 [INTEGRATION] Vídeos carregados:', videos);
+        
+        renderVideosForToken(videos);
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao carregar vídeos:', error);
+        showNotification('Erro ao carregar vídeos', 'error');
+    }
+}
+
+// Renderizar vídeos para seleção
+function renderVideosForToken(videos) {
+    const videosList = document.getElementById('tokenVideosList');
+    const defaultVideoSelect = document.getElementById('tokenDefaultVideo');
+    
+    if (!videosList || !defaultVideoSelect) return;
+    
+    if (videos.length === 0) {
+        videosList.innerHTML = `
+            <div class="empty-state">
+                <p>Nenhum vídeo encontrado. Adicione vídeos primeiro.</p>
+            </div>
+        `;
+        defaultVideoSelect.innerHTML = '<option value="">Nenhum vídeo disponível</option>';
+        return;
+    }
+    
+    // Renderizar lista de checkboxes
+    videosList.innerHTML = videos.map(video => `
+        <div class="video-checkbox-item">
+            <input type="checkbox" id="video_${video._id}" value="${video._id}" name="videos">
+            <label for="video_${video._id}">${video.title}</label>
+            <span class="video-type">${video.type}</span>
+        </div>
+    `).join('');
+    
+    // Renderizar select para vídeo padrão
+    defaultVideoSelect.innerHTML = `
+        <option value="">Selecione um vídeo padrão</option>
+        ${videos.map(video => `
+            <option value="${video._id}">${video.title}</option>
+        `).join('')}
+    `;
+}
+
+// Criar novo token de integração
+async function handleCreateToken(e) {
+    e.preventDefault();
+    
+    try {
+        console.log('🔗 [INTEGRATION] Criando novo token...');
+        
+        const formData = new FormData(e.target);
+        const selectedVideos = Array.from(document.querySelectorAll('#tokenVideosList input[type="checkbox"]:checked'))
+            .map(checkbox => checkbox.value);
+        
+        const tokenData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            website: formData.get('website'),
+            videos: selectedVideos.map(videoId => ({
+                video: videoId,
+                name: document.querySelector(`#video_${videoId} + label`).textContent,
+                isDefault: videoId === formData.get('defaultVideo')
+            }))
+        };
+        
+        console.log('🔗 [INTEGRATION] Dados do token:', tokenData);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(tokenData)
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Erro ao criar token');
+        }
+        
+        const result = await response.json();
+        console.log('✅ [INTEGRATION] Token criado:', result);
+        
+        showNotification('Token de integração criado com sucesso!', 'success');
+        hideModal(document.getElementById('createTokenModal'));
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao criar token:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
+// Copiar token para clipboard
+function copyToken(token) {
+    navigator.clipboard.writeText(token).then(() => {
+        showNotification('Token copiado para clipboard!', 'success');
+    }).catch(() => {
+        showNotification('Erro ao copiar token', 'error');
+    });
+}
+
+// Alternar status do token
+async function toggleTokenStatus(tokenId, currentStatus) {
+    try {
+        console.log('🔗 [INTEGRATION] Alternando status do token:', tokenId);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                isActive: !currentStatus
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar token');
+        }
+        
+        showNotification(`Token ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao alternar status:', error);
+        showNotification('Erro ao atualizar token', 'error');
+    }
+}
+
+// Deletar token
+async function deleteToken(tokenId) {
+    if (!confirm('Tem certeza que deseja deletar este token? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    try {
+        console.log('🔗 [INTEGRATION] Deletando token:', tokenId);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao deletar token');
+        }
+        
+        showNotification('Token deletado com sucesso!', 'success');
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao deletar token:', error);
+        showNotification('Erro ao deletar token', 'error');
     }
 } 
