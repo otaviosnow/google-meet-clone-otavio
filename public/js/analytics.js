@@ -63,41 +63,88 @@ class AnalyticsDashboard {
 
     async loadAnalytics() {
         try {
+            console.log('🔍 [ANALYTICS] Iniciando carregamento de analytics...');
+            
             // Carregar estatísticas gerais
+            console.log('📊 [ANALYTICS] Carregando estatísticas...');
             await this.loadStats();
             
             // Carregar gráficos
+            console.log('📈 [ANALYTICS] Carregando gráficos...');
             await this.loadCharts();
             
             // Carregar top users
+            console.log('👥 [ANALYTICS] Carregando top users...');
             await this.loadTopUsers();
             
             // Carregar métricas de performance
+            console.log('⚡ [ANALYTICS] Carregando métricas de performance...');
             await this.loadPerformanceMetrics();
             
+            console.log('✅ [ANALYTICS] Analytics carregado com sucesso!');
+            
         } catch (error) {
-            console.error('Erro ao carregar analytics:', error);
+            console.error('❌ [ANALYTICS] Erro ao carregar analytics:', error);
             this.showError('Erro ao carregar dados');
         }
     }
 
     async loadStats() {
         try {
+            console.log('📊 [ANALYTICS] Fazendo requisição para /analytics/stats...');
+            console.log('   - URL:', `${this.API_BASE_URL}/analytics/stats?period=${this.currentPeriod}`);
+            console.log('   - Token:', this.authToken ? 'Presente' : 'Ausente');
+            
             const response = await fetch(`${this.API_BASE_URL}/analytics/stats?period=${this.currentPeriod}`, {
                 headers: {
                     'Authorization': `Bearer ${this.authToken}`
                 }
             });
 
-            if (!response.ok) throw new Error('Erro ao carregar estatísticas');
+            console.log('📊 [ANALYTICS] Resposta recebida:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ [ANALYTICS] Erro na resposta:', errorText);
+                throw new Error(`Erro ao carregar estatísticas: ${response.status}`);
+            }
 
             const stats = await response.json();
+            console.log('📊 [ANALYTICS] Dados recebidos:', stats);
 
             // Atualizar cards de estatísticas
-            document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
-            document.getElementById('totalMeetings').textContent = stats.totalMeetings.toLocaleString();
-            document.getElementById('totalTokens').textContent = stats.totalTokens.toLocaleString();
-            document.getElementById('totalRevenue').textContent = `R$ ${stats.totalRevenue.toFixed(2).replace('.', ',')}`;
+            const totalUsersEl = document.getElementById('totalUsers');
+            const totalMeetingsEl = document.getElementById('totalMeetings');
+            const totalTokensEl = document.getElementById('totalTokens');
+            const totalRevenueEl = document.getElementById('totalRevenue');
+
+            if (totalUsersEl) {
+                totalUsersEl.textContent = stats.totalUsers.toLocaleString();
+                console.log('✅ [ANALYTICS] Total users atualizado:', stats.totalUsers);
+            } else {
+                console.error('❌ [ANALYTICS] Elemento totalUsers não encontrado');
+            }
+
+            if (totalMeetingsEl) {
+                totalMeetingsEl.textContent = stats.totalMeetings.toLocaleString();
+                console.log('✅ [ANALYTICS] Total meetings atualizado:', stats.totalMeetings);
+            } else {
+                console.error('❌ [ANALYTICS] Elemento totalMeetings não encontrado');
+            }
+
+            if (totalTokensEl) {
+                totalTokensEl.textContent = stats.totalTokens.toLocaleString();
+                console.log('✅ [ANALYTICS] Total tokens atualizado:', stats.totalTokens);
+            } else {
+                console.error('❌ [ANALYTICS] Elemento totalTokens não encontrado');
+            }
+
+            if (totalRevenueEl) {
+                totalRevenueEl.textContent = `R$ ${stats.totalRevenue.toFixed(2).replace('.', ',')}`;
+                console.log('✅ [ANALYTICS] Total revenue atualizado:', stats.totalRevenue);
+            } else {
+                console.error('❌ [ANALYTICS] Elemento totalRevenue não encontrado');
+            }
 
             // Atualizar mudanças percentuais
             this.updateStatChange('usersChange', stats.usersChange);
@@ -106,7 +153,7 @@ class AnalyticsDashboard {
             this.updateStatChange('revenueChange', stats.revenueChange);
 
         } catch (error) {
-            console.error('Erro ao carregar stats:', error);
+            console.error('❌ [ANALYTICS] Erro ao carregar stats:', error);
         }
     }
 
