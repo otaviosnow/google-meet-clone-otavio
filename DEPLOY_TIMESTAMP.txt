@@ -1,6 +1,7 @@
-Deploy iniciado em: 2024-12-19 15:30:00
-Versão: a1736fc
+Deploy iniciado em: 2024-12-19 15:45:00
+Versão: 04b391f
 Correções:
-- Sistema de histórico financeiro corrigido
-- Atualização de entradas existentes implementada
-- Logs detalhados adicionados para debugging
+- Função formatDate adicionada ao frontend
+- Cálculo local de dias restantes removido (agora usa apenas backend)
+- Try-catch adicionado ao histórico financeiro para debug
+- Erros 500 no /api/financial/entry corrigidos
