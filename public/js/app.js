@@ -3650,17 +3650,41 @@ async function loadVideosForToken() {
         });
         
         if (!response.ok) {
-            throw new Error('Erro ao carregar vídeos');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
         }
         
         const videos = await response.json();
         console.log('🎬 [INTEGRATION] Vídeos carregados:', videos);
         
-        renderVideosForToken(videos);
+        // Garantir que videos seja sempre um array
+        const videosArray = Array.isArray(videos) ? videos : [];
+        console.log('🎬 [INTEGRATION] Vídeos processados:', videosArray);
+        
+        renderVideosForToken(videosArray);
         
     } catch (error) {
         console.error('❌ [INTEGRATION] Erro ao carregar vídeos:', error);
-        showNotification('Erro ao carregar vídeos', 'error');
+        showNotification(`Erro ao carregar vídeos: ${error.message}`, 'error');
+        
+        // Renderizar estado de erro
+        const videosList = document.getElementById('tokenVideosList');
+        const defaultVideoSelect = document.getElementById('tokenDefaultVideo');
+        
+        if (videosList) {
+            videosList.innerHTML = `
+                <div class="empty-state">
+                    <p>Erro ao carregar vídeos: ${error.message}</p>
+                    <button class="btn btn-primary" onclick="loadVideosForToken()">
+                        <i class="fas fa-sync"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+        
+        if (defaultVideoSelect) {
+            defaultVideoSelect.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
+        }
     }
 }
 
@@ -3671,6 +3695,18 @@ function renderVideosForToken(videos) {
     
     if (!videosList || !defaultVideoSelect) return;
     
+    // Verificar se videos é um array válido
+    if (!Array.isArray(videos)) {
+        console.error('❌ [INTEGRATION] Videos não é um array:', videos);
+        videosList.innerHTML = `
+            <div class="empty-state">
+                <p>Erro ao carregar vídeos. Tente novamente.</p>
+            </div>
+        `;
+        defaultVideoSelect.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
+        return;
+    }
+    
     if (videos.length === 0) {
         videosList.innerHTML = `
             <div class="empty-state">
@@ -3680,6 +3716,8 @@ function renderVideosForToken(videos) {
         defaultVideoSelect.innerHTML = '<option value="">Nenhum vídeo disponível</option>';
         return;
     }
+    
+    console.log('🎬 [INTEGRATION] Renderizando vídeos:', videos);
     
     // Renderizar lista de checkboxes
     videosList.innerHTML = videos.map(video => `
@@ -3697,6 +3735,8 @@ function renderVideosForToken(videos) {
             <option value="${video._id}">${video.title}</option>
         `).join('')}
     `;
+    
+    console.log('✅ [INTEGRATION] Vídeos renderizados com sucesso');
 }
 
 // Criar novo token de integração
