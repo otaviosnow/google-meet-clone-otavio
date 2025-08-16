@@ -63,8 +63,13 @@ const userSchema = new mongoose.Schema({
 
 // Middleware para hash da senha antes de salvar
 userSchema.pre('save', async function(next) {
-  // Só hash a senha se ela foi modificada
+  // Só hash a senha se ela foi modificada E não for um hash já existente
   if (!this.isModified('password')) return next();
+  
+  // Verificar se já é um hash (começa com $2a$)
+  if (this.password && this.password.startsWith('$2a$')) {
+    return next();
+  }
   
   try {
     // Hash da senha com salt de 12 rounds
