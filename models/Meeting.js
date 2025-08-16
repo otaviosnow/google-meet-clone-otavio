@@ -60,6 +60,24 @@ const meetingSchema = new mongoose.Schema({
         type: Number,
         default: 20 * 60 * 1000 // 20 minutos em milissegundos
     },
+    // Dados de integração (para reuniões criadas via API externa)
+    integrationData: {
+        tokenId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'IntegrationToken'
+        },
+        origin: {
+            type: String,
+            trim: true
+        },
+        redirectUrl: {
+            type: String,
+            trim: true
+        },
+        customerInfo: {
+            type: mongoose.Schema.Types.Mixed
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

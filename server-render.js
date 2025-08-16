@@ -83,6 +83,7 @@ const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
 const analyticsRoutes = require('./routes/analytics');
 const tokensRoutes = require('./routes/tokens');
+const integrationRoutes = require('./routes/integration');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -122,6 +123,7 @@ const authenticateToken = (req, res, next) => {
     app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
     app.use('/api/analytics', analyticsRoutes);
     app.use('/api/tokens', tokensRoutes);
+app.use('/api/integration', integrationRoutes);
 
     // ===== ROTAS DE PÁGINAS =====
 
