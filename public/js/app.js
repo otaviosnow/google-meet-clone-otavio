@@ -3654,8 +3654,12 @@ async function loadVideosForToken() {
             throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
         }
         
-        const videos = await response.json();
-        console.log('🎬 [INTEGRATION] Vídeos carregados:', videos);
+        const data = await response.json();
+        console.log('🎬 [INTEGRATION] Dados carregados:', data);
+        
+        // A API retorna { videos: [...], pagination: {...} }
+        const videos = data.videos || [];
+        console.log('🎬 [INTEGRATION] Vídeos extraídos:', videos);
         
         // Garantir que videos seja sempre um array
         const videosArray = Array.isArray(videos) ? videos : [];
