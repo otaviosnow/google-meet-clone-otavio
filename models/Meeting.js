@@ -58,7 +58,11 @@ const meetingSchema = new mongoose.Schema({
     },
     maxDuration: {
         type: Number,
-        default: 20 * 60 * 1000 // 20 minutos em milissegundos
+        default: 20 * 60 * 1000 // 20 minutos em milissegundos (fallback)
+    },
+    videoDuration: {
+        type: Number,
+        default: null // Duração do vídeo em milissegundos
     },
     // Dados de integração (para reuniões criadas via API externa)
     integrationData: {
@@ -115,8 +119,17 @@ meetingSchema.methods.canAccess = function(ip) {
 // Método para verificar se a reunião expirou por tempo
 meetingSchema.methods.isExpired = function() {
     if (!this.startedAt) return false;
+    
     const now = new Date();
     const elapsed = now.getTime() - this.startedAt.getTime();
+    
+    // Se temos a duração do vídeo, usar ela + 30 segundos de margem
+    if (this.videoDuration) {
+        const videoDurationWithMargin = this.videoDuration + (30 * 1000); // +30 segundos
+        return elapsed >= videoDurationWithMargin;
+    }
+    
+    // Caso contrário, usar a duração máxima padrão
     return elapsed >= this.maxDuration;
 };
 
@@ -160,6 +173,12 @@ meetingSchema.methods.authorizeAccess = function(ip) {
 meetingSchema.methods.endMeeting = function() {
     this.status = 'ended';
     this.endedAt = new Date();
+    return this.save();
+};
+
+// Método para atualizar a duração do vídeo
+meetingSchema.methods.updateVideoDuration = function(durationMs) {
+    this.videoDuration = durationMs;
     return this.save();
 };
 

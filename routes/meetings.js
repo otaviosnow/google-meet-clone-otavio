@@ -174,6 +174,38 @@ router.post('/:meetingId/end', authenticateToken, async (req, res) => {
     }
 });
 
+// Atualizar duração do vídeo (sem autenticação)
+router.post('/:meetingId/video-duration', async (req, res) => {
+    try {
+        const { meetingId } = req.params;
+        const { duration, durationMs } = req.body;
+        
+        console.log(`⏱️ Recebendo duração do vídeo para reunião: ${meetingId}`);
+        console.log(`   - Duração: ${duration} segundos`);
+        console.log(`   - Duração (ms): ${durationMs} ms`);
+        
+        const meeting = await Meeting.findOne({ meetingId });
+        
+        if (!meeting) {
+            return res.status(404).json({ error: 'Reunião não encontrada' });
+        }
+
+        // Atualizar a duração do vídeo
+        await meeting.updateVideoDuration(durationMs);
+        
+        console.log(`✅ Duração do vídeo atualizada: ${meetingId} - ${duration} segundos`);
+        
+        res.json({ 
+            message: 'Duração do vídeo atualizada com sucesso',
+            duration: duration,
+            durationMs: durationMs
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar duração do vídeo:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 // Encerrar reunião quando vídeo termina (sem autenticação)
 router.post('/:meetingId/end-video', async (req, res) => {
     try {

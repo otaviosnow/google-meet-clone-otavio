@@ -375,6 +375,11 @@ function startVSL(videoUrl = null) {
     
     vslVideo.addEventListener('loadedmetadata', function() {
         console.log('📊 VSL: Metadados carregados');
+        console.log('⏱️ Duração do vídeo:', vslVideo.duration, 'segundos');
+        
+        // Notificar o backend sobre a duração do vídeo
+        notifyVideoDuration(vslVideo.duration);
+        
         // Restaurar posição salva do vídeo
         restoreVideoPosition();
     });
@@ -408,6 +413,37 @@ function startVSL(videoUrl = null) {
     setTimeout(function() {
         attemptAutoplay();
     }, 500);
+}
+
+// Função para notificar o backend sobre a duração do vídeo
+async function notifyVideoDuration(duration) {
+    if (!meetingId) {
+        console.log('❌ Meeting ID não encontrado, não é possível notificar duração');
+        return;
+    }
+    
+    try {
+        console.log('📡 Notificando backend sobre duração do vídeo:', duration, 'segundos');
+        
+        const response = await fetch(`/api/meetings/${meetingId}/video-duration`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                duration: duration,
+                durationMs: Math.round(duration * 1000) // Converter para milissegundos
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Duração do vídeo notificada com sucesso');
+        } else {
+            console.warn('⚠️ Erro ao notificar duração do vídeo:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Erro ao notificar duração do vídeo:', error);
+    }
 }
 
 // Função para tentar autoplay
