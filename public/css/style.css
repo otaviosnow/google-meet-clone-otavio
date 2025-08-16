@@ -624,13 +624,46 @@ body {
     padding: 40px 0;
 }
 
+/* Integration Tab - override completo */
+#integrationTab .dashboard-content {
+    padding: 0 !important;
+}
+
+#integrationTab .tab-content {
+    padding: 0 !important;
+}
+
 /* Integration Tab - conteúdo mais próximo do topo */
 #integrationTab {
-    padding-top: 0;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 #integrationTab .dashboard-content {
-    padding: 10px 0;
+    padding: 5px 0 !important;
+}
+
+#integrationTab .container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+#integrationTab .tab-header {
+    margin-bottom: 10px !important;
+    padding-top: 5px !important;
+}
+
+#integrationTab .integration-stats {
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+#integrationTab .integration-actions {
+    margin-bottom: 10px !important;
+}
+
+#integrationTab .tokens-list {
+    margin-top: 0 !important;
 }
 
 
