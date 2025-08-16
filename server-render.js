@@ -82,6 +82,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
 const analyticsRoutes = require('./routes/analytics');
+const tokensRoutes = require('./routes/tokens');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -108,101 +109,102 @@ const authenticateToken = (req, res, next) => {
 // ===== ROTAS DE AUTENTICAÇÃO =====
 // As rotas de autenticação estão no arquivo routes/auth.js
 
-// ===== ROTAS DE API =====
-app.use('/api/auth', authRoutes);
-app.use('/api/videos', videoRoutes);
-app.use('/api/meetings', meetingRoutes);
-app.use('/api/users', userRoutes);
+    // ===== ROTAS DE API =====
+    app.use('/api/auth', authRoutes);
+    app.use('/api/videos', videoRoutes);
+    app.use('/api/meetings', meetingRoutes);
+    app.use('/api/users', userRoutes);
 
-app.use('/api/financial', financialRoutes);
+    app.use('/api/financial', financialRoutes);
 
-app.use('/api/admin', adminRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
-app.use('/api/analytics', analyticsRoutes);
+    app.use('/api/admin', adminRoutes);
+    app.use('/api/payments', paymentRoutes);
+    app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
+    app.use('/api/analytics', analyticsRoutes);
+    app.use('/api/tokens', tokensRoutes);
 
-// ===== ROTAS DE PÁGINAS =====
+    // ===== ROTAS DE PÁGINAS =====
 
-// Rota principal - página de login
-app.get('/', (req, res) => {
-    console.log('📥 GET / - Página principal (login) acessada');
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Rota para o Google Meet
-app.get('/meet', (req, res) => {
-    console.log('🎯 GET /meet - Página do Meet acessada');
-    res.sendFile(path.join(__dirname, 'public', 'meet.html'));
-});
-
-// Rota para reunião específica
-app.get('/meet/:meetingId', (req, res) => {
-    console.log(`🎯 GET /meet/${req.params.meetingId} - Reunião específica acessada`);
-    res.sendFile(path.join(__dirname, 'public', 'meet.html'));
-});
-
-// Rota para teste de autenticação
-app.get('/test-auth', (req, res) => {
-    console.log('🔐 GET /test-auth - Página de teste de auth acessada');
-    res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
-});
-
-// Rota para página de compra de tokens
-app.get('/comprar-tokens', (req, res) => {
-    console.log('💰 GET /comprar-tokens - Página de compra de tokens acessada');
-    res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
-});
-
-// Rota para página de reset de senha
-app.get('/reset-password', (req, res) => {
-    console.log('🔑 GET /reset-password - Página de reset de senha acessada');
-    res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
-});
-
-// Rota para página de analytics
-app.get('/analytics', (req, res) => {
-    console.log('📊 GET /analytics - Página de analytics acessada');
-    res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
-});
-
-// ===== ARQUIVOS ESTÁTICOS =====
-app.use(express.static('public'));
-
-// Servir arquivos estáticos do admin (ANTES das rotas gerais)
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
-
-// Rota para painel admin (DEPOIS dos arquivos estáticos)
-app.get('/admin', (req, res) => {
-    console.log('⚙️ GET /admin - Painel admin acessado');
-    res.sendFile(path.join(__dirname, 'admin', 'index.html'));
-});
-app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
-app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
-app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Middleware para verificar se arquivo existe
-app.use('/uploads/*', (req, res, next) => {
-    const fs = require('fs');
-    const filePath = path.join(__dirname, 'uploads', req.params[0]);
-    console.log('📁 Verificando arquivo:', filePath);
-    console.log('📁 Arquivo existe:', fs.existsSync(filePath));
-    next();
-});
-
-// ===== ROTA DE TESTE DA API =====
-app.get('/api/test', (req, res) => {
-    console.log('📥 GET /api/test - API de teste acessada');
-    res.json({
-        message: '✅ API funcionando - VERSÃO COMPLETA!',
-        timestamp: new Date().toISOString(),
-        version: 'COMPLETA - 14/08/2025 01:35 AM',
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    // Rota principal - página de login
+    app.get('/', (req, res) => {
+        console.log('📥 GET / - Página principal (login) acessada');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
-});
 
-// Tratamento de erros
+    // Rota para o Google Meet
+    app.get('/meet', (req, res) => {
+        console.log('🎯 GET /meet - Página do Meet acessada');
+        res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+    });
+
+    // Rota para reunião específica
+    app.get('/meet/:meetingId', (req, res) => {
+        console.log(`🎯 GET /meet/${req.params.meetingId} - Reunião específica acessada`);
+        res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+    });
+
+    // Rota para teste de autenticação
+    app.get('/test-auth', (req, res) => {
+        console.log('🔐 GET /test-auth - Página de teste de auth acessada');
+        res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
+    });
+
+    // Rota para página de compra de tokens
+    app.get('/comprar-tokens', (req, res) => {
+        console.log('💰 GET /comprar-tokens - Página de compra de tokens acessada');
+        res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
+    });
+
+    // Rota para página de reset de senha
+    app.get('/reset-password', (req, res) => {
+        console.log('🔑 GET /reset-password - Página de reset de senha acessada');
+        res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+    });
+
+    // Rota para página de analytics
+    app.get('/analytics', (req, res) => {
+        console.log('📊 GET /analytics - Página de analytics acessada');
+        res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
+    });
+
+    // ===== ARQUIVOS ESTÁTICOS =====
+    app.use(express.static('public'));
+
+    // Servir arquivos estáticos do admin (ANTES das rotas gerais)
+    app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
+    // Rota para painel admin (DEPOIS dos arquivos estáticos)
+    app.get('/admin', (req, res) => {
+        console.log('⚙️ GET /admin - Painel admin acessado');
+        res.sendFile(path.join(__dirname, 'admin', 'index.html'));
+    });
+    app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+    app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
+    app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
+    app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+    // Middleware para verificar se arquivo existe
+    app.use('/uploads/*', (req, res, next) => {
+        const fs = require('fs');
+        const filePath = path.join(__dirname, 'uploads', req.params[0]);
+        console.log('📁 Verificando arquivo:', filePath);
+        console.log('📁 Arquivo existe:', fs.existsSync(filePath));
+        next();
+    });
+
+    // ===== ROTA DE TESTE DA API =====
+    app.get('/api/test', (req, res) => {
+        console.log('📥 GET /api/test - API de teste acessada');
+        res.json({
+            message: '✅ API funcionando - VERSÃO COMPLETA!',
+            timestamp: new Date().toISOString(),
+            version: 'COMPLETA - 14/08/2025 01:35 AM',
+            database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+        });
+    });
+
+    // Tratamento de erros
 app.use((err, req, res, next) => {
     console.error('❌ Erro:', err);
     res.status(500).json({

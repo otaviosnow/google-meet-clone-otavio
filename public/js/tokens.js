@@ -101,50 +101,105 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Usuário não autenticado');
             }
 
-            // Chamar API do Pagar.me
-            const response = await fetch('/api/payments/pix', {
+            // Chamar API para criar compra de tokens
+            const response = await fetch('/api/tokens/purchase', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    quantity: quantity,
-                    amount: total
+                    tokens: quantity,
+                    paymentMethod: 'pix'
                 })
             });
 
             const result = await response.json();
 
-            if (!result.success) {
-                throw new Error(result.error || 'Erro ao gerar pagamento');
+            if (response.ok) {
+                // Exibir QR Code
+                qrCodeContainer.innerHTML = `
+                    <img src="${result.pixData.qrCode}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
+                `;
+                
+                // Preencher código PIX
+                pixCode.value = result.pixData.code;
+                
+                // Iniciar verificação de pagamento
+                startPaymentCheck(result.transaction.id);
+            } else {
+                throw new Error(result.error || 'Erro ao gerar PIX');
             }
-
-            // Atualizar campo do código PIX
-            document.getElementById('pixCode').value = result.data.pixQrCode;
-            
-            // Gerar QR Code usando a biblioteca qrcode
-            const qrCodeDataURL = await QRCode.toDataURL(result.data.pixQrCode, {
-                width: 200,
-                height: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                }
-            });
-            
-            // Exibir QR Code
-            qrCodeContainer.innerHTML = `<img src="${qrCodeDataURL}" alt="QR Code PIX" style="width: 200px; height: 200px;">`;
-            
-            // Iniciar verificação de status
-            startPaymentStatusCheck(result.data.transactionId);
             
         } catch (error) {
             console.error('Erro ao gerar QR Code:', error);
             qrCodeContainer.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: #ef4444;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p>Erro ao gerar QR Code PIX</p>
+                    <p style="font-size: 14px; margin-top: 8px;">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Função para verificar status do pagamento
+    function startPaymentCheck(transactionId) {
+        const checkInterval = setInterval(async () => {
+            try {
+                const authToken = localStorage.getItem('authToken');
+                const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const transaction = await response.json();
+                    
+                    if (transaction.status === 'paid') {
+                        clearInterval(checkInterval);
+                        showPaymentSuccess();
+                    } else if (transaction.status === 'failed' || transaction.status === 'cancelled') {
+                        clearInterval(checkInterval);
+                        showPaymentError();
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar pagamento:', error);
+            }
+        }, 5000); // Verificar a cada 5 segundos
+
+        // Parar verificação após 30 minutos
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 30 * 60 * 1000);
+    }
+
+    // Função para mostrar sucesso do pagamento
+    function showPaymentSuccess() {
+        qrCodeContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #10b981;">
+                <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <p>Pagamento confirmado!</p>
+                <p style="font-size: 14px; margin-top: 8px;">Tokens adicionados à sua conta</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 3000);
+    }
+
+    // Função para mostrar erro do pagamento
+    function showPaymentError() {
+        qrCodeContainer.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #ef4444;">
+                <i class="fas fa-times-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <p>Pagamento não confirmado</p>
+                <p style="font-size: 14px; margin-top: 8px;">Tente novamente</p>
+            </div>
+        `;
                     <p>Erro ao gerar QR Code</p>
                     <small>${error.message}</small>
                 </div>

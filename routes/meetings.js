@@ -42,25 +42,29 @@ router.post('/', authenticateToken, async (req, res) => {
 
         await meeting.save();
 
-        // Descontar 2 tokens do usuário
+        // Descontar 1 token do usuário
         const user = await User.findById(req.user._id);
-        if (user.visionTokens < 2) {
-            return res.status(400).json({ error: 'Tokens insuficientes. Você precisa de 2 tokens para criar uma reunião.' });
+        if (user.visionTokens < 1) {
+            return res.status(400).json({ 
+                error: 'Tokens insuficientes. Você precisa de 1 token para criar uma reunião.',
+                needsTokens: true,
+                tokenPrice: 2.00
+            });
         }
         
-        user.visionTokens -= 2;
+        user.visionTokens -= 1;
         await user.save();
 
         // Registrar uso de tokens
         console.log('📝 [MEETING] Registrando uso de tokens...');
         console.log('   - User ID:', req.user._id);
         console.log('   - Meeting ID:', meeting._id);
-        console.log('   - Tokens to use:', 2);
+        console.log('   - Tokens to use:', 1);
         
         const tokenUsage = new TokenUsage({
             user: req.user._id,
             meeting: meeting._id,
-            tokensUsed: 2,
+            tokensUsed: 1,
             action: 'meeting_created',
             description: `Criação da reunião: ${title}`
         });
@@ -69,7 +73,7 @@ router.post('/', authenticateToken, async (req, res) => {
         await tokenUsage.save();
         console.log('✅ [MEETING] TokenUsage salvo com sucesso - ID:', tokenUsage._id);
 
-        console.log(`✅ Reunião criada: ${meetingId} - Tokens descontados: ${user.visionTokens + 2} → ${user.visionTokens}`);
+        console.log(`✅ Reunião criada: ${meetingId} - Tokens descontados: ${user.visionTokens + 1} → ${user.visionTokens}`);
 
         // Popular dados do vídeo para retorno
         await meeting.populate('video', 'title url type');

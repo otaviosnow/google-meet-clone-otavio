@@ -1779,7 +1779,15 @@ async function handleCreateMeeting(e) {
             // Recarregar reuniões
             loadMeetings();
         } else {
-            showNotification(result.error, 'error');
+            // Verificar se é erro de tokens insuficientes
+            if (result.needsTokens) {
+                const shouldBuy = confirm(`${result.error}\n\nDeseja comprar tokens agora?\n\nPreço: R$ ${result.tokenPrice} por token`);
+                if (shouldBuy) {
+                    showTokenPurchaseModal();
+                }
+            } else {
+                showNotification(result.error, 'error');
+            }
         }
     } catch (error) {
         console.error('Erro ao criar reunião:', error);
@@ -1840,6 +1848,12 @@ function copyMeetingLink(meetLink) {
     navigator.clipboard.writeText(meetLink).then(() => {
         showNotification('Link da reunião copiado para a área de transferência!', 'success');
     });
+}
+
+// Função para mostrar modal de compra de tokens
+function showTokenPurchaseModal() {
+    // Redirecionar para a página de compra de tokens
+    window.location.href = '/comprar-tokens';
 }
 
 // Funções de perfil
