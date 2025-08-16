@@ -328,6 +328,48 @@ router.post('/admin/:userId/ban', authenticateToken, requireAdmin, async (req, r
   }
 });
 
+// PUT /api/users/admin/:userId - Editar usuário (admin)
+router.put('/admin/:userId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('✏️ [USERS-ADMIN] Editando usuário...');
+    
+    const { userId } = req.params;
+    const { name, visionTokens, isAdmin, isActive } = req.body;
+    
+    console.log('📝 [USERS-ADMIN] Dados recebidos:', { userId, name, visionTokens, isAdmin, isActive });
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      console.log('❌ [USERS-ADMIN] Usuário não encontrado');
+      return res.status(404).json({
+        error: 'Usuário não encontrado'
+      });
+    }
+    
+    // Atualizar campos
+    if (name !== undefined) user.name = name;
+    if (visionTokens !== undefined) user.visionTokens = parseInt(visionTokens);
+    if (isAdmin !== undefined) user.isAdmin = isAdmin === 'true' || isAdmin === true;
+    if (isActive !== undefined) user.isActive = isActive === 'true' || isActive === true;
+    
+    await user.save();
+    
+    console.log('✅ [USERS-ADMIN] Usuário atualizado:', user.email);
+    
+    res.json({
+      message: 'Usuário atualizado com sucesso',
+      user: user.toPublicJSON()
+    });
+
+  } catch (error) {
+    console.error('Erro ao editar usuário:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 // DELETE /api/users/admin/:userId - Deletar usuário (admin)
 router.delete('/admin/:userId', authenticateToken, requireAdmin, async (req, res) => {
   try {

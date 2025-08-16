@@ -838,6 +838,47 @@
         </div>
     </div>
 
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Usuário</h2>
+                <button class="modal-close" id="closeEditUserModal">&times;</button>
+            </div>
+            
+            <form id="editUserForm" class="user-form">
+                <div class="form-group">
+                    <label for="editUserName">Nome</label>
+                    <input type="text" id="editUserName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserEmail">Email</label>
+                    <input type="email" id="editUserEmail" name="email" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editUserTokens">Tokens</label>
+                    <input type="number" id="editUserTokens" name="visionTokens" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserAdmin">Admin</label>
+                    <select id="editUserAdmin" name="isAdmin">
+                        <option value="false">Não</option>
+                        <option value="true">Sim</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editUserStatus">Status</label>
+                    <select id="editUserStatus" name="isActive">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+                <input type="hidden" id="editUserId" name="userId">
+                <button type="submit" class="btn btn-primary btn-full">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Create Meeting Modal -->
     <div id="createMeetingModal" class="modal">
         <div class="modal-content">

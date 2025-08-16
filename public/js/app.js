@@ -771,8 +771,46 @@ function renderAdminUsersTable(users) {
 
 // Função para editar usuário
 async function editUser(userId) {
-    // Implementar modal de edição
-    showNotification('Funcionalidade de edição em desenvolvimento', 'info');
+    console.log('✏️ [ADMIN] Editando usuário:', userId);
+    
+    if (!userId || userId === 'undefined') {
+        showNotification('ID do usuário inválido', 'error');
+        return;
+    }
+    
+    try {
+        // Buscar dados do usuário
+        const response = await fetch(`${API_BASE_URL}/users/admin`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const user = data.users.find(u => u.id === userId);
+            
+            if (user) {
+                // Preencher modal com dados do usuário
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editUserName').value = user.name || '';
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserTokens').value = user.visionTokens;
+                document.getElementById('editUserAdmin').value = user.isAdmin.toString();
+                document.getElementById('editUserStatus').value = user.isActive.toString();
+                
+                // Mostrar modal
+                document.getElementById('editUserModal').style.display = 'flex';
+            } else {
+                showNotification('Usuário não encontrado', 'error');
+            }
+        } else {
+            showNotification('Erro ao carregar dados do usuário', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        showNotification('Erro ao carregar dados do usuário', 'error');
+    }
 }
 
 // Função para banir/desbanir usuário
@@ -870,6 +908,46 @@ function addAdminEventListeners() {
     });
 }
 
+// Função para salvar alterações do usuário
+async function saveUserChanges(e) {
+    e.preventDefault();
+    
+    const userId = document.getElementById('editUserId').value;
+    const formData = new FormData(e.target);
+    
+    const data = {
+        name: formData.get('name'),
+        visionTokens: parseInt(formData.get('visionTokens')),
+        isAdmin: formData.get('isAdmin'),
+        isActive: formData.get('isActive')
+    };
+    
+    console.log('💾 [ADMIN] Salvando alterações do usuário:', { userId, data });
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/admin/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            showNotification('Usuário atualizado com sucesso!', 'success');
+            document.getElementById('editUserModal').style.display = 'none';
+            loadAdminUsers(); // Recarregar tabela
+        } else {
+            const result = await response.json();
+            showNotification(result.error || 'Erro ao atualizar usuário', 'error');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error);
+        showNotification('Erro ao atualizar usuário', 'error');
+    }
+}
+
 // Event listeners para o painel admin
 document.addEventListener('DOMContentLoaded', function() {
     // Form de autenticação admin
@@ -879,6 +957,20 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const password = document.getElementById('adminPassword').value;
             authenticateAdmin(password);
+        });
+    }
+
+    // Form de edição de usuário
+    const editUserForm = document.getElementById('editUserForm');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', saveUserChanges);
+    }
+
+    // Fechar modal de edição
+    const closeEditUserModal = document.getElementById('closeEditUserModal');
+    if (closeEditUserModal) {
+        closeEditUserModal.addEventListener('click', function() {
+            document.getElementById('editUserModal').style.display = 'none';
         });
     }
 
