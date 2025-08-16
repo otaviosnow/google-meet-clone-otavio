@@ -730,10 +730,19 @@ async function loadAdminUsers() {
 
 // Função para renderizar tabela de usuários
 function renderAdminUsersTable(users) {
+    console.log('📊 [ADMIN] Renderizando tabela de usuários:', users);
+    
     const tbody = document.getElementById('adminUsersTable');
     tbody.innerHTML = '';
 
     users.forEach(user => {
+        console.log('👤 [ADMIN] Renderizando usuário:', { 
+            id: user._id, 
+            name: user.name, 
+            email: user.email,
+            isBanned: user.isBanned 
+        });
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${user.name || 'Sem nome'}</td>
@@ -765,9 +774,16 @@ async function editUser(userId) {
 
 // Função para banir/desbanir usuário
 async function toggleBanUser(userId, ban) {
+    console.log('🔧 [ADMIN] Tentando banir/desbanir usuário:', { userId, ban });
+    
+    if (!userId || userId === 'undefined') {
+        showNotification('ID do usuário inválido', 'error');
+        return;
+    }
+    
     try {
         const response = await fetch(`${API_BASE_URL}/users/admin/${userId}/ban`, {
-            method: 'PUT',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
@@ -790,6 +806,13 @@ async function toggleBanUser(userId, ban) {
 
 // Função para deletar usuário
 async function deleteUser(userId) {
+    console.log('🗑️ [ADMIN] Tentando deletar usuário:', { userId });
+    
+    if (!userId || userId === 'undefined') {
+        showNotification('ID do usuário inválido', 'error');
+        return;
+    }
+    
     if (!confirm('Tem certeza que deseja deletar este usuário? Esta ação não pode ser desfeita.')) {
         return;
     }
