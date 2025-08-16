@@ -3,6 +3,7 @@ const { authenticateToken } = require('../middleware/auth');
 const Meeting = require('../models/Meeting');
 const Video = require('../models/Video');
 const User = require('../models/User');
+const TokenUsage = require('../models/TokenUsage');
 
 const router = express.Router();
 
@@ -49,6 +50,16 @@ router.post('/', authenticateToken, async (req, res) => {
         
         user.visionTokens -= 2;
         await user.save();
+
+        // Registrar uso de tokens
+        const tokenUsage = new TokenUsage({
+            user: req.user.id,
+            meeting: meeting._id,
+            tokensUsed: 2,
+            action: 'meeting_created',
+            description: `Criação da reunião: ${title}`
+        });
+        await tokenUsage.save();
 
         console.log(`✅ Reunião criada: ${meetingId} - Tokens descontados: ${user.visionTokens + 2} → ${user.visionTokens}`);
 

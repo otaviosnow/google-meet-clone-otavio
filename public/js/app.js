@@ -722,7 +722,7 @@ async function loadAdminData() {
             const stats = await statsResponse.json();
             document.getElementById('adminTotalUsers').textContent = stats.totalUsers.toLocaleString();
             document.getElementById('adminTotalMeetings').textContent = stats.totalMeetings.toLocaleString();
-            document.getElementById('adminTotalTokens').textContent = stats.totalTokens.toLocaleString();
+            document.getElementById('adminTotalTokens').textContent = stats.totalTokensConsumed.toLocaleString();
         }
 
         // Carregar usuários

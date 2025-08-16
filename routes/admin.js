@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth');
 const User = require('../models/User');
 const Meeting = require('../models/Meeting');
+const TokenUsage = require('../models/TokenUsage');
 
 const router = express.Router();
 
@@ -94,11 +95,11 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
     const bannedUsers = await User.countDocuments({ isBanned: true });
     const adminUsers = await User.countDocuments({ isAdmin: true });
 
-    // Total de tokens
-    const tokensResult = await User.aggregate([
-      { $group: { _id: null, total: { $sum: '$visionTokens' } } }
+    // Total de tokens consumidos (não tokens disponíveis)
+    const tokensConsumedResult = await TokenUsage.aggregate([
+      { $group: { _id: null, total: { $sum: '$tokensUsed' } } }
     ]);
-    const totalTokens = tokensResult[0]?.total || 0;
+    const totalTokensConsumed = tokensConsumedResult[0]?.total || 0;
 
     // Total de reuniões
     const totalMeetings = await Meeting.countDocuments({});
@@ -108,7 +109,7 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
       activeUsers,
       bannedUsers,
       adminUsers,
-      totalTokens,
+      totalTokensConsumed,
       totalMeetings
     };
 
