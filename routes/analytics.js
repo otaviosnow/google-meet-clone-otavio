@@ -9,7 +9,7 @@ const router = express.Router();
 // Middleware para verificar se é admin
 const requireAdmin = async (req, res, next) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (!user || !user.isAdmin) {
             return res.status(403).json({ error: 'Acesso negado. Apenas administradores.' });
         }

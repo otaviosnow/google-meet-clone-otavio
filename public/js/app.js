@@ -720,9 +720,23 @@ async function loadAdminData() {
 
         if (statsResponse.ok) {
             const stats = await statsResponse.json();
-            document.getElementById('adminTotalUsers').textContent = stats.totalUsers.toLocaleString();
-            document.getElementById('adminTotalMeetings').textContent = stats.totalMeetings.toLocaleString();
-            document.getElementById('adminTotalTokens').textContent = stats.totalTokensConsumed.toLocaleString();
+            
+            // Verificar se os elementos existem e se os valores são válidos
+            const adminTotalUsers = document.getElementById('adminTotalUsers');
+            const adminTotalMeetings = document.getElementById('adminTotalMeetings');
+            const adminTotalTokens = document.getElementById('adminTotalTokens');
+            
+            if (adminTotalUsers && stats.totalUsers !== undefined) {
+                adminTotalUsers.textContent = stats.totalUsers.toLocaleString();
+            }
+            
+            if (adminTotalMeetings && stats.totalMeetings !== undefined) {
+                adminTotalMeetings.textContent = stats.totalMeetings.toLocaleString();
+            }
+            
+            if (adminTotalTokens && stats.totalTokensConsumed !== undefined) {
+                adminTotalTokens.textContent = stats.totalTokensConsumed.toLocaleString();
+            }
         }
 
         // Carregar usuários
