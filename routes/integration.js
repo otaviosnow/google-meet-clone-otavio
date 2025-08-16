@@ -120,8 +120,18 @@ router.post('/tokens', authenticateToken, tokenValidation, handleValidationError
             }
         }
 
+        // Gerar token único manualmente
+        const crypto = require('crypto');
+        const prefix = 'int_';
+        const timestamp = Date.now().toString(36);
+        const random = crypto.randomBytes(8).toString('hex');
+        const generatedToken = `${prefix}${timestamp}_${random}`;
+
+        console.log('🔑 [INTEGRATION] Token gerado:', generatedToken);
+
         const token = new IntegrationToken({
             user: req.user._id,
+            token: generatedToken,
             name,
             description,
             website,
