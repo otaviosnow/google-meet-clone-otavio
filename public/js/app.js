@@ -751,19 +751,22 @@ function renderAdminUsersTable(users) {
             <td>${user.visionTokens}</td>
             <td><span class="user-admin ${user.isAdmin ? 'yes' : 'no'}">${user.isAdmin ? 'Sim' : 'Não'}</span></td>
             <td class="user-actions">
-                <button class="btn-edit" onclick="editUser('${user._id}')">
+                <button class="btn-edit" data-user-id="${user._id}" data-action="edit">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn-ban" onclick="toggleBanUser('${user._id}', ${!user.isBanned})">
+                <button class="btn-ban" data-user-id="${user._id}" data-action="ban" data-ban-status="${!user.isBanned}">
                     <i class="fas fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Desbanir' : 'Banir'}
                 </button>
-                <button class="btn-delete" onclick="deleteUser('${user._id}')">
+                <button class="btn-delete" data-user-id="${user._id}" data-action="delete">
                     <i class="fas fa-trash"></i> Deletar
                 </button>
             </td>
         `;
         tbody.appendChild(row);
     });
+    
+    // Adicionar event listeners após renderizar
+    addAdminEventListeners();
 }
 
 // Função para editar usuário
@@ -836,6 +839,35 @@ async function deleteUser(userId) {
         console.error('Erro ao deletar usuário:', error);
         showNotification('Erro ao deletar usuário', 'error');
     }
+}
+
+// Função para adicionar event listeners do painel admin
+function addAdminEventListeners() {
+    // Botões de ação dos usuários
+    document.querySelectorAll('[data-action="edit"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            console.log('✏️ [ADMIN] Editando usuário:', userId);
+            editUser(userId);
+        });
+    });
+    
+    document.querySelectorAll('[data-action="ban"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const banStatus = this.getAttribute('data-ban-status') === 'true';
+            console.log('🚫 [ADMIN] Banindo/desbanindo usuário:', { userId, banStatus });
+            toggleBanUser(userId, banStatus);
+        });
+    });
+    
+    document.querySelectorAll('[data-action="delete"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            console.log('🗑️ [ADMIN] Deletando usuário:', userId);
+            deleteUser(userId);
+        });
+    });
 }
 
 // Event listeners para o painel admin
