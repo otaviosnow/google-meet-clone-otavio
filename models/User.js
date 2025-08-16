@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
   },
   visionTokens: {
     type: Number,
-    default: 10, // Tokens iniciais gratuitos
+    default: 4, // Tokens iniciais gratuitos
     min: [0, 'Tokens não podem ser negativos']
   },
   avatar: {
