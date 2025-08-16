@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de Integração CallX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        p {
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .config-section {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .config-section h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(107, 114, 128, 0.3);
+        }
+        
+        .result {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+        
+        .result.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-align: left;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .loading {
+            display: none;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀 CallX</div>
+        <h1>Exemplo de Integração</h1>
+        <p>Configure e teste a integração do CallX no seu site</p>
+        
+        <div class="config-section">
+            <h3>⚙️ Configuração</h3>
+            <div class="form-group">
+                <label for="apiUrl">URL da API CallX:</label>
+                <input type="url" id="apiUrl" value="https://seu-dominio-callx.onrender.com/api/integration" placeholder="https://seu-dominio-callx.onrender.com/api/integration">
+            </div>
+            <div class="form-group">
+                <label for="token">Seu Token de Integração:</label>
+                <input type="text" id="token" placeholder="Cole seu token aqui (ex: int_abc123_def456)">
+            </div>
+            <div class="form-group">
+                <label for="videoId">ID do Vídeo (opcional):</label>
+                <input type="text" id="videoId" placeholder="Deixe vazio para usar vídeo padrão">
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🧪 Testes</h3>
+            <button class="btn" onclick="testConnection()">
+                <span class="loading" id="testLoading">
+                    <span class="spinner"></span>
+                </span>
+                Testar Conexão
+            </button>
+            <button class="btn" onclick="listVideos()">
+                <span class="loading" id="videosLoading">
+                    <span class="spinner"></span>
+                </span>
+                Listar Vídeos
+            </button>
+            <button class="btn" onclick="createMeeting()">
+                <span class="loading" id="meetingLoading">
+                    <span class="spinner"></span>
+                </span>
+                Criar Reunião
+            </button>
+        </div>
+        
+        <div class="config-section">
+            <h3>📋 Código para seu Site</h3>
+            <p>Copie este código para integrar no seu site:</p>
+            <div class="code-block" id="integrationCode">
+// Configuração do CallX
+const CALLX_CONFIG = {
+    apiUrl: 'https://seu-dominio-callx.onrender.com/api/integration',
+    token: 'SEU_TOKEN_AQUI'
+};
+
+// Função para criar reunião
+async function createCallXMeeting(videoId = null) {
+    try {
+        const response = await fetch(`${CALLX_CONFIG.apiUrl}/create-meeting`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: CALLX_CONFIG.token,
+                title: 'Reunião via Site',
+                videoId: videoId,
+                redirectUrl: window.location.href
+            })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            window.open(result.meetLink, '_blank');
+            return result;
+        } else {
+            throw new Error(result.error || 'Erro desconhecido');
+        }
+    } catch (error) {
+        console.error('Erro ao criar reunião:', error);
+        alert('Erro: ' + error.message);
+    }
+}
+
+// Botão de exemplo
+function createButton() {
+    const button = document.createElement('button');
+    button.textContent = '🚀 Iniciar Reunião';
+    button.style.cssText = `
+        background: #3b82f6;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+    `;
+    button.onclick = () => createCallXMeeting();
+    return button;
+}
+            </div>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div style="margin-top: 30px;">
+            <button class="btn btn-secondary" onclick="showInstructions()">📖 Ver Instruções</button>
+            <button class="btn btn-secondary" onclick="copyCode()">📋 Copiar Código</button>
+        </div>
+    </div>
+
+    <script>
+        // Função para mostrar loading
+        function showLoading(buttonId) {
+            document.getElementById(buttonId).style.display = 'inline-block';
+        }
+        
+        function hideLoading(buttonId) {
+            document.getElementById(buttonId).style.display = 'none';
+        }
+        
+        // Função para mostrar resultado
+        function showResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+        }
+        
+        // Função para testar conexão
+        async function testConnection() {
+            showLoading('testLoading');
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            
+            if (!apiUrl || !token) {
+                showResult('❌ Preencha a URL da API e o token', 'error');
+                hideLoading('testLoading');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/tokens/${token}/videos`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`
+                        ✅ <strong>Conexão bem-sucedida!</strong><br>
+                        Token: ${data.tokenName}<br>
+                        Vídeos disponíveis: ${data.videos.length}
+                    `, 'success');
+                } else {
+                    const error = await response.json();
+                    showResult(`❌ <strong>Erro na conexão:</strong> ${error.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ <strong>Erro de rede:</strong> ${error.message}`, 'error');
+            }
+            
+            hideLoading('testLoading');
+        }
+        
+        // Função para listar vídeos
+        async function listVideos() {
+            showLoading('videosLoading');
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            
+            if (!apiUrl || !token) {
+                showResult('❌ Preencha a URL da API e o token', 'error');
+                hideLoading('videosLoading');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/tokens/${token}/videos`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let videosHtml = `<strong>📹 Vídeos disponíveis (${data.videos.length}):</strong><br>`;
+                    
+                    data.videos.forEach((video, index) => {
+                        videosHtml += `
+                            ${index + 1}. <strong>${video.name}</strong><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;ID: ${video.id}<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;${video.isDefault ? '⭐ Padrão' : ''}<br><br>
+                        `;
+                    });
+                    
+                    showResult(videosHtml, 'success');
+                } else {
+                    const error = await response.json();
+                    showResult(`❌ <strong>Erro:</strong> ${error.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ <strong>Erro de rede:</strong> ${error.message}`, 'error');
+            }
+            
+            hideLoading('videosLoading');
+        }
+        
+        // Função para criar reunião
+        async function createMeeting() {
+            showLoading('meetingLoading');
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            const videoId = document.getElementById('videoId').value;
+            
+            if (!apiUrl || !token) {
+                showResult('❌ Preencha a URL da API e o token', 'error');
+                hideLoading('meetingLoading');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/create-meeting`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: token,
+                        title: 'Reunião de Teste',
+                        videoId: videoId || null,
+                        redirectUrl: window.location.href
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`
+                        ✅ <strong>Reunião criada com sucesso!</strong><br>
+                        ID: ${result.meetingId}<br>
+                        Link: <a href="${result.meetLink}" target="_blank">${result.meetLink}</a><br>
+                        <button class="btn" onclick="window.open('${result.meetLink}', '_blank')">🎯 Abrir Reunião</button>
+                    `, 'success');
+                } else {
+                    showResult(`❌ <strong>Erro:</strong> ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ <strong>Erro de rede:</strong> ${error.message}`, 'error');
+            }
+            
+            hideLoading('meetingLoading');
+        }
+        
+        // Função para copiar código
+        function copyCode() {
+            const code = document.getElementById('integrationCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showResult('✅ Código copiado para clipboard!', 'success');
+            }).catch(() => {
+                showResult('❌ Erro ao copiar código', 'error');
+            });
+        }
+        
+        // Função para mostrar instruções
+        function showInstructions() {
+            showResult(`
+                <strong>📖 Instruções de Integração:</strong><br><br>
+                
+                <strong>1. Configure no CallX:</strong><br>
+                • Acesse seu dashboard CallX<br>
+                • Vá na aba "Integração"<br>
+                • Crie um novo token<br>
+                • Configure os vídeos disponíveis<br>
+                • Copie o token gerado<br><br>
+                
+                <strong>2. Configure no seu site:</strong><br>
+                • Substitua a URL da API pela sua<br>
+                • Cole seu token no código<br>
+                • Adicione o botão onde quiser<br><br>
+                
+                <strong>3. Personalize:</strong><br>
+                • Mude o texto do botão<br>
+                • Ajuste o estilo CSS<br>
+                • Configure diferentes vídeos<br><br>
+                
+                <strong>4. Teste:</strong><br>
+                • Use os botões de teste acima<br>
+                • Verifique se tudo funciona<br>
+                • Monitore o uso no dashboard
+            `, 'info');
+        }
+        
+        // Atualizar código de exemplo quando mudar a URL
+        document.getElementById('apiUrl').addEventListener('input', function() {
+            const apiUrl = this.value;
+            const codeBlock = document.getElementById('integrationCode');
+            codeBlock.textContent = codeBlock.textContent.replace(
+                /apiUrl: '[^']*'/,
+                `apiUrl: '${apiUrl}'`
+            );
+        });
+    </script>
+</body>
+</html>

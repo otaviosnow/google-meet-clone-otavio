@@ -3484,18 +3484,38 @@ async function loadIntegrationTokens() {
         });
         
         if (!response.ok) {
-            throw new Error('Erro ao carregar tokens');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
         }
         
         const tokens = await response.json();
         console.log('🔗 [INTEGRATION] Tokens carregados:', tokens);
         
-        renderIntegrationTokens(tokens);
-        updateIntegrationStats(tokens);
+        // Garantir que tokens seja sempre um array
+        const tokensArray = Array.isArray(tokens) ? tokens : [];
+        console.log('🔗 [INTEGRATION] Tokens processados:', tokensArray);
+        
+        renderIntegrationTokens(tokensArray);
+        updateIntegrationStats(tokensArray);
         
     } catch (error) {
         console.error('❌ [INTEGRATION] Erro ao carregar tokens:', error);
-        showNotification('Erro ao carregar tokens de integração', 'error');
+        showNotification(`Erro ao carregar tokens: ${error.message}`, 'error');
+        
+        // Renderizar estado de erro
+        const tokensList = document.getElementById('tokensList');
+        if (tokensList) {
+            tokensList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ef4444; margin-bottom: 16px;"></i>
+                    <h3>Erro ao carregar tokens</h3>
+                    <p>${error.message}</p>
+                    <button class="btn btn-primary" onclick="loadIntegrationTokens()">
+                        <i class="fas fa-sync"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -3503,6 +3523,22 @@ async function loadIntegrationTokens() {
 function renderIntegrationTokens(tokens) {
     const tokensList = document.getElementById('tokensList');
     if (!tokensList) return;
+    
+    // Verificar se tokens é um array válido
+    if (!Array.isArray(tokens)) {
+        console.error('❌ [INTEGRATION] Tokens não é um array:', tokens);
+        tokensList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 16px;"></i>
+                <h3>Erro ao carregar tokens</h3>
+                <p>Não foi possível carregar os tokens de integração. Tente novamente.</p>
+                <button class="btn btn-primary" onclick="loadIntegrationTokens()">
+                    <i class="fas fa-sync"></i> Tentar Novamente
+                </button>
+            </div>
+        `;
+        return;
+    }
     
     if (tokens.length === 0) {
         tokensList.innerHTML = `
@@ -3569,22 +3605,36 @@ function renderIntegrationTokens(tokens) {
 
 // Atualizar estatísticas de integração
 function updateIntegrationStats(tokens) {
+    // Garantir que tokens seja um array
+    if (!Array.isArray(tokens)) {
+        console.warn('⚠️ [INTEGRATION] Tokens não é um array em updateIntegrationStats:', tokens);
+        tokens = [];
+    }
+    
     const totalTokens = document.getElementById('totalTokens');
     const totalIntegrations = document.getElementById('totalIntegrations');
     const activeWebsites = document.getElementById('activeWebsites');
     
     if (totalTokens) {
-        totalTokens.textContent = tokens.filter(t => t.isActive).length;
+        const activeCount = tokens.filter(t => t && t.isActive).length;
+        totalTokens.textContent = activeCount;
+        console.log('📊 [INTEGRATION] Tokens ativos:', activeCount);
     }
     
     if (totalIntegrations) {
-        const totalUsage = tokens.reduce((sum, token) => sum + (token.usageCount || 0), 0);
+        const totalUsage = tokens.reduce((sum, token) => sum + (token && token.usageCount ? token.usageCount : 0), 0);
         totalIntegrations.textContent = totalUsage;
+        console.log('📊 [INTEGRATION] Total de usos:', totalUsage);
     }
     
     if (activeWebsites) {
-        const uniqueWebsites = new Set(tokens.filter(t => t.isActive && t.website).map(t => t.website));
+        const uniqueWebsites = new Set(
+            tokens
+                .filter(t => t && t.isActive && t.website)
+                .map(t => t.website)
+        );
         activeWebsites.textContent = uniqueWebsites.size;
+        console.log('📊 [INTEGRATION] Sites ativos:', uniqueWebsites.size);
     }
 }
 
