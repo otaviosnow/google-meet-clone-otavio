@@ -442,6 +442,99 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// POST /api/auth/verify-admin - Verificar se usuário é admin
+router.post('/verify-admin', async (req, res) => {
+  try {
+    console.log('🔐 [AUTH-VERIFY-ADMIN] Iniciando verificação de admin...');
+    
+    // Pegar token do header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      console.log('❌ [AUTH-VERIFY-ADMIN] Token não fornecido');
+      return res.status(401).json({
+        error: 'Token não fornecido'
+      });
+    }
+
+    // Verificar token
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('✅ [AUTH-VERIFY-ADMIN] Token válido, userId:', decoded.userId);
+    
+    // Buscar usuário
+    const user = await User.findById(decoded.userId).select('+password');
+    
+    if (!user) {
+      console.log('❌ [AUTH-VERIFY-ADMIN] Usuário não encontrado');
+      return res.status(401).json({
+        error: 'Usuário não encontrado'
+      });
+    }
+
+    console.log('👤 [AUTH-VERIFY-ADMIN] Usuário encontrado:');
+    console.log('   - ID:', user._id);
+    console.log('   - Nome:', user.name);
+    console.log('   - Email:', user.email);
+    console.log('   - Admin:', user.isAdmin);
+    console.log('   - Ativo:', user.isActive);
+
+    if (!user.isActive) {
+      console.log('❌ [AUTH-VERIFY-ADMIN] Usuário desativado');
+      return res.status(401).json({
+        error: 'Usuário desativado'
+      });
+    }
+
+    if (!user.isAdmin) {
+      console.log('❌ [AUTH-VERIFY-ADMIN] Usuário não é admin');
+      return res.status(403).json({
+        error: 'Acesso negado - Usuário não é admin'
+      });
+    }
+
+    // Verificar senha se fornecida
+    const { password } = req.body;
+    if (password) {
+      console.log('🔐 [AUTH-VERIFY-ADMIN] Verificando senha...');
+      const isPasswordValid = await user.comparePassword(password);
+      console.log('   - Senha válida:', isPasswordValid);
+      
+      if (!isPasswordValid) {
+        console.log('❌ [AUTH-VERIFY-ADMIN] Senha incorreta');
+        return res.status(401).json({
+          error: 'Senha incorreta'
+        });
+      }
+    }
+
+    console.log('✅ [AUTH-VERIFY-ADMIN] Verificação de admin bem-sucedida');
+    res.json({
+      message: 'Acesso admin confirmado',
+      user: user.toPublicJSON()
+    });
+
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        error: 'Token inválido'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        error: 'Token expirado'
+      });
+    }
+
+    console.error('Erro ao verificar admin:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 // POST /api/auth/logout - Logout (opcional, pois o token é gerenciado no frontend)
 router.post('/logout', (req, res) => {
   res.json({
