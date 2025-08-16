@@ -193,6 +193,7 @@ function initializeEventListeners() {
     menuItems.forEach(item => {
         item.addEventListener('click', () => {
             const tab = item.dataset.tab;
+            console.log('🎯 [MENU] Clique detectado no menu:', tab);
             switchTab(tab);
         });
     });
@@ -600,6 +601,8 @@ function showDashboard() {
 
 // Função para alternar entre abas do dashboard
 function switchTab(tabName) {
+    console.log('🔄 [SWITCH-TAB] Alternando para aba:', tabName);
+    
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
     tabContents.forEach(content => content.classList.remove('active'));
@@ -608,6 +611,26 @@ function switchTab(tabName) {
     const selectedMenuItem = document.querySelector(`[data-tab="${tabName}"]`);
     const selectedTabContent = document.getElementById(`${tabName}Tab`);
     
+    console.log('🎯 [SWITCH-TAB] Elementos encontrados:');
+    console.log('   - Menu item:', selectedMenuItem ? 'Sim' : 'Não');
+    console.log('   - Tab content:', selectedTabContent ? 'Sim' : 'Não');
+    
+    // Para analytics e admin, não precisamos de selectedTabContent
+    if (tabName === 'analytics') {
+        console.log('📈 [SWITCH-TAB] Redirecionando para /analytics...');
+        selectedMenuItem.classList.add('active');
+        window.location.href = '/analytics';
+        return;
+    }
+    
+    if (tabName === 'admin') {
+        console.log('⚙️ [SWITCH-TAB] Mostrando painel admin...');
+        selectedMenuItem.classList.add('active');
+        showAdminTab();
+        return;
+    }
+    
+    // Para outras abas, verificar se o conteúdo existe
     if (selectedMenuItem && selectedTabContent) {
         selectedMenuItem.classList.add('active');
         selectedTabContent.classList.add('active');
@@ -615,22 +638,20 @@ function switchTab(tabName) {
         // Carregar dados específicos da aba
         switch(tabName) {
             case 'videos':
+                console.log('📹 [SWITCH-TAB] Carregando vídeos...');
                 loadVideos();
                 break;
             case 'meetings':
+                console.log('🎬 [SWITCH-TAB] Carregando reuniões...');
                 loadMeetings();
                 break;
             case 'goals':
+                console.log('📊 [SWITCH-TAB] Carregando metas...');
                 loadFinancialData();
                 break;
             case 'profile':
+                console.log('👤 [SWITCH-TAB] Carregando perfil...');
                 loadProfileStats();
-                break;
-            case 'analytics':
-                window.location.href = '/analytics';
-                break;
-            case 'admin':
-                showAdminTab();
                 break;
         }
         
