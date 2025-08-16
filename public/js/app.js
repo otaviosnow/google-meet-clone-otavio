@@ -737,7 +737,7 @@ function renderAdminUsersTable(users) {
 
     users.forEach(user => {
         console.log('👤 [ADMIN] Renderizando usuário:', { 
-            id: user._id, 
+            id: user.id, 
             name: user.name, 
             email: user.email,
             isBanned: user.isBanned 
@@ -751,13 +751,13 @@ function renderAdminUsersTable(users) {
             <td>${user.visionTokens}</td>
             <td><span class="user-admin ${user.isAdmin ? 'yes' : 'no'}">${user.isAdmin ? 'Sim' : 'Não'}</span></td>
             <td class="user-actions">
-                <button class="btn-edit" data-user-id="${user._id}" data-action="edit">
+                <button class="btn-edit" data-user-id="${user.id}" data-action="edit">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button class="btn-ban" data-user-id="${user._id}" data-action="ban" data-ban-status="${!user.isBanned}">
+                <button class="btn-ban" data-user-id="${user.id}" data-action="ban" data-ban-status="${!user.isBanned}">
                     <i class="fas fa-${user.isBanned ? 'unlock' : 'ban'}"></i> ${user.isBanned ? 'Desbanir' : 'Banir'}
                 </button>
-                <button class="btn-delete" data-user-id="${user._id}" data-action="delete">
+                <button class="btn-delete" data-user-id="${user.id}" data-action="delete">
                     <i class="fas fa-trash"></i> Deletar
                 </button>
             </td>
