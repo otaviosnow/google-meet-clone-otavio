@@ -2247,10 +2247,22 @@ async function addManualEntry(e) {
 
 // Atualizar display financeiro
 function updateFinancialDisplay(data) {
-    // Atualizar meta mensal
+    // Atualizar meta mensal no display
     const monthlyGoalDisplay = document.getElementById('monthlyGoalDisplay');
     if (monthlyGoalDisplay) {
         monthlyGoalDisplay.textContent = `R$ ${(data.monthlyGoal || 0).toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Atualizar campos de entrada da meta (para persistir dados)
+    const monthlyGoalInput = document.getElementById('monthlyGoal');
+    if (monthlyGoalInput) {
+        monthlyGoalInput.value = data.monthlyGoal || 0;
+    }
+    
+    const goalDeadline = document.getElementById('goalDeadline');
+    if (goalDeadline && data.deadlineDate) {
+        const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+        goalDeadline.value = deadlineDate;
     }
     
     // Atualizar progresso da meta

@@ -279,9 +279,6 @@
                             <button class="tab-btn" data-tab="history">
                                 <i class="fas fa-history"></i> Histórico e Relatórios
                             </button>
-                            <button class="tab-btn" data-tab="modifications">
-                                <i class="fas fa-edit"></i> Histórico de Modificações
-                            </button>
                         </div>
                         
                         <!-- Conteúdo das Abas -->
@@ -600,50 +597,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Aba 6: Histórico de Modificações -->
-                            <div id="modifications-tab" class="tab-panel">
-                                <div class="modifications-history">
-                                    <h3><i class="fas fa-edit"></i> Histórico de Modificações</h3>
-                                    <p class="subtitle">Acompanhe todas as mudanças feitas no seu sistema financeiro</p>
-                                    
-                                    <!-- Filtros de Modificações -->
-                                    <div class="modifications-filters">
-                                        <div class="filter-group">
-                                            <label for="modificationTypeFilter">Tipo de Modificação</label>
-                                            <select id="modificationTypeFilter">
-                                                <option value="all">Todas as modificações</option>
-                                                <option value="entry">Entradas financeiras</option>
-                                                <option value="goal_created">Metas criadas</option>
-                                                <option value="goal_update">Metas atualizadas</option>
-                                                <option value="goal_deleted">Metas deletadas</option>
-                                            </select>
-                                        </div>
-                                        <div class="filter-group">
-                                            <label for="modificationActionFilter">Ação</label>
-                                            <select id="modificationActionFilter">
-                                                <option value="all">Todas as ações</option>
-                                                <option value="add">Adições</option>
-                                                <option value="update">Atualizações</option>
-                                                <option value="create">Criações</option>
-                                                <option value="delete">Exclusões</option>
-                                            </select>
-                                        </div>
-                                        <button id="applyModificationFiltersBtn" class="btn btn-primary">
-                                            <i class="fas fa-filter"></i> Filtrar Modificações
-                                        </button>
-                                    </div>
 
-                                    <!-- Lista de Modificações -->
-                                    <div class="modifications-list" id="modificationsList">
-                                        <!-- Modificações serão carregadas aqui -->
-                                    </div>
-
-                                    <!-- Paginação -->
-                                    <div class="modifications-pagination" id="modificationsPagination">
-                                        <!-- Paginação será carregada aqui -->
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
