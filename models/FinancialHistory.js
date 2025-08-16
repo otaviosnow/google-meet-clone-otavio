@@ -130,7 +130,7 @@ financialHistorySchema.index({ user: 1, type: 1 });
 financialHistorySchema.index({ user: 1, action: 1 });
 
 // Método para criar histórico de entrada financeira
-financialHistorySchema.statics.createEntryHistory = async function(userId, entry, previousValues, newValues) {
+financialHistorySchema.statics.createEntryHistory = async function(userId, entry, action, previousValues, newValues) {
     console.log('📝 [HISTORY] Criando histórico de entrada - Dados recebidos:', {
         userId,
         entry: {
@@ -143,19 +143,34 @@ financialHistorySchema.statics.createEntryHistory = async function(userId, entry
             date: entry?.date,
             _id: entry?._id
         },
+        action,
         previousValues,
         newValues
     });
     
     const grossRevenue = entry?.grossRevenue || 0;
-    const description = `Adicionada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+    let description = '';
+    
+    switch(action) {
+        case 'create':
+            description = `Adicionada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+            break;
+        case 'update':
+            description = `Atualizada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+            break;
+        case 'delete':
+            description = `Removida entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+            break;
+        default:
+            description = `Modificada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+    }
     
     console.log('📝 [HISTORY] Descrição gerada:', description);
     
     const history = new this({
         user: userId,
         type: 'entry',
-        action: 'add',
+        action: action || 'add',
         description,
         entryData: {
             grossRevenue: grossRevenue,
