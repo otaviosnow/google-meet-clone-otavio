@@ -84,6 +84,7 @@ const paymentRoutes = require('./routes/payments');
 const analyticsRoutes = require('./routes/analytics');
 const tokensRoutes = require('./routes/tokens');
 const integrationRoutes = require('./routes/integration');
+const { runCompleteCleanup } = require('./utils/cleanupExpiredMeetings');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
 const generateToken = (userId) => {
@@ -241,6 +242,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🎉 Deploy bem-sucedido!`);
     console.log(`🗄️  Banco de dados: MongoDB`);
     console.log(`📁 Versão: COMPLETA COM INTERFACE`);
+    console.log(`🧹 Limpeza Automática: Ativa`);
+    
+    // Iniciar limpeza automática de reuniões expiradas
+    startAutomaticCleanup();
 });
 
 // Tratamento de erros do servidor
@@ -250,6 +255,36 @@ server.on('error', (err) => {
         console.error('❌ Porta já está em uso:', PORT);
     }
 });
+
+// Função para iniciar limpeza automática
+function startAutomaticCleanup() {
+    console.log('🧹 Iniciando limpeza automática de reuniões expiradas...');
+    
+    // Executar limpeza a cada 6 horas
+    const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000; // 6 horas em milissegundos
+    
+    // Executar limpeza imediatamente na inicialização
+    runCompleteCleanup().then(result => {
+        if (result.success) {
+            console.log(`✅ Limpeza inicial concluída: ${result.markedAsExpired} marcadas como expiradas, ${result.removedCount} removidas`);
+        } else {
+            console.error('❌ Erro na limpeza inicial:', result.error);
+        }
+    });
+    
+    // Agendar limpeza periódica
+    setInterval(async () => {
+        console.log('🔄 Executando limpeza automática periódica...');
+        const result = await runCompleteCleanup();
+        if (result.success) {
+            console.log(`✅ Limpeza periódica concluída: ${result.markedAsExpired} marcadas como expiradas, ${result.removedCount} removidas`);
+        } else {
+            console.error('❌ Erro na limpeza periódica:', result.error);
+        }
+    }, CLEANUP_INTERVAL);
+    
+    console.log(`⏰ Limpeza automática agendada para executar a cada ${CLEANUP_INTERVAL / 1000 / 60 / 60} horas`);
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

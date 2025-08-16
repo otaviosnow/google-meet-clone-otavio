@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const User = require('../models/User');
 const Meeting = require('../models/Meeting');
 const TokenUsage = require('../models/TokenUsage');
+const { runCompleteCleanup } = require('../utils/cleanupExpiredMeetings');
 
 const router = express.Router();
 
@@ -304,7 +305,37 @@ router.get('/users/:id', authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
-  }
+      }
+});
+
+// POST /api/admin/cleanup - Executar limpeza manual de reuniões expiradas
+router.post('/cleanup', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        console.log('🧹 [ADMIN] Executando limpeza manual de reuniões expiradas...');
+        
+        const result = await runCompleteCleanup();
+        
+        if (result.success) {
+            console.log(`✅ [ADMIN] Limpeza manual concluída: ${result.markedAsExpired} marcadas como expiradas, ${result.removedCount} removidas`);
+            
+            res.json({
+                message: 'Limpeza executada com sucesso',
+                markedAsExpired: result.markedAsExpired,
+                removedCount: result.removedCount
+            });
+        } else {
+            console.error('❌ [ADMIN] Erro na limpeza manual:', result.error);
+            
+            res.status(500).json({
+                error: 'Erro ao executar limpeza',
+                details: result.error
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ [ADMIN] Erro ao executar limpeza manual:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
 });
 
 module.exports = router;

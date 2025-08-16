@@ -528,8 +528,30 @@ function initializeCallScreen() {
 }
 
 // Função para encerrar chamada
-function endCall() {
+async function endCall() {
     console.log('=== ENCERRANDO CHAMADA ===');
+    
+    // Notificar o backend que a reunião foi encerrada
+    if (meetingId) {
+        try {
+            console.log('🔗 Notificando backend sobre encerramento da reunião:', meetingId);
+            
+            const response = await fetch(`/api/meetings/${meetingId}/end-video`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                console.log('✅ Backend notificado sobre encerramento da reunião');
+            } else {
+                console.warn('⚠️ Erro ao notificar backend sobre encerramento:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao notificar backend sobre encerramento:', error);
+        }
+    }
     
     // Limpar localStorage e marcar como encerrada
     localStorage.removeItem('googleMeetInCall');
