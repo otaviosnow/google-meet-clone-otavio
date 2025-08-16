@@ -108,32 +108,6 @@ const authenticateToken = (req, res, next) => {
 // ===== ROTAS DE AUTENTICAÇÃO =====
 // As rotas de autenticação estão no arquivo routes/auth.js
 
-// Verificar usuário autenticado
-app.get('/api/auth/me', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId).select('-password');
-        
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                error: 'Usuário não encontrado'
-            });
-        }
-
-        res.json({
-            success: true,
-            user
-        });
-        
-    } catch (error) {
-        console.error('❌ Erro ao buscar usuário:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Erro interno do servidor'
-        });
-    }
-});
-
 // ===== ROTAS DE API =====
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
