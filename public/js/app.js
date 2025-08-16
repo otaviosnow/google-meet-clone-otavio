@@ -299,6 +299,11 @@ async function handleLogin(e) {
         password: formData.get('password') || document.getElementById('loginPassword').value
     };
     
+    console.log('🔐 [LOGIN] Tentando login...');
+    console.log('📧 Email:', data.email);
+    console.log('🔑 Senha:', data.password ? 'Fornecida' : 'Não fornecida');
+    console.log('🔗 API URL:', `${API_BASE_URL}/auth/login`);
+    
     try {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -308,9 +313,14 @@ async function handleLogin(e) {
             body: JSON.stringify(data)
         });
         
+        console.log('📡 [LOGIN] Response status:', response.status);
+        console.log('📡 [LOGIN] Response headers:', response.headers);
+        
         const result = await response.json();
+        console.log('📋 [LOGIN] Response data:', result);
         
         if (response.ok) {
+            console.log('✅ [LOGIN] Login bem-sucedido');
             authToken = result.token;
             currentUser = result.user;
             localStorage.setItem('authToken', authToken);
@@ -319,10 +329,11 @@ async function handleLogin(e) {
             loadUserData();
             showNotification('Login realizado com sucesso!', 'success');
         } else {
+            console.log('❌ [LOGIN] Erro no login:', result.error);
             showNotification(result.error, 'error');
         }
     } catch (error) {
-        console.error('Erro no login:', error);
+        console.error('❌ [LOGIN] Erro no login:', error);
         showNotification('Erro ao fazer login', 'error');
     }
 }
@@ -745,6 +756,9 @@ function renderAdminUsersTable(users) {
         
         const row = document.createElement('tr');
         row.innerHTML = `
+            <td>
+                <input type="checkbox" class="user-checkbox" data-user-id="${user.id}" onchange="updateSelection()">
+            </td>
             <td>${user.name || 'Sem nome'}</td>
             <td>${user.email}</td>
             <td><span class="user-status ${user.isBanned ? 'banned' : 'active'}">${user.isBanned ? 'Banido' : 'Ativo'}</span></td>
@@ -767,6 +781,7 @@ function renderAdminUsersTable(users) {
     
     // Adicionar event listeners após renderizar
     addAdminEventListeners();
+    updateSelection();
 }
 
 // Função para editar usuário
@@ -948,6 +963,248 @@ async function saveUserChanges(e) {
     }
 }
 
+// ===== FUNÇÕES PARA AÇÕES EM LOTE =====
+
+// Função para atualizar contador de seleção
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const batchActions = document.getElementById('batchActions');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    const totalCheckboxes = document.querySelectorAll('.user-checkbox');
+    const checkedCount = checkboxes.length;
+    
+    // Atualizar contador
+    selectedCount.textContent = checkedCount;
+    
+    // Mostrar/ocultar ações em lote
+    if (checkedCount > 0) {
+        batchActions.style.display = 'flex';
+    } else {
+        batchActions.style.display = 'none';
+    }
+    
+    // Atualizar checkbox "Selecionar Todos"
+    if (checkedCount === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedCount === totalCheckboxes.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    }
+}
+
+// Função para selecionar/deselecionar todos
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateSelection();
+}
+
+// Função para limpar seleção
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+    
+    updateSelection();
+}
+
+// Função para obter IDs dos usuários selecionados
+function getSelectedUserIds() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    return Array.from(checkboxes).map(checkbox => checkbox.dataset.userId);
+}
+
+// Função para banir usuários em lote
+async function batchBanUsers() {
+    const userIds = getSelectedUserIds();
+    
+    if (userIds.length === 0) {
+        showNotification('Nenhum usuário selecionado', 'error');
+        return;
+    }
+    
+    if (!confirm(`Tem certeza que deseja banir ${userIds.length} usuário(s)?`)) {
+        return;
+    }
+    
+    console.log('🚫 [ADMIN] Banindo usuários em lote:', userIds);
+    
+    try {
+        const promises = userIds.map(userId => 
+            fetch(`${API_BASE_URL}/users/admin/${userId}/ban`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ isBanned: true })
+            })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successCount = responses.filter(r => r.ok).length;
+        
+        if (successCount === userIds.length) {
+            showNotification(`${successCount} usuário(s) banido(s) com sucesso!`, 'success');
+            clearSelection();
+            loadAdminUsers();
+        } else {
+            showNotification(`${successCount}/${userIds.length} usuário(s) banido(s) com sucesso`, 'warning');
+            loadAdminUsers();
+        }
+    } catch (error) {
+        console.error('Erro ao banir usuários em lote:', error);
+        showNotification('Erro ao banir usuários', 'error');
+    }
+}
+
+// Função para desbanir usuários em lote
+async function batchUnbanUsers() {
+    const userIds = getSelectedUserIds();
+    
+    if (userIds.length === 0) {
+        showNotification('Nenhum usuário selecionado', 'error');
+        return;
+    }
+    
+    console.log('🔓 [ADMIN] Desbanindo usuários em lote:', userIds);
+    
+    try {
+        const promises = userIds.map(userId => 
+            fetch(`${API_BASE_URL}/users/admin/${userId}/ban`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ isBanned: false })
+            })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successCount = responses.filter(r => r.ok).length;
+        
+        if (successCount === userIds.length) {
+            showNotification(`${successCount} usuário(s) desbanido(s) com sucesso!`, 'success');
+            clearSelection();
+            loadAdminUsers();
+        } else {
+            showNotification(`${successCount}/${userIds.length} usuário(s) desbanido(s) com sucesso`, 'warning');
+            loadAdminUsers();
+        }
+    } catch (error) {
+        console.error('Erro ao desbanir usuários em lote:', error);
+        showNotification('Erro ao desbanir usuários', 'error');
+    }
+}
+
+// Função para deletar usuários em lote
+async function batchDeleteUsers() {
+    const userIds = getSelectedUserIds();
+    
+    if (userIds.length === 0) {
+        showNotification('Nenhum usuário selecionado', 'error');
+        return;
+    }
+    
+    if (!confirm(`Tem certeza que deseja deletar ${userIds.length} usuário(s)? Esta ação não pode ser desfeita.`)) {
+        return;
+    }
+    
+    console.log('🗑️ [ADMIN] Deletando usuários em lote:', userIds);
+    
+    try {
+        const promises = userIds.map(userId => 
+            fetch(`${API_BASE_URL}/users/admin/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successCount = responses.filter(r => r.ok).length;
+        
+        if (successCount === userIds.length) {
+            showNotification(`${successCount} usuário(s) deletado(s) com sucesso!`, 'success');
+            clearSelection();
+            loadAdminUsers();
+        } else {
+            showNotification(`${successCount}/${userIds.length} usuário(s) deletado(s) com sucesso`, 'warning');
+            loadAdminUsers();
+        }
+    } catch (error) {
+        console.error('Erro ao deletar usuários em lote:', error);
+        showNotification('Erro ao deletar usuários', 'error');
+    }
+}
+
+// Função para adicionar tokens em lote
+async function batchAddTokens() {
+    const userIds = getSelectedUserIds();
+    
+    if (userIds.length === 0) {
+        showNotification('Nenhum usuário selecionado', 'error');
+        return;
+    }
+    
+    const tokensToAdd = prompt(`Quantos tokens adicionar para ${userIds.length} usuário(s)?`);
+    
+    if (!tokensToAdd || isNaN(tokensToAdd) || parseInt(tokensToAdd) <= 0) {
+        showNotification('Quantidade de tokens inválida', 'error');
+        return;
+    }
+    
+    const tokens = parseInt(tokensToAdd);
+    console.log('🎫 [ADMIN] Adicionando tokens em lote:', { userIds, tokens });
+    
+    try {
+        const promises = userIds.map(userId => 
+            fetch(`${API_BASE_URL}/users/admin/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ addTokens: tokens })
+            })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successCount = responses.filter(r => r.ok).length;
+        
+        if (successCount === userIds.length) {
+            showNotification(`${tokens} tokens adicionado(s) para ${successCount} usuário(s)!`, 'success');
+            clearSelection();
+            loadAdminUsers();
+        } else {
+            showNotification(`${tokens} tokens adicionado(s) para ${successCount}/${userIds.length} usuário(s)`, 'warning');
+            loadAdminUsers();
+        }
+    } catch (error) {
+        console.error('Erro ao adicionar tokens em lote:', error);
+        showNotification('Erro ao adicionar tokens', 'error');
+    }
+}
+
 // Event listeners para o painel admin
 document.addEventListener('DOMContentLoaded', function() {
     // Form de autenticação admin
@@ -1006,7 +1263,7 @@ function switchGoalsTab(tabName) {
         // Carregar dados específicos da aba
         switch(tabName) {
             case 'config':
-                // Carregar dados da meta configurada
+                // Carregar dados da meta configurada automaticamente
                 loadGoalConfig();
                 break;
             case 'summary':
@@ -2370,24 +2627,17 @@ function updateSummaryTab(data) {
         console.log('⚠️ [FRONTEND-RESUMO] Elemento goalProgressDisplay não encontrado ou meta zero');
     }
     
-    // Dias restantes
+    // Dias restantes - sempre usar dados do backend
     const daysRemaining = document.getElementById('daysRemaining');
     if (daysRemaining) {
-        if (data.daysRemaining !== undefined) {
-            // Usar dados do backend se disponíveis
+        if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
+            // Usar dados do backend (calculados baseados na data limite)
             daysRemaining.textContent = `${data.daysRemaining} dias`;
             console.log('📅 [FRONTEND-RESUMO] Dias restantes (backend):', data.daysRemaining);
         } else {
-            // Fallback para cálculo local
-            const today = new Date();
-            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-            const remaining = daysInMonth - today.getDate();
-            daysRemaining.textContent = `${remaining} dias`;
-            console.log('📅 [FRONTEND-RESUMO] Dias restantes (cálculo local):', {
-                today: today.getDate(),
-                daysInMonth,
-                remaining
-            });
+            // Se não há data limite configurada, mostrar mensagem
+            daysRemaining.textContent = 'Não configurado';
+            console.log('⚠️ [FRONTEND-RESUMO] Data limite não configurada');
         }
     } else {
         console.log('⚠️ [FRONTEND-RESUMO] Elemento daysRemaining não encontrado');
@@ -2782,10 +3032,12 @@ async function deleteEntry(entryId) {
     }
 }
 
-// Carregar configuração da meta
+// Carregar configuração da meta automaticamente
 async function loadGoalConfig() {
+    console.log('⚙️ [FRONTEND-CONFIG] Carregando configurações da meta automaticamente...');
+    
     try {
-        const response = await fetch(`${API_BASE_URL}/financial/goal`, {
+        const response = await fetch(`${API_BASE_URL}/financial/summary`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
             }
@@ -2793,19 +3045,45 @@ async function loadGoalConfig() {
         
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 [FRONTEND-CONFIG] Dados recebidos:', {
+                monthlyGoal: data.monthlyGoal,
+                deadlineDate: data.deadlineDate,
+                daysRemaining: data.daysRemaining
+            });
             
             // Preencher campos com dados salvos
             const monthlyGoalInput = document.getElementById('monthlyGoal');
             const goalDeadline = document.getElementById('goalDeadline');
             
-            // Verificar se os elementos existem antes de acessar
-            if (monthlyGoalInput) monthlyGoalInput.value = data.monthlyGoal || 0;
-            if (goalDeadline && data.deadlineDate) {
-                goalDeadline.value = new Date(data.deadlineDate).toISOString().split('T')[0];
+            if (monthlyGoalInput) {
+                const monthlyGoalValue = data.monthlyGoal || 0;
+                monthlyGoalInput.value = monthlyGoalValue;
+                console.log('💰 [FRONTEND-CONFIG] Meta mensal carregada:', monthlyGoalValue);
+            } else {
+                console.log('⚠️ [FRONTEND-CONFIG] Elemento monthlyGoal não encontrado');
             }
+            
+            if (goalDeadline && data.deadlineDate) {
+                const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+                goalDeadline.value = deadlineDate;
+                console.log('📅 [FRONTEND-CONFIG] Data limite carregada:', deadlineDate);
+            } else {
+                console.log('⚠️ [FRONTEND-CONFIG] Elemento goalDeadline não encontrado ou data não disponível');
+            }
+            
+            // Mostrar mensagem de sucesso se há dados salvos
+            if (data.monthlyGoal > 0 || data.deadlineDate) {
+                showNotification('Configurações carregadas automaticamente!', 'success');
+            }
+            
+            console.log('✅ [FRONTEND-CONFIG] Configurações carregadas com sucesso');
+        } else {
+            console.error('❌ [FRONTEND-CONFIG] Erro ao carregar configurações - Status:', response.status);
+            const error = await response.json();
+            console.error('❌ [FRONTEND-CONFIG] Detalhes do erro:', error);
         }
     } catch (error) {
-        console.error('Erro ao carregar configuração da meta:', error);
+        console.error('❌ [FRONTEND-CONFIG] Erro ao carregar configurações:', error);
     }
 }
 

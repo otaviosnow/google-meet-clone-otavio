@@ -776,10 +776,37 @@
                                 </div>
                             </div>
                             
+                            <!-- Ações em lote -->
+                            <div class="batch-actions" id="batchActions" style="display: none;">
+                                <div class="batch-info">
+                                    <span id="selectedCount">0</span> usuário(s) selecionado(s)
+                                </div>
+                                <div class="batch-buttons">
+                                    <button class="btn btn-warning" onclick="batchBanUsers()">
+                                        <i class="fas fa-ban"></i> Banir Selecionados
+                                    </button>
+                                    <button class="btn btn-success" onclick="batchUnbanUsers()">
+                                        <i class="fas fa-unlock"></i> Desbanir Selecionados
+                                    </button>
+                                    <button class="btn btn-danger" onclick="batchDeleteUsers()">
+                                        <i class="fas fa-trash"></i> Deletar Selecionados
+                                    </button>
+                                    <button class="btn btn-info" onclick="batchAddTokens()">
+                                        <i class="fas fa-plus"></i> Adicionar Tokens
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="clearSelection()">
+                                        <i class="fas fa-times"></i> Limpar Seleção
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <div class="users-table-container">
                                 <table class="users-table">
                                     <thead>
                                         <tr>
+                                            <th>
+                                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                            </th>
                                             <th>Nome</th>
                                             <th>Email</th>
                                             <th>Status</th>
