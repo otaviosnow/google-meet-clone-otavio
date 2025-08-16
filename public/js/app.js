@@ -1,6 +1,22 @@
 // Configurações da API
 const API_BASE_URL = window.location.origin + '/api';
 
+// Função para formatar datas
+function formatDate(dateString) {
+    if (!dateString) return 'Data não disponível';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Data inválida';
+    
+    return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 // Estado da aplicação
 let currentUser = null;
 let authToken = localStorage.getItem('authToken');
@@ -2064,11 +2080,8 @@ function calculateMonthlyProjection(data) {
         projectionElement.textContent = `R$ ${projectedProfit.toFixed(2).replace('.', ',')}`;
     }
     
-    // Calcular e atualizar dias restantes
-    const daysRemainingElement = document.getElementById('daysRemaining');
-    if (daysRemainingElement) {
-        daysRemainingElement.textContent = `${daysRemaining} dias`;
-    }
+    // NOTA: Os dias restantes são calculados pelo backend baseado na data limite configurada
+    // Não sobrescrever aqui para evitar conflitos
     
     // Atualizar média diária necessária para atingir a meta
     const monthlyGoal = parseFloat(document.getElementById('monthlyGoal')?.value || 0);

@@ -131,66 +131,76 @@ financialHistorySchema.index({ user: 1, action: 1 });
 
 // Método para criar histórico de entrada financeira
 financialHistorySchema.statics.createEntryHistory = async function(userId, entry, action, previousValues, newValues) {
-    console.log('📝 [HISTORY] Criando histórico de entrada - Dados recebidos:', {
-        userId,
-        entry: {
-            grossRevenue: entry?.grossRevenue,
-            chipCost: entry?.chipCost,
-            additionalCost: entry?.additionalCost,
-            adsCost: entry?.adsCost,
-            totalExpenses: entry?.totalExpenses,
-            netProfit: entry?.netProfit,
-            date: entry?.date,
-            _id: entry?._id
-        },
-        action,
-        previousValues,
-        newValues
-    });
-    
-    const grossRevenue = entry?.grossRevenue || 0;
-    let description = '';
-    
-    switch(action) {
-        case 'create':
-            description = `Adicionada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
-            break;
-        case 'update':
-            description = `Atualizada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
-            break;
-        case 'delete':
-            description = `Removida entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
-            break;
-        default:
-            description = `Modificada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+    try {
+        console.log('📝 [HISTORY] Criando histórico de entrada - Dados recebidos:', {
+            userId,
+            entry: {
+                grossRevenue: entry?.grossRevenue,
+                chipCost: entry?.chipCost,
+                additionalCost: entry?.additionalCost,
+                adsCost: entry?.adsCost,
+                totalExpenses: entry?.totalExpenses,
+                netProfit: entry?.netProfit,
+                date: entry?.date,
+                _id: entry?._id
+            },
+            action,
+            previousValues,
+            newValues
+        });
+        
+        const grossRevenue = entry?.grossRevenue || 0;
+        let description = '';
+        
+        switch(action) {
+            case 'create':
+                description = `Adicionada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+                break;
+            case 'update':
+                description = `Atualizada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+                break;
+            case 'delete':
+                description = `Removida entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+                break;
+            default:
+                description = `Modificada entrada financeira: R$ ${grossRevenue.toFixed(2)} de receita bruta`;
+        }
+        
+        console.log('📝 [HISTORY] Descrição gerada:', description);
+        
+        const history = new this({
+            user: userId,
+            type: 'entry',
+            action: action || 'add',
+            description,
+            entryData: {
+                grossRevenue: grossRevenue,
+                chipCost: entry?.chipCost || 0,
+                additionalCost: entry?.additionalCost || 0,
+                adsCost: entry?.adsCost || 0,
+                totalExpenses: entry?.totalExpenses || 0,
+                netProfit: entry?.netProfit || 0,
+                date: entry?.date || new Date()
+            },
+            previousValues: previousValues || {},
+            newValues: newValues || {},
+            relatedEntry: entry?._id
+        });
+        
+        console.log('📝 [HISTORY] Histórico criado, salvando...');
+        const savedHistory = await history.save();
+        console.log('✅ [HISTORY] Histórico salvo com sucesso:', savedHistory._id);
+        
+        return savedHistory;
+    } catch (error) {
+        console.error('❌ [HISTORY] Erro ao criar histórico:', error);
+        console.error('❌ [HISTORY] Detalhes do erro:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+        });
+        throw error;
     }
-    
-    console.log('📝 [HISTORY] Descrição gerada:', description);
-    
-    const history = new this({
-        user: userId,
-        type: 'entry',
-        action: action || 'add',
-        description,
-        entryData: {
-            grossRevenue: grossRevenue,
-            chipCost: entry?.chipCost || 0,
-            additionalCost: entry?.additionalCost || 0,
-            adsCost: entry?.adsCost || 0,
-            totalExpenses: entry?.totalExpenses || 0,
-            netProfit: entry?.netProfit || 0,
-            date: entry?.date || new Date()
-        },
-        previousValues: previousValues || {},
-        newValues: newValues || {},
-        relatedEntry: entry?._id
-    });
-    
-    console.log('📝 [HISTORY] Histórico criado, salvando...');
-    const savedHistory = await history.save();
-    console.log('✅ [HISTORY] Histórico salvo com sucesso:', savedHistory._id);
-    
-    return savedHistory;
 };
 
 // Método para criar histórico de atualização de meta
