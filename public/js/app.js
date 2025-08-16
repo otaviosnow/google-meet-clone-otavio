@@ -2630,6 +2630,12 @@ function updateSummaryTab(data) {
     // Dias restantes - sempre usar dados do backend
     const daysRemaining = document.getElementById('daysRemaining');
     if (daysRemaining) {
+        console.log('📅 [FRONTEND-RESUMO] Dados recebidos para dias restantes:', {
+            daysRemaining: data.daysRemaining,
+            deadlineDate: data.deadlineDate,
+            monthlyGoal: data.monthlyGoal
+        });
+        
         if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
             // Usar dados do backend (calculados baseados na data limite)
             daysRemaining.textContent = `${data.daysRemaining} dias`;
