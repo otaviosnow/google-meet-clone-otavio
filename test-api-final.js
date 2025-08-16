@@ -2,12 +2,12 @@ require('dotenv').config();
 
 const API_BASE_URL = 'https://google-meet-saas-v2.onrender.com/api';
 
-async function testAPI() {
-    console.log('🧪 Testando API com senha correta...');
+async function testAPIFinal() {
+    console.log('🌐 === TESTE FINAL DA API ===\n');
     
     try {
-        // 1. Fazer login
-        console.log('\n1️⃣ Fazendo login...');
+        // 1. Login
+        console.log('1️⃣ Fazendo login...');
         const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
@@ -15,7 +15,7 @@ async function testAPI() {
             },
             body: JSON.stringify({
                 email: 'teste90@gmail.com',
-                password: '@Teste90'
+                password: '123456'
             })
         });
         
@@ -27,7 +27,8 @@ async function testAPI() {
         
         const loginData = await loginResponse.json();
         console.log('✅ Login bem-sucedido');
-        console.log('🎫 Token recebido:', loginData.token ? 'Sim' : 'Não');
+        console.log(`   - Tokens: ${loginData.user.visionTokens}`);
+        console.log(`   - Admin: ${loginData.user.isAdmin}`);
         
         const token = loginData.token;
         
@@ -47,18 +48,20 @@ async function testAPI() {
         
         const meData = await meResponse.json();
         console.log('✅ Rota /me funcionando');
-        console.log('👤 Dados do usuário:');
-        console.log('   - Nome:', meData.user.name);
-        console.log('   - Email:', meData.user.email);
-        console.log('   - Tokens:', meData.user.visionTokens);
-        console.log('   - Admin:', meData.user.isAdmin);
-        console.log('   - Ativo:', meData.user.isActive);
+        console.log(`   - Tokens: ${meData.user.visionTokens}`);
+        console.log(`   - Admin: ${meData.user.isAdmin}`);
         
-        // 3. Verificar se os tokens estão corretos
-        if (meData.user.visionTokens >= 1000) {
-            console.log('✅ Tokens estão corretos no banco e na API!');
+        // 3. Verificar se tudo está correto
+        if (loginData.user.visionTokens === 1000 && meData.user.visionTokens === 1000) {
+            console.log('\n🎉 SUCESSO TOTAL!');
+            console.log('✅ Tokens funcionando na API');
+            console.log('✅ Login funcionando');
+            console.log('✅ Rota /me funcionando');
+            console.log('✅ Sistema de tokens reconstruído com sucesso!');
         } else {
-            console.log('❌ Tokens incorretos na API:', meData.user.visionTokens);
+            console.log('\n❌ PROBLEMA PERSISTE');
+            console.log(`   Login tokens: ${loginData.user.visionTokens}`);
+            console.log(`   /me tokens: ${meData.user.visionTokens}`);
         }
         
     } catch (error) {
@@ -66,4 +69,4 @@ async function testAPI() {
     }
 }
 
-testAPI();
+testAPIFinal();

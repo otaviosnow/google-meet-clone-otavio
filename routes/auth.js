@@ -212,43 +212,70 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
 // POST /api/auth/login - Login do usuário
 router.post('/login', loginValidation, handleValidationErrors, async (req, res) => {
   try {
+    console.log('🔐 [AUTH-LOGIN] Iniciando login...');
     const { email, password } = req.body;
+    console.log(`   - Email: ${email}`);
+    console.log(`   - Senha: ${password ? 'Fornecida' : 'Não fornecida'}`);
 
     // Buscar usuário com senha
     const user = await User.findOne({ email }).select('+password');
     
     if (!user) {
+      console.log('❌ [AUTH-LOGIN] Usuário não encontrado');
       return res.status(401).json({
         error: 'Email ou senha incorretos'
       });
     }
 
+    console.log('✅ [AUTH-LOGIN] Usuário encontrado:');
+    console.log(`   - ID: ${user._id}`);
+    console.log(`   - Nome: ${user.name}`);
+    console.log(`   - Email: ${user.email}`);
+    console.log(`   - Tokens: ${user.visionTokens}`);
+    console.log(`   - Admin: ${user.isAdmin}`);
+    console.log(`   - Ativo: ${user.isActive}`);
+    console.log(`   - Senha hash: ${user.password ? 'Presente' : 'Ausente'}`);
+
     if (!user.isActive) {
+      console.log('❌ [AUTH-LOGIN] Usuário desativado');
       return res.status(401).json({
         error: 'Conta desativada'
       });
     }
 
     // Verificar senha
+    console.log('🔐 [AUTH-LOGIN] Verificando senha...');
     const isPasswordValid = await user.comparePassword(password);
+    console.log(`   - Senha válida: ${isPasswordValid}`);
+    
     if (!isPasswordValid) {
+      console.log('❌ [AUTH-LOGIN] Senha inválida');
       return res.status(401).json({
         error: 'Email ou senha incorretos'
       });
     }
 
     // Atualizar último login
+    console.log('📅 [AUTH-LOGIN] Atualizando último login...');
     await user.updateLastLogin();
 
     // Gerar token
     const token = generateToken(user._id);
+    console.log('🎫 [AUTH-LOGIN] Token gerado');
 
     // Retornar dados do usuário e token
+    const publicData = user.toPublicJSON();
+    console.log('📤 [AUTH-LOGIN] Dados públicos:');
+    console.log(`   - Tokens: ${publicData.visionTokens}`);
+    console.log(`   - Admin: ${publicData.isAdmin}`);
+
     res.json({
       message: 'Login realizado com sucesso',
-      user: user.toPublicJSON(),
+      user: publicData,
       token
     });
+    
+    console.log('✅ [AUTH-LOGIN] Login concluído com sucesso');
 
   } catch (error) {
     console.error('Erro no login:', error);
