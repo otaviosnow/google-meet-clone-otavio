@@ -17,7 +17,7 @@ router.post('/', authenticateToken, async (req, res) => {
         }
 
         // Verificar se o vídeo existe e pertence ao usuário
-        const video = await Video.findOne({ _id: videoId, user: req.user.id });
+        const video = await Video.findOne({ _id: videoId, user: req.user._id });
         if (!video) {
             return res.status(404).json({ error: 'Vídeo não encontrado' });
         }
@@ -34,7 +34,7 @@ router.post('/', authenticateToken, async (req, res) => {
             title,
             description: '',
             video: videoId,
-            creator: req.user.id,
+            creator: req.user._id,
             meetLink: meetLink,
             creatorIP: creatorIP,
             status: 'active'
@@ -141,7 +141,7 @@ router.get('/:meetingId', async (req, res) => {
 // Listar reuniões do usuário
 router.get('/', authenticateToken, async (req, res) => {
     try {
-        const meetings = await Meeting.find({ creator: req.user.id })
+        const meetings = await Meeting.find({ creator: req.user._id })
             .populate('video', 'title url type')
             .sort({ createdAt: -1 });
 
@@ -157,7 +157,7 @@ router.post('/:meetingId/end', authenticateToken, async (req, res) => {
     try {
         const { meetingId } = req.params;
         
-        const meeting = await Meeting.findOne({ meetingId, creator: req.user.id });
+        const meeting = await Meeting.findOne({ meetingId, creator: req.user._id });
         
         if (!meeting) {
             return res.status(404).json({ error: 'Reunião não encontrada' });
@@ -231,7 +231,7 @@ router.post('/:meetingId/end-video', async (req, res) => {
 // Deletar reunião
 router.delete('/:id', authenticateToken, async (req, res) => {
     try {
-        const meeting = await Meeting.findOne({ _id: req.params.id, creator: req.user.id });
+        const meeting = await Meeting.findOne({ _id: req.params.id, creator: req.user._id });
         
         if (!meeting) {
             return res.status(404).json({ error: 'Reunião não encontrada' });
