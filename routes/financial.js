@@ -590,30 +590,56 @@ router.get('/entries', authenticateToken, async (req, res) => {
 
 // GET /api/financial/history - Obter histórico financeiro
 router.get('/history', authenticateToken, async (req, res) => {
+  console.log('📋 [HISTORY] GET /history - Usuário:', req.user._id);
+  console.log('📋 [HISTORY] Parâmetros recebidos:', req.query);
+  
   try {
     const { startDate, endDate, type } = req.query;
     
     let query = { user: req.user._id };
+    console.log('🔍 [HISTORY] Query inicial:', query);
     
     if (startDate && endDate) {
       query.date = {
         $gte: new Date(startDate),
         $lte: new Date(endDate)
       };
+      console.log('📅 [HISTORY] Filtro de data aplicado:', {
+        startDate: new Date(startDate),
+        endDate: new Date(endDate)
+      });
+    } else {
+      console.log('⚠️ [HISTORY] Nenhum filtro de data aplicado');
     }
     
     if (type && type !== 'all') {
       // Filtrar por tipo se especificado
       if (type === 'revenue') {
         query.grossRevenue = { $gt: 0 };
+        console.log('💰 [HISTORY] Filtro de receita aplicado');
       } else if (type === 'expenses') {
         query.totalExpenses = { $gt: 0 };
+        console.log('💸 [HISTORY] Filtro de despesas aplicado');
       }
+    } else {
+      console.log('📊 [HISTORY] Nenhum filtro de tipo aplicado');
     }
     
-    const entries = await FinancialEntry.find(query).sort({ date: -1 });
+    console.log('🔍 [HISTORY] Query final:', JSON.stringify(query, null, 2));
     
-    res.json({
+    const entries = await FinancialEntry.find(query).sort({ date: -1 });
+    console.log('📋 [HISTORY] Entradas encontradas:', entries.length);
+    
+    if (entries.length > 0) {
+      console.log('📋 [HISTORY] Primeira entrada:', {
+        id: entries[0]._id,
+        date: entries[0].date,
+        grossRevenue: entries[0].grossRevenue,
+        user: entries[0].user
+      });
+    }
+    
+    const response = {
       entries: entries.map(entry => ({
         id: entry._id,
         date: entry.date,
@@ -625,10 +651,13 @@ router.get('/history', authenticateToken, async (req, res) => {
         netProfit: entry.netProfit,
         notes: entry.notes
       }))
-    });
+    };
+    
+    console.log('📤 [HISTORY] Resposta enviada com', response.entries.length, 'entradas');
+    res.json(response);
     
   } catch (error) {
-    console.error('Erro ao obter histórico financeiro:', error);
+    console.error('❌ [HISTORY] Erro ao obter histórico financeiro:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
