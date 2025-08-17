@@ -3625,6 +3625,8 @@ async function loadIntegrationTokens() {
 // Renderizar tokens de integração
 function renderIntegrationTokens(tokens) {
     const tokensList = document.getElementById('tokensList');
+    const integrationActions = document.querySelector('.integration-actions');
+    
     if (!tokensList) return;
     
     // Verificar se tokens é um array válido
@@ -3640,6 +3642,10 @@ function renderIntegrationTokens(tokens) {
                 </button>
             </div>
         `;
+        // Esconder botões de ação em caso de erro
+        if (integrationActions) {
+            integrationActions.style.display = 'none';
+        }
         return;
     }
     
@@ -3654,7 +3660,16 @@ function renderIntegrationTokens(tokens) {
                 </button>
             </div>
         `;
+        // Esconder botões de ação quando não há tokens
+        if (integrationActions) {
+            integrationActions.style.display = 'none';
+        }
         return;
+    }
+    
+    // Mostrar botões de ação quando há tokens
+    if (integrationActions) {
+        integrationActions.style.display = 'flex';
     }
     
     tokensList.innerHTML = tokens.map(token => `
