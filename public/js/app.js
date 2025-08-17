@@ -2383,68 +2383,27 @@ function showNotification(message, type = 'info') {
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Estilos da notificação
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 12px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
-        z-index: 99999;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        min-width: 300px;
-        max-width: 400px;
-        word-wrap: break-word;
-    `;
-    
-    if (type === 'success') {
-        notification.style.backgroundColor = '#34a853';
-    } else if (type === 'error') {
-        notification.style.backgroundColor = '#ea4335';
-    } else {
-        notification.style.backgroundColor = '#1a73e8';
-    }
-    
+    // Adicionar ao body
     document.body.appendChild(notification);
     
-    // Remover após 5 segundos
+    // Forçar reflow para garantir que a animação funcione
+    notification.offsetHeight;
+    
+    // Mostrar notificação com animação
+    notification.classList.add('show');
+    
+    // Remover após 6 segundos (mais tempo para ler)
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
+        notification.classList.remove('show');
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
-    }, 5000);
+    }, 6000);
 }
 
-// Adicionar estilos de animação
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
+// Estilos de animação já estão no CSS principal
 
 // ===== SISTEMA FINANCEIRO =====
 
