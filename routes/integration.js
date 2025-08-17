@@ -83,7 +83,7 @@ router.get('/tokens', authenticateToken, async (req, res) => {
         console.log('🔗 [INTEGRATION] Listando tokens do usuário:', req.user._id);
         
         const tokens = await IntegrationToken.find({ user: req.user._id })
-            .populate('defaultVideo', 'title url')
+            .populate('videos.video', 'title url')
             .sort({ createdAt: -1 });
 
         console.log(`✅ [INTEGRATION] ${tokens.length} tokens encontrados`);

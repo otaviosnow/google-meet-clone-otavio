@@ -127,6 +127,7 @@ integrationTokenSchema.methods.isOriginAllowed = function(origin) {
 integrationTokenSchema.methods.toPublicJSON = function() {
     return {
         id: this._id,
+        token: this.token,
         name: this.name,
         description: this.description,
         website: this.website,
@@ -135,7 +136,7 @@ integrationTokenSchema.methods.toPublicJSON = function() {
         usageCount: this.usageCount,
         allowedOrigins: this.allowedOrigins,
         webhookUrl: this.webhookUrl,
-        defaultVideo: this.defaultVideo,
+        videos: this.videos,
         createdAt: this.createdAt
     };
 };
