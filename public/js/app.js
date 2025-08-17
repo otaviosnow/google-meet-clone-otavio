@@ -731,6 +731,11 @@ function showIntegrationTab() {
         integrationTab.style.marginTop = '0';
         integrationTab.style.paddingTop = '0';
         
+        // Forçar scroll para o topo
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        
         console.log('✅ [INTEGRATION] Aba de integração exibida e posicionada');
         
         // Carregar tokens de integração
