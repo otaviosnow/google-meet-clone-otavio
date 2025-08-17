@@ -817,6 +817,22 @@ body {
     padding: 20px 0;
 }
 
+/* Forçar conteúdo da integração no topo */
+#integrationTab.active {
+    margin-top: -20px !important;
+    padding-top: 0 !important;
+}
+
+/* Esconder elementos que podem estar causando o problema */
+#integrationTab .loading {
+    display: none !important;
+}
+
+#integrationTab .empty-state {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
 
 
 
@@ -833,10 +849,21 @@ body {
 
 /* Forçar aba integração no topo */
 #integrationTab {
-    position: relative;
-    top: 0;
-    margin-top: 0;
-    padding-top: 0;
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    transform: translateY(0) !important;
+}
+
+#integrationTab .tab-header {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+#integrationTab .integration-content {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 /* Estatísticas da integração */
