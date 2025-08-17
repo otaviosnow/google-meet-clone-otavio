@@ -157,6 +157,14 @@ function initializeEventListeners() {
     loginBtn.addEventListener('click', () => showAuthModal('login'));
     registerBtn.addEventListener('click', () => showAuthModal('register'));
     
+    // Hero Demo Button
+    const heroDemoBtn = document.getElementById('heroDemoBtn');
+    if (heroDemoBtn) {
+        heroDemoBtn.addEventListener('click', () => {
+            window.location.href = '/meet.html?demo=true';
+        });
+    }
+    
     // Modal controls
     closeModal.addEventListener('click', hideAuthModal);
     showRegister.addEventListener('click', (e) => {
