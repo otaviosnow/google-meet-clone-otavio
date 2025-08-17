@@ -147,27 +147,28 @@ async function checkAuth() {
                 // Se estiver na URL de integração, mostrar dashboard com aba de integração ativa
                 showDashboard();
                 loadUserData();
-                switchTab('integration');
+                // Usar o sistema antigo para evitar redirecionamento
+                showIntegrationTabDirectly();
             } else if (window.location.pathname === '/videos') {
                 // Se estiver na URL de vídeos, mostrar dashboard com aba de vídeos ativa
                 showDashboard();
                 loadUserData();
-                switchTab('videos');
+                showVideosTabDirectly();
             } else if (window.location.pathname === '/meetings') {
                 // Se estiver na URL de reuniões, mostrar dashboard com aba de reuniões ativa
                 showDashboard();
                 loadUserData();
-                switchTab('meetings');
+                showMeetingsTabDirectly();
             } else if (window.location.pathname === '/profile') {
                 // Se estiver na URL de perfil, mostrar dashboard com aba de perfil ativa
                 showDashboard();
                 loadUserData();
-                switchTab('profile');
+                showProfileTabDirectly();
             } else if (window.location.pathname === '/financial') {
                 // Se estiver na URL financeira, mostrar dashboard com aba de metas ativa
                 showDashboard();
                 loadUserData();
-                switchTab('goals');
+                showGoalsTabDirectly();
             } else {
                 showDashboard();
                 loadUserData();
@@ -183,6 +184,18 @@ async function checkAuth() {
         localStorage.removeItem('authToken');
         authToken = null;
         showLanding();
+    }
+}
+
+// Função para limpar todos os intervalos
+function clearAllIntervals() {
+    if (window.meetingsUpdateInterval) {
+        clearInterval(window.meetingsUpdateInterval);
+        window.meetingsUpdateInterval = null;
+    }
+    if (window.anyUpdateInterval) {
+        clearInterval(window.anyUpdateInterval);
+        window.anyUpdateInterval = null;
     }
 }
 
@@ -326,6 +339,23 @@ function initializeEventListeners() {
         if (e.target.classList.contains('modal')) {
             hideModal(e.target);
         }
+    });
+    
+    // Limpar intervalos quando a página é escondida (Safari pode ter problemas com isso)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearAllIntervals();
+        }
+    });
+    
+    // Limpar intervalos quando a página é descarregada
+    window.addEventListener('beforeunload', () => {
+        clearAllIntervals();
+    });
+    
+    // Limpar intervalos quando a página perde o foco
+    window.addEventListener('blur', () => {
+        clearAllIntervals();
     });
 }
 
@@ -722,6 +752,12 @@ function switchTab(tabName) {
             window.meetingsUpdateInterval = null;
         }
         
+        // Limpar qualquer outro intervalo que possa estar rodando
+        if (window.anyUpdateInterval) {
+            clearInterval(window.anyUpdateInterval);
+            window.anyUpdateInterval = null;
+        }
+        
         // Carregar dados específicos da aba
         switch(tabName) {
             case 'videos':
@@ -731,15 +767,25 @@ function switchTab(tabName) {
             case 'meetings':
                 console.log('🎬 [SWITCH-TAB] Carregando reuniões...');
                 loadMeetings();
-                // Atualizar reuniões periodicamente para refletir mudanças de status
+                // Atualizar reuniões periodicamente apenas se necessário
                 if (window.meetingsUpdateInterval) {
                     clearInterval(window.meetingsUpdateInterval);
+                    window.meetingsUpdateInterval = null;
                 }
-                window.meetingsUpdateInterval = setInterval(() => {
-                    if (document.querySelector('[data-tab="meetings"]').classList.contains('active')) {
-                        loadMeetings();
-                    }
-                }, 10000); // Atualizar a cada 10 segundos
+                
+                // Só criar intervalo se não estiver no Safari ou se a aba estiver realmente ativa
+                const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                if (!isSafari) {
+                    window.meetingsUpdateInterval = setInterval(() => {
+                        const meetingsTab = document.querySelector('[data-tab="meetings"]');
+                        const isTabActive = meetingsTab && meetingsTab.classList.contains('active');
+                        const isPageVisible = !document.hidden;
+                        
+                        if (isTabActive && isPageVisible) {
+                            loadMeetings();
+                        }
+                    }, 30000); // Aumentar para 30 segundos para reduzir carga
+                }
                 break;
             case 'goals':
                 console.log('📊 [SWITCH-TAB] Carregando metas...');
@@ -806,6 +852,101 @@ function showIntegrationTab() {
         loadIntegrationTokens();
     } else {
         console.error('❌ [INTEGRATION] Aba de integração não encontrada');
+    }
+}
+
+// Função para mostrar aba de integração diretamente (sem redirecionamento)
+function showIntegrationTabDirectly() {
+    console.log('🔗 [INTEGRATION] Mostrando aba de integração diretamente...');
+    
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector('[data-tab="integration"]');
+    const selectedTabContent = document.getElementById('integrationTab');
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        loadIntegrationTokens();
+    }
+}
+
+// Função para mostrar aba de vídeos diretamente
+function showVideosTabDirectly() {
+    console.log('📹 [VIDEOS] Mostrando aba de vídeos diretamente...');
+    
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector('[data-tab="videos"]');
+    const selectedTabContent = document.getElementById('videosTab');
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        loadVideos();
+    }
+}
+
+// Função para mostrar aba de reuniões diretamente
+function showMeetingsTabDirectly() {
+    console.log('🎬 [MEETINGS] Mostrando aba de reuniões diretamente...');
+    
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector('[data-tab="meetings"]');
+    const selectedTabContent = document.getElementById('meetingsTab');
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        loadMeetings();
+    }
+}
+
+// Função para mostrar aba de perfil diretamente
+function showProfileTabDirectly() {
+    console.log('👤 [PROFILE] Mostrando aba de perfil diretamente...');
+    
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector('[data-tab="profile"]');
+    const selectedTabContent = document.getElementById('profileTab');
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        loadProfileStats();
+    }
+}
+
+// Função para mostrar aba de metas diretamente
+function showGoalsTabDirectly() {
+    console.log('📊 [GOALS] Mostrando aba de metas diretamente...');
+    
+    // Remover classe active de todos os itens do menu e conteúdos
+    menuItems.forEach(item => item.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    // Adicionar classe active ao item selecionado
+    const selectedMenuItem = document.querySelector('[data-tab="goals"]');
+    const selectedTabContent = document.getElementById('goalsTab');
+    
+    if (selectedMenuItem && selectedTabContent) {
+        selectedMenuItem.classList.add('active');
+        selectedTabContent.classList.add('active');
+        loadFinancialData();
     }
 }
 
@@ -1457,9 +1598,21 @@ function switchGoalsTab(tabName) {
     }
 }
 
+// Variável para controlar se já está carregando
+let isLoadingVideos = false;
+
 // Funções de vídeos
 async function loadVideos() {
+    // Evitar múltiplas requisições simultâneas
+    if (isLoadingVideos) {
+        console.log('📹 [VIDEOS] Já está carregando, ignorando requisição...');
+        return;
+    }
+    
+    isLoadingVideos = true;
+    
     try {
+        console.log('📹 [VIDEOS] Iniciando carregamento...');
         const response = await fetch(`${API_BASE_URL}/videos`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -1469,9 +1622,14 @@ async function loadVideos() {
         if (response.ok) {
             const data = await response.json();
             renderVideos(data.videos);
+            console.log('✅ [VIDEOS] Carregamento concluído');
+        } else {
+            console.error('❌ [VIDEOS] Erro na resposta:', response.status);
         }
     } catch (error) {
-        console.error('Erro ao carregar vídeos:', error);
+        console.error('❌ [VIDEOS] Erro ao carregar vídeos:', error);
+    } finally {
+        isLoadingVideos = false;
     }
 }
 
@@ -1716,9 +1874,21 @@ function copyVideoUrl(url) {
     });
 }
 
+// Variável para controlar se já está carregando reuniões
+let isLoadingMeetings = false;
+
 // Funções de reuniões
 async function loadMeetings() {
+    // Evitar múltiplas requisições simultâneas
+    if (isLoadingMeetings) {
+        console.log('🎬 [MEETINGS] Já está carregando, ignorando requisição...');
+        return;
+    }
+    
+    isLoadingMeetings = true;
+    
     try {
+        console.log('🎬 [MEETINGS] Iniciando carregamento...');
         const response = await fetch(`${API_BASE_URL}/meetings`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
@@ -1729,9 +1899,14 @@ async function loadMeetings() {
             const meetings = await response.json();
             renderMeetings(meetings);
             loadVideoOptions();
+            console.log('✅ [MEETINGS] Carregamento concluído');
+        } else {
+            console.error('❌ [MEETINGS] Erro na resposta:', response.status);
         }
     } catch (error) {
-        console.error('Erro ao carregar reuniões:', error);
+        console.error('❌ [MEETINGS] Erro ao carregar reuniões:', error);
+    } finally {
+        isLoadingMeetings = false;
     }
 }
 
