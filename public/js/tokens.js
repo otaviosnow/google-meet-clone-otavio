@@ -1,11 +1,22 @@
 // Tokens Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 [TOKENS] Iniciando página de tokens');
+    
     const tokenQuantity = document.getElementById('tokenQuantity');
     const totalValue = document.getElementById('totalValue');
     const increaseBtn = document.getElementById('increaseBtn');
     const decreaseBtn = document.getElementById('decreaseBtn');
     const tokensForm = document.getElementById('tokensForm');
     const generatePixBtn = document.getElementById('generatePixBtn');
+    
+    console.log('🔍 [TOKENS] Elementos encontrados:', {
+        tokenQuantity: !!tokenQuantity,
+        totalValue: !!totalValue,
+        increaseBtn: !!increaseBtn,
+        decreaseBtn: !!decreaseBtn,
+        tokensForm: !!tokensForm,
+        generatePixBtn: !!generatePixBtn
+    });
     
     // Elementos do modal PIX
     const pixModal = document.getElementById('pixModal');
@@ -23,7 +34,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTotal() {
         const quantity = parseInt(tokenQuantity.value) || 0;
         const total = quantity * TOKEN_PRICE;
-        totalValue.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        const formattedTotal = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        
+        if (totalValue) {
+            totalValue.textContent = formattedTotal;
+            console.log('💰 [TOKENS] Valor total atualizado:', {
+                quantity: quantity,
+                total: total,
+                formatted: formattedTotal
+            });
+        } else {
+            console.error('❌ [TOKENS] Elemento totalValue não encontrado');
+        }
     }
 
     // Função para formatar número brasileiro
@@ -78,11 +100,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener para mudança no input
     tokenQuantity.addEventListener('input', function() {
-        const value = parseInt(this.value) || 0;
+        console.log('📝 [TOKENS] Input alterado:', this.value);
+        let value = parseInt(this.value) || 0;
+        
+        // Garantir valor mínimo
         if (value < MIN_QUANTITY) {
-            this.value = MIN_QUANTITY;
+            value = MIN_QUANTITY;
+            this.value = value;
         }
+        
         updateTotal();
+        updateButtonStates();
+    });
+
+    // Event listener para mudança no input (evento change)
+    tokenQuantity.addEventListener('change', function() {
+        console.log('🔄 [TOKENS] Input mudou:', this.value);
+        let value = parseInt(this.value) || 0;
+        
+        // Garantir valor mínimo
+        if (value < MIN_QUANTITY) {
+            value = MIN_QUANTITY;
+            this.value = value;
+        }
+        
+        updateTotal();
+        updateButtonStates();
     });
 
     // Event listener para o formulário
