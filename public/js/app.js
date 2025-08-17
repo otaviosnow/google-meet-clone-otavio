@@ -1711,11 +1711,11 @@ function renderVideos(videos) {
     // Atualizar contador de vídeos
     const videoCount = document.getElementById('videoCount');
     if (videoCount) {
-        videoCount.textContent = `(${videos.length}/5)`;
+        videoCount.textContent = `(${videos.length}/3)`;
     }
     
     // Verificar se atingiu o limite
-    if (videos.length >= 5) {
+    if (videos.length >= 3) {
         const addVideoBtn = document.getElementById('addVideoBtn');
         if (addVideoBtn) {
             addVideoBtn.disabled = true;
@@ -1874,6 +1874,11 @@ async function handleAddVideo(e) {
             showNotification('Arquivo de vídeo é obrigatório para upload', 'error');
             return;
         }
+        
+        // Mostrar progresso de upload
+        const file = fileInput.files[0];
+        showUploadProgress(file);
+        
         // O arquivo já está no FormData do formulário, não precisa adicionar novamente
     } else if (type === 'drive' || type === 'url') {
         const url = formData.get('url') || document.getElementById('videoUrl').value;
@@ -1895,15 +1900,18 @@ async function handleAddVideo(e) {
         const result = await response.json();
         
         if (response.ok) {
+            hideUploadProgress();
             hideModal(addVideoModal);
             addVideoForm.reset();
             loadVideos();
             showNotification('Vídeo adicionado com sucesso!', 'success');
         } else {
+            hideUploadProgress();
             showNotification(result.error, 'error');
         }
     } catch (error) {
         console.error('Erro ao adicionar vídeo:', error);
+        hideUploadProgress();
         showNotification('Erro ao adicionar vídeo', 'error');
     }
 }
@@ -1944,6 +1952,87 @@ function copyVideoUrl(url) {
     navigator.clipboard.writeText(url).then(() => {
         showNotification('URL copiada para a área de transferência!', 'success');
     });
+}
+
+// Funções de Progresso de Upload
+function showUploadProgress(file) {
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const uploadSpeed = document.getElementById('uploadSpeed');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    // Mostrar container de progresso
+    progressContainer.style.display = 'block';
+    
+    // Atualizar informações do arquivo
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    
+    // Iniciar animação de progresso
+    progressFill.classList.add('uploading');
+    
+    // Simular progresso (já que não temos progresso real do fetch)
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress >= 90) {
+            progress = 90; // Parar em 90% até o upload terminar
+            clearInterval(interval);
+        }
+        
+        updateProgressDisplay(progress, 'Enviando vídeo...');
+    }, 200);
+    
+    // Armazenar interval para limpeza
+    progressContainer.dataset.progressInterval = interval;
+}
+
+function updateProgressDisplay(percent, status) {
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    // Atualizar porcentagem
+    progressPercent.textContent = `${Math.round(percent)}%`;
+    progressStatus.textContent = status;
+    
+    // Atualizar círculo de progresso
+    const circumference = 2 * Math.PI * 45; // raio = 45
+    const offset = circumference - (percent / 100) * circumference;
+    progressFill.style.strokeDashoffset = offset;
+}
+
+function hideUploadProgress() {
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressFill = document.querySelector('.progress-fill');
+    
+    // Limpar interval se existir
+    if (progressContainer.dataset.progressInterval) {
+        clearInterval(parseInt(progressContainer.dataset.progressInterval));
+        delete progressContainer.dataset.progressInterval;
+    }
+    
+    // Remover animação
+    progressFill.classList.remove('uploading');
+    
+    // Esconder container
+    progressContainer.style.display = 'none';
+    
+    // Resetar progresso
+    updateProgressDisplay(0, 'Preparando upload...');
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 // Variável para controlar se já está carregando reuniões
@@ -4219,6 +4308,301 @@ function renderIntegrationTokens(tokens) {
 
 // Atualizar estatísticas de integração
 function updateIntegrationStats(tokens) {
+    // Garantir que tokens seja um array
+    if (!Array.isArray(tokens)) {
+        console.warn('⚠️ [INTEGRATION] Tokens não é um array em updateIntegrationStats:', tokens);
+        tokens = [];
+    }
+    
+    const totalTokens = document.getElementById('totalTokens');
+    const totalIntegrations = document.getElementById('totalIntegrations');
+    const activeWebsites = document.getElementById('activeWebsites');
+    
+    if (totalTokens) {
+        const activeCount = tokens.filter(t => t && t.isActive).length;
+        totalTokens.textContent = activeCount;
+        console.log('📊 [INTEGRATION] Tokens ativos:', activeCount);
+    }
+    
+    if (totalIntegrations) {
+        const totalUsage = tokens.reduce((sum, token) => sum + (token && token.usageCount ? token.usageCount : 0), 0);
+        totalIntegrations.textContent = totalUsage;
+        console.log('📊 [INTEGRATION] Total de usos:', totalUsage);
+    }
+    
+    if (activeWebsites) {
+        const uniqueWebsites = new Set(
+            tokens
+                .filter(t => t && t.isActive && t.website)
+                .map(t => t.website)
+        );
+        activeWebsites.textContent = uniqueWebsites.size;
+        console.log('📊 [INTEGRATION] Sites ativos:', uniqueWebsites.size);
+    }
+}
+
+// Carregar vídeos para seleção no token
+async function loadVideosForToken() {
+    try {
+        console.log('🎬 [INTEGRATION] Carregando vídeos para token...');
+        
+        const response = await fetch(`${API_BASE_URL}/videos`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('🎬 [INTEGRATION] Dados carregados:', data);
+        
+        // A API retorna { videos: [...], pagination: {...} }
+        const videos = data.videos || [];
+        console.log('🎬 [INTEGRATION] Vídeos extraídos:', videos);
+        
+        // Garantir que videos seja sempre um array
+        const videosArray = Array.isArray(videos) ? videos : [];
+        console.log('🎬 [INTEGRATION] Vídeos processados:', videosArray);
+        
+        renderVideosForToken(videosArray);
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao carregar vídeos:', error);
+        showNotification(`Erro ao carregar vídeos: ${error.message}`, 'error');
+        
+        // Renderizar estado de erro
+        const videosList = document.getElementById('tokenVideosList');
+        
+        if (videosList) {
+            videosList.innerHTML = `
+                <div class="empty-state">
+                    <p>Erro ao carregar vídeos: ${error.message}</p>
+                    <button class="btn btn-primary" onclick="loadVideosForToken()">
+                        <i class="fas fa-sync"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Renderizar vídeos para seleção
+function renderVideosForToken(videos) {
+    const videosList = document.getElementById('tokenVideosList');
+    
+    if (!videosList) {
+        console.error('❌ [INTEGRATION] Elemento tokenVideosList não encontrado');
+        return;
+    }
+    
+    // Verificar se videos é um array válido
+    if (!Array.isArray(videos)) {
+        console.error('❌ [INTEGRATION] Videos não é um array:', videos);
+        videosList.innerHTML = `
+            <div class="empty-state">
+                <p>Erro ao carregar vídeos. Tente novamente.</p>
+            </div>
+        `;
+        defaultVideoSelect.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
+        return;
+    }
+    
+    if (videos.length === 0) {
+        videosList.innerHTML = `
+            <div class="empty-state">
+                <p>Nenhum vídeo encontrado. Adicione vídeos primeiro.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('🎬 [INTEGRATION] Renderizando vídeos:', videos);
+    
+    // Renderizar lista de checkboxes
+    videosList.innerHTML = videos.map(video => `
+        <div class="video-checkbox-item">
+            <input type="checkbox" id="video_${video._id}" value="${video._id}" name="videos">
+            <label for="video_${video._id}">${video.title}</label>
+            <span class="video-type">${video.type}</span>
+        </div>
+    `).join('');
+    
+    // Renderizar apenas a lista de checkboxes (sem vídeo padrão)
+    
+    console.log('✅ [INTEGRATION] Vídeos renderizados com sucesso');
+}
+
+// Criar novo token de integração
+async function handleCreateToken(e) {
+    e.preventDefault();
+    
+    try {
+        console.log('🔗 [INTEGRATION] Criando novo token...');
+        
+        const formData = new FormData(e.target);
+        const selectedVideos = Array.from(document.querySelectorAll('#tokenVideosList input[type="checkbox"]:checked'))
+            .map(checkbox => checkbox.value);
+        
+        const tokenData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            website: formData.get('website'),
+            videos: selectedVideos.map(videoId => ({
+                video: videoId,
+                name: document.querySelector(`#video_${videoId} + label`).textContent,
+                isDefault: videoId === formData.get('defaultVideo')
+            }))
+        };
+        
+        console.log('🔗 [INTEGRATION] Dados do token:', tokenData);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(tokenData)
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Erro ao criar token');
+        }
+        
+        const result = await response.json();
+        console.log('✅ [INTEGRATION] Token criado:', result);
+        
+        showNotification('Token de integração criado com sucesso!', 'success');
+        hideModal(document.getElementById('createTokenModal'));
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao criar token:', error);
+        showNotification(error.message, 'error');
+    }
+}
+
+// Copiar token para clipboard
+function copyToken(token) {
+    navigator.clipboard.writeText(token).then(() => {
+        showNotification('Token copiado para clipboard!', 'success');
+    }).catch(() => {
+        showNotification('Erro ao copiar token', 'error');
+    });
+}
+
+// Alternar status do token
+async function toggleTokenStatus(tokenId, currentStatus) {
+    try {
+        console.log('🔗 [INTEGRATION] Alternando status do token:', tokenId);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                isActive: !currentStatus
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao atualizar token');
+        }
+        
+        showNotification(`Token ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao alternar status:', error);
+        showNotification('Erro ao atualizar token', 'error');
+    }
+}
+
+// Deletar token
+async function deleteToken(tokenId) {
+    if (!confirm('Tem certeza que deseja deletar este token? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    try {
+        console.log('🔗 [INTEGRATION] Deletando token:', tokenId);
+        
+        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao deletar token');
+        }
+        
+        showNotification('Token deletado com sucesso!', 'success');
+        loadIntegrationTokens();
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao deletar token:', error);
+        showNotification('Erro ao deletar token', 'error');
+    }
+} 
+
+// Função para mostrar erro de token já usado
+function showTokenAlreadyUsedError() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        ">
+            <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+            <h3 style="color: #dc3545; margin-bottom: 15px;">Token Já Utilizado</h3>
+            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
+                Este token de integração já foi utilizado por você. 
+                Cada pessoa só pode usar um token uma única vez.
+            </p>
+            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
+                Se você precisa criar outra reunião, entre em contato com o administrador 
+                para obter um novo token.
+            </p>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+            ">Entendi</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
     // Garantir que tokens seja um array
     if (!Array.isArray(tokens)) {
         console.warn('⚠️ [INTEGRATION] Tokens não é um array em updateIntegrationStats:', tokens);
