@@ -3676,9 +3676,10 @@ function renderIntegrationTokens(tokens) {
                 </button>
             </div>
         `;
-        // Esconder botões de ação em caso de erro
+        // Esconder apenas botões de ação (não o tutorial) em caso de erro
         if (integrationActions) {
-            integrationActions.style.display = 'none';
+            const actionButtons = integrationActions.querySelectorAll('button:not(.btn-outline)');
+            actionButtons.forEach(btn => btn.style.display = 'none');
         }
         return;
     }
@@ -3694,16 +3695,18 @@ function renderIntegrationTokens(tokens) {
                 </button>
             </div>
         `;
-        // Esconder botões de ação quando não há tokens
+        // Esconder apenas botões de ação (não o tutorial) quando não há tokens
         if (integrationActions) {
-            integrationActions.style.display = 'none';
+            const actionButtons = integrationActions.querySelectorAll('button:not(.btn-outline)');
+            actionButtons.forEach(btn => btn.style.display = 'none');
         }
         return;
     }
     
-    // Mostrar botões de ação quando há tokens
+    // Mostrar todos os botões de ação quando há tokens
     if (integrationActions) {
-        integrationActions.style.display = 'flex';
+        const actionButtons = integrationActions.querySelectorAll('button');
+        actionButtons.forEach(btn => btn.style.display = 'inline-flex');
     }
     
     tokensList.innerHTML = tokens.map(token => `
