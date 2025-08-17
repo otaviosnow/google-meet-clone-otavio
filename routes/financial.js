@@ -180,7 +180,18 @@ router.get('/summary', authenticateToken, async (req, res) => {
       totalExpenses,
       totalProfit,
       goalProgress: Math.round(goalProgress * 100) / 100,
-      entriesCount: entries.length
+      entriesCount: entries.length,
+      entries: entries.map(entry => ({
+        id: entry._id,
+        date: entry.date,
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
+        notes: entry.notes
+      }))
     };
     
     console.log('📊 [RESUMO] Valores calculados:', {

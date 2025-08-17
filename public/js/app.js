@@ -3071,6 +3071,12 @@ function updateSummaryTab(data) {
             daysRemaining.textContent = daysText;
             console.log('📅 [FRONTEND-RESUMO] Dias restantes definidos como:', daysText);
             console.log('📅 [FRONTEND-RESUMO] Valor original do backend:', data.daysRemaining);
+            
+            // Verificar se o valor foi realmente definido
+            setTimeout(() => {
+                const currentValue = daysRemaining.textContent;
+                console.log('📅 [FRONTEND-RESUMO] Valor atual após definição:', currentValue);
+            }, 100);
         } else {
             // Se não há data limite configurada, mostrar mensagem
             daysRemaining.textContent = 'Não configurado';
