@@ -54,27 +54,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listeners para os botões de quantidade
-    increaseBtn.addEventListener('click', function() {
-        console.log('🔺 Botão aumentar clicado');
-        const currentValue = parseInt(tokenQuantity.value) || 0;
-        const newValue = currentValue + 1;
-        tokenQuantity.value = newValue;
-        updateTotal();
-        updateButtonStates();
-        
-        // Feedback visual
-        this.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            this.style.transform = '';
-        }, 150);
-    });
-
-    decreaseBtn.addEventListener('click', function() {
-        console.log('🔻 Botão diminuir clicado');
-        const currentValue = parseInt(tokenQuantity.value) || 0;
-        if (currentValue > MIN_QUANTITY) {
-            const newValue = currentValue - 1;
+    if (increaseBtn) {
+        increaseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔺 Botão aumentar clicado');
+            
+            const currentValue = parseInt(tokenQuantity.value) || 0;
+            const newValue = currentValue + 1;
             tokenQuantity.value = newValue;
+            
+            console.log('🔺 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
+            
             updateTotal();
             updateButtonStates();
             
@@ -83,8 +74,41 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 this.style.transform = '';
             }, 150);
-        }
-    });
+        });
+        console.log('✅ [TOKENS] Event listener do botão aumentar adicionado');
+    } else {
+        console.error('❌ [TOKENS] Botão increaseBtn não encontrado');
+    }
+
+    if (decreaseBtn) {
+        decreaseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔻 Botão diminuir clicado');
+            
+            const currentValue = parseInt(tokenQuantity.value) || 0;
+            if (currentValue > MIN_QUANTITY) {
+                const newValue = currentValue - 1;
+                tokenQuantity.value = newValue;
+                
+                console.log('🔻 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
+                
+                updateTotal();
+                updateButtonStates();
+                
+                // Feedback visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            } else {
+                console.log('🔻 [TOKENS] Valor mínimo atingido, não pode diminuir');
+            }
+        });
+        console.log('✅ [TOKENS] Event listener do botão diminuir adicionado');
+    } else {
+        console.error('❌ [TOKENS] Botão decreaseBtn não encontrado');
+    }
 
     // Função para atualizar estados dos botões
     function updateButtonStates() {
