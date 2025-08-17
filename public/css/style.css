@@ -873,21 +873,7 @@ body {
     justify-content: center;
 }
 
-/* Seção de tokens */
-.tokens-section {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    border-radius: 16px;
-    padding: 24px;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-.tokens-section h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #e8eaed;
-    margin-bottom: 20px;
-}
 
 /* Lista de tokens */
 .tokens-list {
@@ -896,7 +882,6 @@ body {
     padding: 24px;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    min-height: 200px;
 }
 
 /* Token Cards para a aba de integração */
