@@ -3488,8 +3488,12 @@ async function loadIntegrationTokens() {
             throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
         }
         
-        const tokens = await response.json();
-        console.log('🔗 [INTEGRATION] Tokens carregados:', tokens);
+        const data = await response.json();
+        console.log('🔗 [INTEGRATION] Resposta da API:', data);
+        
+        // Extrair array de tokens da resposta
+        const tokens = data.tokens || [];
+        console.log('🔗 [INTEGRATION] Tokens extraídos:', tokens);
         
         // Garantir que tokens seja sempre um array
         const tokensArray = Array.isArray(tokens) ? tokens : [];
@@ -3592,10 +3596,10 @@ function renderIntegrationTokens(tokens) {
                 <button class="btn btn-secondary" onclick="copyToken('${token.token}')">
                     <i class="fas fa-copy"></i> Copiar Token
                 </button>
-                <button class="btn btn-secondary" onclick="toggleTokenStatus('${token._id}', ${token.isActive})">
+                <button class="btn btn-secondary" onclick="toggleTokenStatus('${token.id}', ${token.isActive})">
                     <i class="fas fa-${token.isActive ? 'pause' : 'play'}"></i> ${token.isActive ? 'Desativar' : 'Ativar'}
                 </button>
-                <button class="btn btn-danger" onclick="deleteToken('${token._id}')">
+                <button class="btn btn-danger" onclick="deleteToken('${token.id}')">
                     <i class="fas fa-trash"></i> Deletar
                 </button>
             </div>
