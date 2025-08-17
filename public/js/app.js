@@ -2749,16 +2749,85 @@ function updateFinancialDisplay(data) {
     updateTrends(data);
 }
 
-// Atualizar gráfico de progresso da meta
+// Atualizar gráfico de progresso da meta - Gráfico de área horizontal
 function updateGoalProgressChart(data) {
     const canvas = document.getElementById('goalProgressChart');
     const progressText = document.getElementById('progressText');
     
     if (!canvas) return;
     
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Limpar canvas
+    ctx.clearRect(0, 0, width, height);
+    
     // Calcular progresso
     const progress = data.monthlyGoal > 0 ? (data.totalProfit / data.monthlyGoal) * 100 : 0;
     const progressPercent = Math.min(progress, 100);
+    
+    // Atualizar texto de progresso
+    if (progressText) {
+        progressText.textContent = `${progressPercent.toFixed(1)}% da meta atingida`;
+    }
+    
+    // Configurações do gráfico
+    const padding = 20;
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+    const barHeight = 30;
+    const y = (height - barHeight) / 2;
+    
+    // Desenhar fundo da barra
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+    ctx.fillRect(padding, y, chartWidth, barHeight);
+    
+    // Desenhar borda da barra
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padding, y, chartWidth, barHeight);
+    
+    // Calcular largura do progresso
+    const progressWidth = (progressPercent / 100) * chartWidth;
+    
+    // Criar gradiente para o progresso
+    const gradient = ctx.createLinearGradient(padding, 0, padding + progressWidth, 0);
+    gradient.addColorStop(0, '#3b82f6');
+    gradient.addColorStop(1, '#6366f1');
+    
+    // Desenhar barra de progresso
+    ctx.fillStyle = gradient;
+    ctx.fillRect(padding, y, progressWidth, barHeight);
+    
+    // Adicionar efeito de brilho
+    const highlightGradient = ctx.createLinearGradient(padding, y, padding, y + barHeight);
+    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+    highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = highlightGradient;
+    ctx.fillRect(padding, y, progressWidth, barHeight);
+    
+    // Desenhar linha de meta (100%)
+    if (progressPercent < 100) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(padding + chartWidth, y - 5);
+        ctx.lineTo(padding + chartWidth, y + barHeight + 5);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    
+    // Adicionar texto de porcentagem no final da barra
+    if (progressWidth > 50) { // Só mostrar se houver espaço suficiente
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${progressPercent.toFixed(1)}%`, padding + progressWidth - 30, y + barHeight/2 + 5);
+    }
     
     // Atualizar texto
     if (progressText) {
