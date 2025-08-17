@@ -9,7 +9,8 @@ const Video = require('../models/Video');
 const router = express.Router();
 
 // LOG PARA CONFIRMAR QUE ESTA VERSÃO ESTÁ SENDO USADA
-console.log('🚨🚨🚨 COM MULTER - UPLOAD DE ARQUIVOS GRANDES 🚨🚨🚨');
+console.log('🚨🚨🚨 COM MULTER - UPLOAD DE VÍDEOS ATÉ 300MB 🚨🚨🚨');
+console.log('📊 Configuração: Máximo 300MB por arquivo, 3 arquivos por vez');
 
 // Configuração do Multer para arquivos grandes
 const storage = multer.diskStorage({
@@ -30,8 +31,8 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB - muito maior que 100MB
-    files: 5 // Aumentar para 5 arquivos
+    fileSize: 300 * 1024 * 1024, // 300MB - otimizado para vídeos de 250MB
+    files: 3 // Limitar a 3 arquivos por vez
   },
   fileFilter: function (req, file, cb) {
     console.log('🔍 Verificando arquivo:', file.originalname, file.mimetype);
@@ -129,9 +130,9 @@ const handleMulterError = (error, req, res, next) => {
     
     switch (error.code) {
       case 'LIMIT_FILE_SIZE':
-        return res.status(400).json({ error: 'Arquivo muito grande. Máximo 500MB.' });
+        return res.status(400).json({ error: 'Arquivo muito grande. Máximo 300MB.' });
       case 'LIMIT_FILE_COUNT':
-        return res.status(400).json({ error: 'Muitos arquivos. Máximo 5 arquivos.' });
+        return res.status(400).json({ error: 'Muitos arquivos. Máximo 3 arquivos.' });
       case 'LIMIT_UNEXPECTED_FILE':
         return res.status(400).json({ error: 'Campo de arquivo inesperado.' });
       default:
@@ -196,6 +197,27 @@ router.post('/', authenticateToken, upload.single('video'), handleMulterError, a
 
   } catch (error) {
     console.error('Erro ao criar vídeo:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+// GET /api/videos/upload-info - Obter informações sobre upload
+router.get('/upload-info', authenticateToken, async (req, res) => {
+  try {
+    const userVideoCount = await Video.countDocuments({ user: req.user._id });
+    
+    res.json({
+      maxFileSize: '300MB',
+      maxFiles: 3,
+      currentVideos: userVideoCount,
+      maxVideos: 5,
+      remainingSlots: Math.max(0, 5 - userVideoCount),
+      supportedFormats: ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm']
+    });
+  } catch (error) {
+    console.error('Erro ao obter informações de upload:', error);
     res.status(500).json({
       error: 'Erro interno do servidor'
     });
