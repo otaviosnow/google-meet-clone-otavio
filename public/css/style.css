@@ -637,33 +637,45 @@ body {
 #integrationTab {
     padding-top: 0 !important;
     margin-top: 0 !important;
+    min-height: auto !important;
 }
 
 #integrationTab .dashboard-content {
-    padding: 5px 0 !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
 }
 
 #integrationTab .container {
     padding-top: 0 !important;
     margin-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 #integrationTab .tab-header {
-    margin-bottom: 10px !important;
-    padding-top: 5px !important;
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 #integrationTab .integration-stats {
     margin-top: 0 !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
 }
 
 #integrationTab .integration-actions {
-    margin-bottom: 10px !important;
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
 }
 
 #integrationTab .tokens-list {
     margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+#integrationTab .empty-state {
+    margin-top: 0 !important;
+    padding-top: 20px !important;
 }
 
 
@@ -1170,8 +1182,9 @@ body {
 
 /* Integration empty state específico */
 #integrationTab .empty-state {
-    padding: 30px 20px;
-    margin-top: 5px;
+    padding: 20px;
+    margin-top: 0 !important;
+    padding-top: 20px !important;
 }
 
 .empty-state-icon {
