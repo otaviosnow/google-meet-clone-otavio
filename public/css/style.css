@@ -185,15 +185,15 @@ body {
     text-align: center;
 }
 
-/* Bloco do título principal - com cor de fundo */
-.hero-title-block {
+/* Título principal (sem bloco) */
+.hero-title {
     background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
     padding: 80px 0 60px 0;
     position: relative;
     overflow: hidden;
 }
 
-.hero-title-block::before {
+.hero-title::before {
     content: '';
     position: absolute;
     top: 0;
@@ -204,7 +204,7 @@ body {
                 radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
 }
 
-.hero-title-block h1 {
+.hero-title h1 {
     font-size: 56px;
     font-weight: 800;
     margin-bottom: 0;
@@ -221,27 +221,41 @@ body {
     margin: 0 auto;
 }
 
-/* Bloco da descrição e botão - com cor de fundo diferente */
-.hero-description-block {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
-    padding: 60px 20px;
+/* Bloco da descrição (igual ao exemplo dos Links Únicos) */
+.hero-description-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 20px;
+    padding: 40px 20px;
+    margin: 0;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.hero-description-block::before {
+.hero-description-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.hero-description-card:hover::before {
+    opacity: 1;
+}
+
+.hero-description-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(59, 130, 246, 0.3);
 }
 
 .hero-description-block::before {
@@ -256,50 +270,79 @@ body {
     pointer-events: none;
 }
 
-.hero-description-block p {
-    font-size: 20px;
-    line-height: 1.8;
-    opacity: 0.95;
-    margin: 0 0 40px 0;
+/* Ícone da descrição */
+.description-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
     color: #ffffff;
+    font-size: 32px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+}
+
+/* Título do card */
+.hero-description-card h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #e8eaed;
+    position: relative;
+    z-index: 1;
+}
+
+/* Texto da descrição */
+.hero-description-card p {
+    font-size: 18px;
+    line-height: 1.7;
+    opacity: 0.9;
+    margin: 0 0 32px 0;
+    color: #9ca3af;
     font-weight: 400;
     position: relative;
     z-index: 1;
     text-align: center;
-    max-width: 900px;
-    margin: 0 auto 40px auto;
+    max-width: 800px;
+    margin: 0 auto 32px auto;
     padding: 0 20px;
 }
 
-.hero-description-block p br {
+.hero-description-card p br {
     display: block;
     margin: 15px 0;
 }
 
-.hero-description-block .hero-buttons {
+/* Botões do card */
+.hero-description-card .hero-buttons {
     display: flex;
     justify-content: center;
     position: relative;
     z-index: 1;
 }
 
-.hero-description-block .btn {
-    font-size: 18px;
-    padding: 18px 50px;
-    border-radius: 50px;
-    font-weight: 700;
+.hero-description-card .btn {
+    font-size: 16px;
+    padding: 15px 40px;
+    border-radius: 12px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-    border: 2px solid rgba(59, 130, 246, 0.3);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
     backdrop-filter: blur(20px);
     position: relative;
     overflow: hidden;
 }
 
-.hero-description-block .btn::before {
+.hero-description-card .btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -310,14 +353,14 @@ body {
     transition: left 0.6s ease;
 }
 
-.hero-description-block .btn:hover::before {
+.hero-description-card .btn:hover::before {
     left: 100%;
 }
 
-.hero-description-block .btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
-    border-color: rgba(59, 130, 246, 0.6);
+.hero-description-card .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.5);
 }
 
 .hero h1 {
