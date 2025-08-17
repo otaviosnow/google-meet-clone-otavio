@@ -4084,7 +4084,6 @@ async function loadVideosForToken() {
         
         // Renderizar estado de erro
         const videosList = document.getElementById('tokenVideosList');
-        const defaultVideoSelect = document.getElementById('tokenDefaultVideo');
         
         if (videosList) {
             videosList.innerHTML = `
@@ -4096,19 +4095,17 @@ async function loadVideosForToken() {
                 </div>
             `;
         }
-        
-        if (defaultVideoSelect) {
-            defaultVideoSelect.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
-        }
     }
 }
 
 // Renderizar vídeos para seleção
 function renderVideosForToken(videos) {
     const videosList = document.getElementById('tokenVideosList');
-    const defaultVideoSelect = document.getElementById('tokenDefaultVideo');
     
-    if (!videosList || !defaultVideoSelect) return;
+    if (!videosList) {
+        console.error('❌ [INTEGRATION] Elemento tokenVideosList não encontrado');
+        return;
+    }
     
     // Verificar se videos é um array válido
     if (!Array.isArray(videos)) {
@@ -4128,7 +4125,6 @@ function renderVideosForToken(videos) {
                 <p>Nenhum vídeo encontrado. Adicione vídeos primeiro.</p>
             </div>
         `;
-        defaultVideoSelect.innerHTML = '<option value="">Nenhum vídeo disponível</option>';
         return;
     }
     
@@ -4143,13 +4139,7 @@ function renderVideosForToken(videos) {
         </div>
     `).join('');
     
-    // Renderizar select para vídeo padrão
-    defaultVideoSelect.innerHTML = `
-        <option value="">Selecione um vídeo padrão</option>
-        ${videos.map(video => `
-            <option value="${video._id}">${video.title}</option>
-        `).join('')}
-    `;
+    // Renderizar apenas a lista de checkboxes (sem vídeo padrão)
     
     console.log('✅ [INTEGRATION] Vídeos renderizados com sucesso');
 }
