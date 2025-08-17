@@ -143,6 +143,21 @@ async function checkAuth() {
                 // Se já estiver na URL do dashboard, apenas mostrar o dashboard
                 showDashboard();
                 loadUserData();
+            } else if (window.location.pathname === '/integrations') {
+                // Se estiver na URL de integrações, mostrar dashboard com aba de integração ativa
+                showDashboard();
+                loadUserData();
+                // Aguardar um pouco para garantir que o dashboard carregou
+                setTimeout(() => {
+                    showIntegrationTab();
+                    loadIntegrationTokens();
+                    // Marcar a aba como ativa
+                    const integrationMenuItem = document.querySelector('[data-tab="integration"]');
+                    if (integrationMenuItem) {
+                        menuItems.forEach(item => item.classList.remove('active'));
+                        integrationMenuItem.classList.add('active');
+                    }
+                }, 100);
             } else {
                 showDashboard();
                 loadUserData();
@@ -652,13 +667,8 @@ function switchTab(tabName) {
     }
     
     if (tabName === 'integration') {
-        console.log('🔗 [SWITCH-TAB] Mostrando aba de integração...');
-        selectedMenuItem.classList.add('active');
-        showIntegrationTab();
-        // Carregar tokens de integração
-        loadIntegrationTokens();
-        // Forçar scroll para o topo
-        window.scrollTo(0, 0);
+        console.log('🔗 [SWITCH-TAB] Redirecionando para /integrations...');
+        window.location.href = '/integrations';
         return;
     }
     
