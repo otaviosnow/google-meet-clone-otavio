@@ -154,43 +154,24 @@ router.get('/summary', authenticateToken, async (req, res) => {
     const monthlyGoal = goal ? goal.monthlyGoal : 0;
     const goalProgress = monthlyGoal > 0 ? Math.min((totalProfit / monthlyGoal) * 100, 100) : 0;
     
-    // Calcular dias restantes baseado na data limite configurada
+    // Usar dias restantes salvos no banco de dados
     let daysRemaining = null;
-    if (goal && goal.deadlineDate) {
-      const now = new Date();
-      const deadline = new Date(goal.deadlineDate);
-      
-      // Ajustar para considerar apenas a data (sem hora)
-      const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const deadlineDate = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
-      
-      const diffTime = deadlineDate - nowDate;
-      daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      daysRemaining = Math.max(0, daysRemaining); // Não pode ser negativo
-      
-      console.log('📅 [RESUMO] Dias restantes calculados:', {
-        now: now.toISOString(),
-        nowDate: nowDate.toISOString(),
-        deadline: deadline.toISOString(),
-        deadlineDate: deadlineDate.toISOString(),
-        diffTime: diffTime,
-        daysRemaining: daysRemaining
-      });
+    if (goal && goal.daysRemaining !== undefined && goal.daysRemaining !== null) {
+      daysRemaining = goal.daysRemaining;
+      console.log('📅 [RESUMO] Dias restantes salvos no banco:', daysRemaining);
     } else {
-      console.log('⚠️ [RESUMO] Nenhuma data limite configurada');
+      console.log('⚠️ [RESUMO] Nenhum valor de dias restantes configurado');
     }
     
     // Log adicional para debug do daysRemaining
     console.log('🔍 [RESUMO] Debug daysRemaining:', {
       goalExists: !!goal,
-      deadlineDate: goal?.deadlineDate,
       daysRemaining: daysRemaining,
       type: typeof daysRemaining
     });
     
     const response = {
       monthlyGoal,
-      deadlineDate: goal ? goal.deadlineDate : null,
       daysRemaining,
       totalRevenue,
       totalExpenses,
@@ -237,16 +218,16 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
   console.log('📝 [META] Dados recebidos:', req.body);
   
   try {
-    const { monthlyGoal, deadlineDate } = req.body;
+    const { monthlyGoal, daysRemaining } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     
-    // Usar data padrão se deadlineDate não for fornecida
-    const finalDeadlineDate = deadlineDate || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
+    // Validar dias restantes
+    const finalDaysRemaining = daysRemaining && !isNaN(daysRemaining) ? parseInt(daysRemaining) : 30;
     
     console.log('📅 [META] Mês atual:', currentMonth);
     console.log('💰 [META] Meta mensal:', monthlyGoal);
-    console.log('📅 [META] Data limite original:', deadlineDate);
-    console.log('📅 [META] Data limite final:', finalDeadlineDate);
+    console.log('📅 [META] Dias restantes recebidos:', daysRemaining);
+    console.log('📅 [META] Dias restantes finais:', finalDaysRemaining);
     
     // Buscar meta existente para calcular valores anteriores
     const existingGoal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
@@ -289,7 +270,7 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       { user: req.user._id, currentMonth },
       { 
         monthlyGoal,
-        deadlineDate: new Date(finalDeadlineDate)
+        daysRemaining: finalDaysRemaining
       },
       { upsert: true, new: true }
     );

@@ -17,6 +17,24 @@ function formatDate(dateString) {
     });
 }
 
+// Função para obter data atual no formato YYYY-MM-DD (timezone local)
+function getCurrentDateString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Função para converter data para formato YYYY-MM-DD (timezone local)
+function formatDateToLocal(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Estado da aplicação
 let currentUser = null;
 let authToken = localStorage.getItem('authToken');
@@ -1640,7 +1658,7 @@ function switchGoalsTab(tabName) {
                 // Definir data atual no formulário manual
                 const manualDate = document.getElementById('manualDate');
                 if (manualDate) {
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getCurrentDateString();
                     manualDate.value = today;
                 }
                 break;
@@ -2516,7 +2534,7 @@ async function addQuickEntry(e) {
     e.preventDefault();
     
     // Usar data atual automaticamente
-    const today = new Date().toISOString().split('T')[0];
+    const today = getCurrentDateString();
     const grossRevenue = parseFloat(document.getElementById('quickGrossRevenue').value) || 0;
     const chipCost = parseFloat(document.getElementById('quickChipCost').value) || 0;
     const additionalCost = parseFloat(document.getElementById('quickAdditionalCost').value) || 0;
@@ -2674,7 +2692,7 @@ function updateFinancialDisplay(data) {
     
     const goalDeadline = document.getElementById('goalDeadline');
     if (goalDeadline && data.deadlineDate) {
-        const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+        const deadlineDate = formatDateToLocal(data.deadlineDate);
         goalDeadline.value = deadlineDate;
     }
     
@@ -2709,16 +2727,14 @@ function updateFinancialDisplay(data) {
     // Atualizar lucro de hoje
     const todayProfitElement = document.getElementById('todayProfit');
     if (todayProfitElement && data.entries && data.entries.length > 0) {
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const todayString = getCurrentDateString(); // Formato YYYY-MM-DD (timezone local)
         
         console.log('📅 [FINANCIAL] Debug - Data de hoje:', todayString);
         console.log('📅 [FINANCIAL] Debug - Total de entradas:', data.entries.length);
         
         // Procurar por entradas de hoje
         const todayEntries = data.entries.filter(entry => {
-            const entryDate = new Date(entry.date);
-            const entryString = entryDate.toISOString().split('T')[0];
+            const entryString = formatDateToLocal(entry.date);
             
             console.log('📅 [FINANCIAL] Debug - Comparando:', {
                 entryDate: entry.date,
@@ -3118,7 +3134,7 @@ function updateConfigTab(data) {
     // Carregar dados salvos da meta se existirem
     const goalDeadline = document.getElementById('goalDeadline');
     if (goalDeadline && data.deadlineDate) {
-        const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+        const deadlineDate = formatDateToLocal(data.deadlineDate);
         goalDeadline.value = deadlineDate;
         console.log('📅 [FRONTEND-CONFIG] Data limite atualizada:', deadlineDate);
     } else {
@@ -3202,16 +3218,14 @@ function updateSummaryTab(data) {
     // Lucro de hoje - usar a função existente do updateFinancialDisplay
     const todayProfit = document.getElementById('todayProfit');
     if (todayProfit && data.entries && data.entries.length > 0) {
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const todayString = getCurrentDateString(); // Formato YYYY-MM-DD (timezone local)
         
         console.log('📅 [FINANCIAL] Debug - Data de hoje:', todayString);
         console.log('📅 [FINANCIAL] Debug - Total de entradas:', data.entries.length);
         
         // Procurar por entradas de hoje
         const todayEntries = data.entries.filter(entry => {
-            const entryDate = new Date(entry.date);
-            const entryString = entryDate.toISOString().split('T')[0];
+            const entryString = formatDateToLocal(entry.date);
             
             console.log('📅 [FINANCIAL] Debug - Comparando:', {
                 entryDate: entry.date,
@@ -3430,7 +3444,7 @@ async function addDailyEntry() {
     console.log('📝 [ENTRY] Iniciando adição de entrada diária');
     
     // Usar data atual automaticamente
-    const today = new Date().toISOString().split('T')[0];
+    const today = getCurrentDateString();
     const revenue = parseFloat(entryRevenue.value) || 0;
     const expenses = parseFloat(entryExpenses.value) || 0;
     
@@ -3495,8 +3509,8 @@ async function loadFinancialHistory() {
     
     // Calcular datas baseadas no filtro de período
     const daysBack = parseInt(dateFilterElement.value) || 30;
-    const endDate = new Date().toISOString().split('T')[0]; // Hoje
-    const startDate = new Date(Date.now() - (daysBack * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    const endDate = getCurrentDateString(); // Hoje
+    const startDate = formatDateToLocal(new Date(Date.now() - (daysBack * 24 * 60 * 60 * 1000)));
     const type = typeFilterElement.value || 'all';
     
     console.log('📋 [HISTORY] Parâmetros de busca:', { startDate, endDate, type, daysBack });
@@ -3757,7 +3771,7 @@ async function loadGoalConfig() {
             }
             
             if (goalDeadline && data.deadlineDate) {
-                const deadlineDate = new Date(data.deadlineDate).toISOString().split('T')[0];
+                const deadlineDate = formatDateToLocal(data.deadlineDate);
                 goalDeadline.value = deadlineDate;
                 console.log('📅 [FRONTEND-CONFIG] Data limite carregada:', deadlineDate);
             } else {
