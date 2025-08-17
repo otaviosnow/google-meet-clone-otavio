@@ -831,6 +831,8 @@ body {
     padding-top: 0 !important;
     margin-top: 0 !important;
     min-height: auto !important;
+    position: relative !important;
+    top: 0 !important;
 }
 
 #integrationTab .dashboard-content {
@@ -839,9 +841,11 @@ body {
 }
 
 #integrationTab .container {
-    padding-top: 0 !important;
+    padding-top: 20px !important;
     margin-top: 0 !important;
     padding-bottom: 0 !important;
+    position: relative !important;
+    top: 0 !important;
 }
 
 #integrationTab .tab-header {

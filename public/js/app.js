@@ -724,7 +724,14 @@ function showIntegrationTab() {
     const integrationTab = document.getElementById('integrationTab');
     if (integrationTab) {
         integrationTab.style.display = 'block';
-        console.log('✅ [INTEGRATION] Aba de integração exibida');
+        
+        // Garantir posicionamento correto
+        integrationTab.style.position = 'relative';
+        integrationTab.style.top = '0';
+        integrationTab.style.marginTop = '0';
+        integrationTab.style.paddingTop = '0';
+        
+        console.log('✅ [INTEGRATION] Aba de integração exibida e posicionada');
         
         // Carregar tokens de integração
         loadIntegrationTokens();
