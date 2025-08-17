@@ -819,7 +819,7 @@ body {
 
 /* Forçar conteúdo da integração no topo */
 #integrationTab.active {
-    margin-top: -600px !important;
+    margin-top: -1200px !important;
     padding-top: 0 !important;
     position: relative !important;
     top: 0 !important;
@@ -843,10 +843,9 @@ body {
 
 /* Conteúdo da integração */
 .integration-content {
-    padding: 0;
-    position: relative;
-    top: 0;
-    margin-top: 0;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 /* Forçar aba integração no topo */
@@ -882,7 +881,9 @@ body {
     padding: 24px;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 16px;
     transition: all 0.3s ease;
 }
 
@@ -891,17 +892,28 @@ body {
     transform: translateY(-2px);
 }
 
-.integration-stats .stat-card h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #9ca3af;
-    margin-bottom: 10px;
+.integration-stats .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
 }
 
-.integration-stats .stat-card p {
+.integration-stats .stat-info h3 {
     font-size: 28px;
     font-weight: 700;
     color: #e8eaed;
+    margin: 0 0 5px 0;
+}
+
+.integration-stats .stat-info p {
+    color: #9ca3af;
+    font-size: 14px;
     margin: 0;
 }
 
