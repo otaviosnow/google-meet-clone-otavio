@@ -282,9 +282,6 @@ router.post('/create-meeting', async (req, res) => {
             });
         }
 
-        // Proteção contra criação de reuniões duplicadas muito rapidamente
-        const fiveSecondsAgo = new Date(Date.now() - 5000);
-        
         // Identificar usuário único por IP + User Agent
         const userIdentifier = req.ip || req.connection.remoteAddress;
         const userAgent = req.headers['user-agent'] || 'unknown';
@@ -292,19 +289,18 @@ router.post('/create-meeting', async (req, res) => {
         
         console.log('🔍 [INTEGRATION] Identificador do usuário:', uniqueUserKey);
         
-        // Verificar reuniões recentes do mesmo usuário
-        const recentMeetings = await Meeting.countDocuments({
+        // Verificar se este usuário já usou este token ANTES
+        const existingMeeting = await Meeting.findOne({
             creator: integrationToken.user._id,
             'integrationData.tokenId': integrationToken._id,
-            'integrationData.userIdentifier': uniqueUserKey,
-            createdAt: { $gte: fiveSecondsAgo }
+            'integrationData.userIdentifier': uniqueUserKey
         });
 
-        if (recentMeetings > 0) {
-            console.log('⚠️ [INTEGRATION] Tentativa de criação duplicada detectada para usuário:', uniqueUserKey);
-            return res.status(429).json({ 
-                error: 'Aguarde alguns segundos antes de criar outra reunião',
-                retryAfter: 5
+        if (existingMeeting) {
+            console.log('🚫 [INTEGRATION] Usuário já usou este token antes:', uniqueUserKey);
+            return res.status(403).json({ 
+                error: 'Você já usou este token de integração. Cada pessoa só pode usar uma vez.',
+                alreadyUsed: true
             });
         }
 

@@ -3864,3 +3864,53 @@ async function deleteToken(tokenId) {
         showNotification('Erro ao deletar token', 'error');
     }
 } 
+
+// Função para mostrar erro de token já usado
+function showTokenAlreadyUsedError() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        ">
+            <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+            <h3 style="color: #dc3545; margin-bottom: 15px;">Token Já Utilizado</h3>
+            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
+                Este token de integração já foi utilizado por você. 
+                Cada pessoa só pode usar um token uma única vez.
+            </p>
+            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
+                Se você precisa criar outra reunião, entre em contato com o administrador 
+                para obter um novo token.
+            </p>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+            ">Entendi</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
