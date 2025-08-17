@@ -2377,13 +2377,20 @@ function hideModal(modal) {
     modal.classList.remove('active');
 }
 
+// Array para controlar notificações ativas
+let activeNotifications = [];
+
 function showNotification(message, type = 'info') {
-    // Criar notificação
+    // Remover notificações antigas que podem estar sobrepostas
+    clearOldNotifications();
+    
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Adicionar ao body
+    // Adicionar à lista de notificações ativas
+    activeNotifications.push(notification);
+    
     document.body.appendChild(notification);
     
     // Forçar reflow para garantir que a animação funcione
@@ -2392,15 +2399,31 @@ function showNotification(message, type = 'info') {
     // Mostrar notificação com animação
     notification.classList.add('show');
     
-    // Remover após 6 segundos (mais tempo para ler)
+    // Remover após 6 segundos
     setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
-            }
-        }, 300);
+        removeNotification(notification);
     }, 6000);
+}
+
+function clearOldNotifications() {
+    // Remover notificações antigas do DOM e da lista
+    activeNotifications = activeNotifications.filter(notification => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+        return false; // Remove todas as notificações antigas
+    });
+}
+
+function removeNotification(notification) {
+    notification.classList.remove('show');
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+        // Remover da lista de notificações ativas
+        activeNotifications = activeNotifications.filter(n => n !== notification);
+    }, 300);
 }
 
 // Estilos de animação já estão no CSS principal
@@ -3649,10 +3672,7 @@ async function loadGoalConfig() {
                 console.log('⚠️ [FRONTEND-CONFIG] Elemento goalDeadline não encontrado ou data não disponível');
             }
             
-            // Mostrar mensagem de sucesso se há dados salvos
-            if (data.monthlyGoal > 0 || data.deadlineDate) {
-                showNotification('Configurações carregadas automaticamente!', 'success');
-            }
+            // Configurações carregadas sem notificação automática
             
             console.log('✅ [FRONTEND-CONFIG] Configurações carregadas com sucesso');
         } else {
