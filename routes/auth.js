@@ -41,6 +41,8 @@ const registerValidation = [
     .withMessage('Email inválido'),
   body('cpf')
     .trim()
+    .notEmpty()
+    .withMessage('CPF é obrigatório')
     .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
     .withMessage('CPF deve estar no formato 000.000.000-00'),
   body('password')
