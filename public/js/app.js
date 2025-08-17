@@ -715,19 +715,14 @@ function showAdminTab() {
 function showIntegrationTab() {
     console.log('🔗 [INTEGRATION] Mostrando aba de integração...');
     
-    // Esconder todas as abas
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.style.display = 'none';
-    });
+    // Esconder todas as abas usando o sistema de classes
+    tabContents.forEach(content => content.classList.remove('active'));
     
-    // Mostrar aba de integração
+    // Mostrar aba de integração usando o sistema de classes
     const integrationTab = document.getElementById('integrationTab');
     if (integrationTab) {
-        integrationTab.style.display = 'block';
-        
-
-        
-        console.log('✅ [INTEGRATION] Aba de integração exibida e posicionada');
+        integrationTab.classList.add('active');
+        console.log('✅ [INTEGRATION] Aba de integração exibida');
         
         // Carregar tokens de integração
         loadIntegrationTokens();
