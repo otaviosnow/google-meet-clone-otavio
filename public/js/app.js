@@ -143,34 +143,6 @@ async function checkAuth() {
                 // Se já estiver na URL do dashboard, apenas mostrar o dashboard
                 showDashboard();
                 loadUserData();
-            } else if (window.location.pathname === '/integrations') {
-                // Se estiver na URL de integrações, mostrar dashboard com aba de integração ativa
-                document.body.setAttribute('data-page', 'integrations');
-                showDashboard();
-                loadUserData();
-                
-                // Esconder todas as outras abas imediatamente
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    content.style.display = 'none';
-                });
-                
-                // Mostrar apenas a aba de integração
-                const integrationTab = document.getElementById('integrationTab');
-                if (integrationTab) {
-                    integrationTab.classList.add('active');
-                    integrationTab.style.display = 'block';
-                }
-                
-                // Marcar a aba como ativa no menu
-                const integrationMenuItem = document.querySelector('[data-tab="integration"]');
-                if (integrationMenuItem) {
-                    menuItems.forEach(item => item.classList.remove('active'));
-                    integrationMenuItem.classList.add('active');
-                }
-                
-                // Carregar dados da integração
-                loadIntegrationTokens();
             } else {
                 showDashboard();
                 loadUserData();
@@ -680,8 +652,11 @@ function switchTab(tabName) {
     }
     
     if (tabName === 'integration') {
-        console.log('🔗 [SWITCH-TAB] Redirecionando para /integrations...');
-        window.location.href = '/integrations';
+        console.log('🔗 [SWITCH-TAB] Mostrando aba de integração...');
+        selectedMenuItem.classList.add('active');
+        showIntegrationTab();
+        // Carregar tokens de integração
+        loadIntegrationTokens();
         return;
     }
     

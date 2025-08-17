@@ -821,58 +821,11 @@ body {
 
 
 
-/* ===== NOVA ABA DE INTEGRAÇÃO ===== */
+/* ===== ABA DE INTEGRAÇÃO ===== */
 
-/* Container principal da integração */
-.integration-container {
+/* Conteúdo da integração */
+.integration-content {
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Quando estiver na URL /integrations, forçar posicionamento no topo */
-body[data-page="integrations"] .integration-container,
-body[data-page="integrations"] #integrationTab {
-    position: relative !important;
-    top: 0 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* Garantir que o dashboard-content não force scroll na página de integrações */
-body[data-page="integrations"] .dashboard-content {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Header da integração */
-.integration-header {
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-.integration-header h1 {
-    font-size: 36px;
-    font-weight: 700;
-    color: #e8eaed;
-    margin-bottom: 16px;
-    background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.integration-header h2 {
-    font-size: 32px;
-    font-weight: 600;
-    color: #e8eaed;
-    margin-bottom: 10px;
-}
-
-.integration-header p {
-    color: #9ca3af;
-    font-size: 18px;
-    margin: 0;
 }
 
 /* Estatísticas da integração */
@@ -889,9 +842,7 @@ body[data-page="integrations"] .dashboard-content {
     padding: 24px;
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    text-align: center;
     transition: all 0.3s ease;
 }
 
@@ -900,28 +851,17 @@ body[data-page="integrations"] .dashboard-content {
     transform: translateY(-2px);
 }
 
-.integration-stats .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
+.integration-stats .stat-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 10px;
 }
 
-.integration-stats .stat-info h3 {
+.integration-stats .stat-card p {
     font-size: 28px;
     font-weight: 700;
     color: #e8eaed;
-    margin: 0 0 5px 0;
-}
-
-.integration-stats .stat-info p {
-    color: #9ca3af;
-    font-size: 14px;
     margin: 0;
 }
 
@@ -931,6 +871,22 @@ body[data-page="integrations"] .dashboard-content {
     gap: 12px;
     margin-bottom: 30px;
     justify-content: center;
+}
+
+/* Seção de tokens */
+.tokens-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tokens-section h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #e8eaed;
+    margin-bottom: 20px;
 }
 
 /* Lista de tokens */

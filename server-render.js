@@ -140,11 +140,7 @@ app.use('/api/integration', integrationRoutes);
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 
-    // Rota para integrações (mesma página, mas URL específica)
-    app.get('/integrations', (req, res) => {
-        console.log('🔗 GET /integrations - Página de integrações acessada');
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
+
 
     // Rota para o Google Meet
     app.get('/meet', (req, res) => {

@@ -898,42 +898,27 @@
 
     <!-- Integration Tab Content -->
     <div id="integrationTab" class="tab-content">
-        <div class="integration-container">
-            <div class="integration-header">
-                <h1><i class="fas fa-link"></i> Integração Externa</h1>
-                <p>Gerencie seus tokens de integração para conectar o CallX aos seus sites externos</p>
-            </div>
-
+        <div class="tab-header">
+            <h2><i class="fas fa-link"></i> Integração Externa</h2>
+        </div>
+        <div class="integration-content">
+            <!-- Estatísticas da Integração -->
             <div class="integration-stats">
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-key"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalTokens">0</h3>
-                        <p>Tokens Ativos</p>
-                    </div>
+                    <h3><i class="fas fa-key"></i> Tokens Ativos</h3>
+                    <p id="totalTokens">0</p>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-play"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalIntegrations">0</h3>
-                        <p>Reuniões via Integração</p>
-                    </div>
+                    <h3><i class="fas fa-play"></i> Reuniões via Integração</h3>
+                    <p id="totalIntegrations">0</p>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="activeWebsites">0</h3>
-                        <p>Sites Conectados</p>
-                    </div>
+                    <h3><i class="fas fa-globe"></i> Sites Conectados</h3>
+                    <p id="activeWebsites">0</p>
                 </div>
             </div>
 
+            <!-- Ações da Integração -->
             <div class="integration-actions">
                 <button id="createTokenBtn" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Criar Novo Token
@@ -943,10 +928,14 @@
                 </button>
             </div>
 
-            <div class="tokens-list" id="tokensList">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Carregando tokens de integração...</p>
+            <!-- Lista de Tokens -->
+            <div class="tokens-section">
+                <h3><i class="fas fa-list"></i> Tokens de Integração</h3>
+                <div class="tokens-list" id="tokensList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando tokens de integração...</p>
+                    </div>
                 </div>
             </div>
         </div>
