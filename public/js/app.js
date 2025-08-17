@@ -357,6 +357,33 @@ function initializeEventListeners() {
     window.addEventListener('blur', () => {
         clearAllIntervals();
     });
+    
+    // Lidar com navegação do histórico (botão voltar/avançar)
+    window.addEventListener('popstate', (event) => {
+        console.log('🔄 [POPSTATE] Navegação detectada:', event.state);
+        
+        if (event.state && event.state.tab) {
+            // Se há um estado salvo, mostrar a aba correspondente
+            switchTab(event.state.tab);
+        } else {
+            // Se não há estado, verificar a URL atual
+            const path = window.location.pathname;
+            if (path === '/videos') {
+                showVideosTabDirectly();
+            } else if (path === '/meetings') {
+                showMeetingsTabDirectly();
+            } else if (path === '/profile') {
+                showProfileTabDirectly();
+            } else if (path === '/financial') {
+                showGoalsTabDirectly();
+            } else if (path === '/integration') {
+                showIntegrationTabDirectly();
+            } else if (path === '/dashboard' || path === '/') {
+                showDashboard();
+                loadUserData();
+            }
+        }
+    });
 }
 
 // Funções de autenticação
@@ -724,10 +751,37 @@ function switchTab(tabName) {
         'admin': '/admin'
     };
     
-    // Se a aba tem uma URL específica, redirecionar
+    // Se a aba tem uma URL específica, usar navegação SPA
     if (tabUrls[tabName]) {
-        console.log(`🌐 [SWITCH-TAB] Redirecionando para ${tabUrls[tabName]}...`);
-        window.location.href = tabUrls[tabName];
+        console.log(`🌐 [SWITCH-TAB] Navegando para ${tabUrls[tabName]}...`);
+        
+        // Usar history.pushState para navegação SPA (sem reload)
+        history.pushState({ tab: tabName }, '', tabUrls[tabName]);
+        
+        // Mostrar a aba correspondente
+        switch(tabName) {
+            case 'videos':
+                showVideosTabDirectly();
+                break;
+            case 'meetings':
+                showMeetingsTabDirectly();
+                break;
+            case 'profile':
+                showProfileTabDirectly();
+                break;
+            case 'goals':
+                showGoalsTabDirectly();
+                break;
+            case 'integration':
+                showIntegrationTabDirectly();
+                break;
+            case 'analytics':
+                window.location.href = '/analytics';
+                return;
+            case 'admin':
+                window.location.href = '/admin';
+                return;
+        }
         return;
     }
     
