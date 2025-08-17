@@ -150,14 +150,13 @@ body {
 
 /* Hero Section */
 .hero {
-    padding: 60px 0 40px 0;
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    padding: 0;
     color: #ffffff;
     position: relative;
     overflow: hidden;
     min-height: 60vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
 }
 
 .hero::before {
@@ -179,29 +178,30 @@ body {
 .hero-blocks {
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px 0;
+    width: 100%;
 }
 
 .hero-block {
     text-align: center;
 }
 
-/* Divisão visual entre blocos */
-.hero-divider {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
-    margin: 20px auto;
-    width: 80%;
-    border-radius: 1px;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+/* Bloco do título principal - com cor de fundo */
+.hero-title-block {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    padding: 80px 0 60px 0;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Bloco do título principal */
-.hero-title-block {
-    padding: 40px 0;
+.hero-title-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
 }
 
 .hero-title-block h1 {
@@ -215,19 +215,33 @@ body {
     background-clip: text;
     text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     letter-spacing: -1px;
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
-/* Bloco da descrição e botão */
+/* Bloco da descrição e botão - com cor de fundo diferente */
 .hero-description-block {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(99, 102, 241, 0.04));
-    border-radius: 30px;
-    padding: 50px 30px;
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(59, 130, 246, 0.15);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+    padding: 60px 20px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    margin: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-description-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
 }
 
 .hero-description-block::before {
@@ -254,6 +268,7 @@ body {
     text-align: center;
     max-width: 900px;
     margin: 0 auto 40px auto;
+    padding: 0 20px;
 }
 
 .hero-description-block p br {
