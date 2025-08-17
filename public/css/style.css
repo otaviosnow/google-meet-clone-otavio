@@ -859,6 +859,193 @@ body {
     height: auto !important;
 }
 
+/* ===== PÁGINA ESPECÍFICA DE INTEGRAÇÕES ===== */
+
+.integrations-content {
+    padding: 40px 0;
+    min-height: calc(100vh - 80px);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.integrations-content .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.integrations-content .integration-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #e8eaed;
+    text-align: center;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.integrations-content .integration-header p {
+    color: #9ca3af;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* Token Cards */
+.token-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.token-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.token-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.token-info h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #e8eaed;
+    margin-bottom: 8px;
+}
+
+.token-info p {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0;
+}
+
+.token-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.token-status.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.token-status.inactive {
+    background: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.token-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.token-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.token-detail .label {
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.token-detail .value {
+    color: #e8eaed;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.token-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+}
+
+/* Video Checkbox List */
+.videos-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.video-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    color: #e8eaed;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.video-checkbox input[type="checkbox"] {
+    accent-color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .integrations-content .integration-header h1 {
+        font-size: 28px;
+    }
+    
+    .integrations-content .integration-header p {
+        font-size: 16px;
+    }
+    
+    .token-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .token-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .token-actions {
+        justify-content: center;
+    }
+}
+
 /* ===== NOVA ABA DE INTEGRAÇÃO ===== */
 
 /* Container principal da integração */
