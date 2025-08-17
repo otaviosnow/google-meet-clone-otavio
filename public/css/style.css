@@ -817,6 +817,11 @@ body {
     padding: 40px 0;
 }
 
+/* Integration Tab - remover padding do dashboard-content */
+#integrationTab .dashboard-content {
+    padding: 0;
+}
+
 
 
 
