@@ -284,17 +284,43 @@ router.post('/create-meeting', async (req, res) => {
 
         // Proteção contra criação de reuniões duplicadas muito rapidamente
         const fiveSecondsAgo = new Date(Date.now() - 5000);
+        
+        // Identificar usuário único por IP + User Agent
+        const userIdentifier = req.ip || req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const uniqueUserKey = `${userIdentifier}-${userAgent}`;
+        
+        console.log('🔍 [INTEGRATION] Identificador do usuário:', uniqueUserKey);
+        
+        // Verificar reuniões recentes do mesmo usuário
         const recentMeetings = await Meeting.countDocuments({
             creator: integrationToken.user._id,
             'integrationData.tokenId': integrationToken._id,
+            'integrationData.userIdentifier': uniqueUserKey,
             createdAt: { $gte: fiveSecondsAgo }
         });
 
         if (recentMeetings > 0) {
-            console.log('⚠️ [INTEGRATION] Tentativa de criação duplicada detectada');
+            console.log('⚠️ [INTEGRATION] Tentativa de criação duplicada detectada para usuário:', uniqueUserKey);
             return res.status(429).json({ 
                 error: 'Aguarde alguns segundos antes de criar outra reunião',
                 retryAfter: 5
+            });
+        }
+
+        // Proteção adicional: Rate limiting global por token (máximo 10 reuniões por minuto)
+        const oneMinuteAgo = new Date(Date.now() - 60000);
+        const recentMeetingsGlobal = await Meeting.countDocuments({
+            creator: integrationToken.user._id,
+            'integrationData.tokenId': integrationToken._id,
+            createdAt: { $gte: oneMinuteAgo }
+        });
+
+        if (recentMeetingsGlobal >= 10) {
+            console.log('🚫 [INTEGRATION] Rate limit excedido para token:', integrationToken.token);
+            return res.status(429).json({ 
+                error: 'Limite de reuniões excedido. Tente novamente em alguns minutos.',
+                retryAfter: 60
             });
         }
 
@@ -351,7 +377,8 @@ router.post('/create-meeting', async (req, res) => {
                 tokenId: integrationToken._id,
                 origin: origin,
                 redirectUrl: redirectUrl,
-                customerInfo: customerInfo
+                customerInfo: customerInfo,
+                userIdentifier: uniqueUserKey
             }
         });
 
