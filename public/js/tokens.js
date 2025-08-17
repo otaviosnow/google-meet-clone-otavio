@@ -297,11 +297,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p style="font-size: 14px; margin-top: 8px;">Tente novamente</p>
             </div>
         `;
-                    <p>Erro ao gerar QR Code</p>
-                    <small>${error.message}</small>
-                </div>
-            `;
-        }
     }
 
     // Função para verificar status do pagamento
