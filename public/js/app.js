@@ -645,6 +645,8 @@ function switchTab(tabName) {
         console.log('🔗 [SWITCH-TAB] Mostrando aba de integração...');
         selectedMenuItem.classList.add('active');
         showIntegrationTab();
+        // Carregar tokens de integração
+        loadIntegrationTokens();
         return;
     }
     

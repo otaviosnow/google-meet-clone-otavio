@@ -682,6 +682,18 @@ body {
     line-height: 1.5;
 }
 
+.ended-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.ended-buttons .btn {
+    min-width: 140px;
+}
+
 .whatsapp-btn {
     display: inline-flex;
     align-items: center;

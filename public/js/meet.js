@@ -44,6 +44,9 @@ const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
 const chatMessages = document.getElementById('chatMessages');
 
+// Variável global para controlar se é demonstração
+let isDemoMode = false;
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO GOOGLE MEET CLONE - CALLX ===');
@@ -52,10 +55,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const meetingIdFromUrl = urlParams.get('meetingId');
     const videoUrl = urlParams.get('video');
+    const demoParam = urlParams.get('demo');
+    
+    // Verificar se é modo demonstração
+    isDemoMode = demoParam === 'true';
     
     console.log('🔍 Parâmetros da URL:', {
         meetingIdFromUrl,
         videoUrl,
+        demoParam,
+        isDemoMode,
         fullUrl: window.location.href
     });
     
@@ -64,20 +73,26 @@ document.addEventListener('DOMContentLoaded', function() {
         meetingIdElement.textContent = meetingId;
     }
     
-    // Verificar se já está na chamada ou encerrada
-    const isInCall = localStorage.getItem('googleMeetInCall');
-    const isEnded = localStorage.getItem('googleMeetEnded');
-    
-    if (isEnded === 'true') {
-        console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
-        showEndedScreen();
-    } else if (isInCall === 'true') {
-        console.log('🔄 Usuário já estava na chamada - restaurando...');
-        showCallScreen();
-        startCall(videoUrl);
-    } else {
-        console.log('🆕 Primeira vez - mostrando tela de nome');
+    // Se for demonstração, sempre mostrar tela de nome (não usar cache)
+    if (isDemoMode) {
+        console.log('🎭 MODO DEMONSTRAÇÃO - Sempre mostrar tela de nome');
         showNameScreen();
+    } else {
+        // Verificar se já está na chamada ou encerrada (apenas para reuniões reais)
+        const isInCall = localStorage.getItem('googleMeetInCall');
+        const isEnded = localStorage.getItem('googleMeetEnded');
+        
+        if (isEnded === 'true') {
+            console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
+            showEndedScreen();
+        } else if (isInCall === 'true') {
+            console.log('🔄 Usuário já estava na chamada - restaurando...');
+            showCallScreen();
+            startCall(videoUrl);
+        } else {
+            console.log('🆕 Primeira vez - mostrando tela de nome');
+            showNameScreen();
+        }
     }
     
     // Gerar ID da reunião se não vier da URL
@@ -90,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDeviceScreen();
     initializeCallScreen();
     initializeChat();
+    initializeEndedScreen();
 });
 
 // Função para gerar ID da reunião
@@ -160,6 +176,18 @@ function showEndedScreen() {
     deviceScreen.style.display = 'none';
     callScreen.style.display = 'none';
     endedScreen.style.display = 'flex';
+    
+    // Se for demonstração, mostrar botão de reiniciar
+    const restartDemoBtn = document.getElementById('restartDemoBtn');
+    if (restartDemoBtn) {
+        if (isDemoMode) {
+            restartDemoBtn.style.display = 'inline-block';
+            console.log('🎭 MODO DEMONSTRAÇÃO - Botão de reiniciar visível');
+        } else {
+            restartDemoBtn.style.display = 'none';
+        }
+    }
+    
     console.log('🏁 Mostrando tela de encerramento');
 }
 
@@ -313,9 +341,14 @@ function updateJoinButton() {
 function joinCall() {
     console.log('=== ENTRANDO NA CHAMADA ===');
     
-    // Salvar no localStorage
-    localStorage.setItem('googleMeetInCall', 'true');
-    localStorage.removeItem('googleMeetEnded');
+    // Se for demonstração, não salvar no cache
+    if (isDemoMode) {
+        console.log('🎭 MODO DEMONSTRAÇÃO - Não salvando no cache');
+    } else {
+        // Salvar no localStorage apenas para reuniões reais
+        localStorage.setItem('googleMeetInCall', 'true');
+        localStorage.removeItem('googleMeetEnded');
+    }
     
     // Mostrar tela de chamada
     showCallScreen();
@@ -589,14 +622,25 @@ async function endCall() {
         }
     }
     
-    // Limpar localStorage e marcar como encerrada
-    localStorage.removeItem('googleMeetInCall');
-    localStorage.setItem('googleMeetEnded', 'true');
-    
-    // Limpar posição do vídeo quando a chamada terminar
-    localStorage.removeItem('videoPosition');
-    localStorage.removeItem('videoLastUpdate');
-    localStorage.removeItem('cameraEnabled');
+    // Se for demonstração, não salvar no cache - permitir reiniciar
+    if (isDemoMode) {
+        console.log('🎭 MODO DEMONSTRAÇÃO - Não salvando no cache, permitindo reiniciar');
+        // Limpar qualquer cache existente para garantir que sempre volte para tela de nome
+        localStorage.removeItem('googleMeetInCall');
+        localStorage.removeItem('googleMeetEnded');
+        localStorage.removeItem('videoPosition');
+        localStorage.removeItem('videoLastUpdate');
+        localStorage.removeItem('cameraEnabled');
+    } else {
+        // Para reuniões reais, salvar no cache normalmente
+        localStorage.removeItem('googleMeetInCall');
+        localStorage.setItem('googleMeetEnded', 'true');
+        
+        // Limpar posição do vídeo quando a chamada terminar
+        localStorage.removeItem('videoPosition');
+        localStorage.removeItem('videoLastUpdate');
+        localStorage.removeItem('cameraEnabled');
+    }
     
     // Parar webcam
     stopWebcam();
@@ -788,6 +832,43 @@ function initializeChat() {
         return date.toLocaleTimeString('pt-BR', { 
             hour: '2-digit', 
             minute: '2-digit' 
+        });
+    }
+}
+
+// Inicializar tela de encerramento
+function initializeEndedScreen() {
+    const restartDemoBtn = document.getElementById('restartDemoBtn');
+    if (restartDemoBtn) {
+        restartDemoBtn.addEventListener('click', function() {
+            console.log('🎭 Reiniciando demonstração...');
+            
+            // Limpar qualquer cache existente
+            localStorage.removeItem('googleMeetInCall');
+            localStorage.removeItem('googleMeetEnded');
+            localStorage.removeItem('videoPosition');
+            localStorage.removeItem('videoLastUpdate');
+            localStorage.removeItem('cameraEnabled');
+            
+            // Resetar variáveis de estado
+            currentScreen = 'name';
+            participantName = '';
+            isCameraEnabled = false;
+            isMicrophoneEnabled = false;
+            isWebcamActive = false;
+            isMuted = true;
+            isVideoOn = false;
+            isCallStarted = false;
+            
+            // Limpar campos
+            if (participantNameInput) {
+                participantNameInput.value = '';
+            }
+            
+            // Mostrar tela de nome
+            showNameScreen();
+            
+            console.log('✅ Demonstração reiniciada com sucesso');
         });
     }
 }
