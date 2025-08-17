@@ -16,15 +16,30 @@ console.log('📊 Configuração: Máximo 300MB por arquivo, 3 arquivos por vez'
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Criar pasta uploads se não existir
-    if (!fs.existsSync('./uploads')) {
-      fs.mkdirSync('./uploads', { recursive: true });
+    const uploadDir = './uploads';
+    console.log('📁 Verificando diretório de upload:', uploadDir);
+    
+    if (!fs.existsSync(uploadDir)) {
+      console.log('📁 Criando diretório de upload:', uploadDir);
+      try {
+        fs.mkdirSync(uploadDir, { recursive: true });
+        console.log('✅ Diretório de upload criado com sucesso');
+      } catch (error) {
+        console.error('❌ Erro ao criar diretório de upload:', error);
+        return cb(error);
+      }
+    } else {
+      console.log('✅ Diretório de upload já existe');
     }
-    cb(null, './uploads');
+    
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     // Gerar nome único para o arquivo
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const filename = file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname);
+    console.log('📄 Nome do arquivo gerado:', filename);
+    cb(null, filename);
   }
 });
 
@@ -152,11 +167,11 @@ router.post('/', authenticateToken, upload.single('video'), handleMulterError, a
   console.log('🔍 Content-Type:', req.headers['content-type']);
   
   try {
-    // Verificar limite de 5 vídeos por usuário
+    // Verificar limite de 3 vídeos por usuário
     const userVideoCount = await Video.countDocuments({ user: req.user._id });
-    if (userVideoCount >= 5) {
+    if (userVideoCount >= 3) {
       return res.status(400).json({
-        error: 'Limite de 5 vídeos atingido. Delete um vídeo para adicionar outro.'
+        error: 'Limite de 3 vídeos atingido. Delete um vídeo para adicionar outro.'
       });
     }
 
@@ -212,8 +227,8 @@ router.get('/upload-info', authenticateToken, async (req, res) => {
       maxFileSize: '300MB',
       maxFiles: 3,
       currentVideos: userVideoCount,
-      maxVideos: 5,
-      remainingSlots: Math.max(0, 5 - userVideoCount),
+      maxVideos: 3,
+      remainingSlots: Math.max(0, 3 - userVideoCount),
       supportedFormats: ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm']
     });
   } catch (error) {
@@ -296,6 +311,28 @@ router.post('/:id/increment-views', async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
     
+    if (!video) {
+      return res.status(404).json({
+        error: 'Vídeo não encontrado'
+      });
+    }
+
+    await video.incrementViews();
+
+    res.json({
+      message: 'Visualização registrada',
+      views: video.views
+    });
+
+  } catch (error) {
+    console.error('Erro ao incrementar visualizações:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+module.exports = router; 
     if (!video) {
       return res.status(404).json({
         error: 'Vídeo não encontrado'

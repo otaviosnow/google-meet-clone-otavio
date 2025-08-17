@@ -171,22 +171,22 @@ app.use('/api/integration', integrationRoutes);
     });
 
     // Rota para o Google Meet
-    app.get('/meet', (req, res) => {
-        console.log('🎯 GET /meet - Página do Meet acessada');
-        res.sendFile(path.join(__dirname, 'public', 'meet.html'));
-    });
+app.get('/meet', (req, res) => {
+  console.log('🎯 GET /meet - Página do Meet acessada');
+  res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+});
 
     // Rota para reunião específica
     app.get('/meet/:meetingId', (req, res) => {
         console.log(`🎯 GET /meet/${req.params.meetingId} - Reunião específica acessada`);
         res.sendFile(path.join(__dirname, 'public', 'meet.html'));
-    });
+});
 
-    // Rota para teste de autenticação
-    app.get('/test-auth', (req, res) => {
-        console.log('🔐 GET /test-auth - Página de teste de auth acessada');
-        res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
-    });
+// Rota para teste de autenticação
+app.get('/test-auth', (req, res) => {
+  console.log('🔐 GET /test-auth - Página de teste de auth acessada');
+  res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
+});
 
     // Rota para página de compra de tokens
     app.get('/comprar-tokens', (req, res) => {
@@ -234,7 +234,17 @@ app.use('/api/integration', integrationRoutes);
         const fs = require('fs');
         const filePath = path.join(__dirname, 'uploads', req.params[0]);
         console.log('📁 Verificando arquivo:', filePath);
-        console.log('📁 Arquivo existe:', fs.existsSync(filePath));
+        
+        if (!fs.existsSync(filePath)) {
+            console.log('📁 Arquivo existe: false');
+            console.log('❌ Rota não encontrada:', req.originalUrl);
+            return res.status(404).json({
+                error: 'Arquivo não encontrado',
+                path: req.originalUrl
+            });
+        }
+        
+        console.log('📁 Arquivo existe: true');
         next();
     });
 
@@ -249,23 +259,23 @@ app.use('/api/integration', integrationRoutes);
         });
     });
 
-    // Tratamento de erros
+// Tratamento de erros
 app.use((err, req, res, next) => {
-    console.error('❌ Erro:', err);
-    res.status(500).json({
-        error: 'Erro interno do servidor',
-        message: err.message
-    });
+  console.error('❌ Erro:', err);
+  res.status(500).json({
+    error: 'Erro interno do servidor',
+    message: err.message
+  });
 });
 
 // Rota 404
 app.use('*', (req, res) => {
-    console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
-    res.status(404).json({
-        error: 'Rota não encontrada',
-        path: req.originalUrl,
+  console.log(`❌ Rota não encontrada: ${req.originalUrl}`);
+  res.status(404).json({
+    error: 'Rota não encontrada',
+    path: req.originalUrl,
         version: 'COMPLETA - 14/08/2025 01:35 AM'
-    });
+  });
 });
 
 // Iniciar servidor
@@ -273,15 +283,15 @@ console.log('🔧 CONFIGURANDO SERVIDOR...');
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log('🚀🚀🚀 SERVIDOR COMPLETO INICIADO! 🚀🚀🚀');
     console.log('📅 VERSÃO: COMPLETA - 14/08/2025 01:35 AM');
-    console.log(`📱 URL: http://localhost:${PORT}`);
-    console.log(`📋 API: http://localhost:${PORT}/api/test`);
-    console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
-    console.log(`🔐 Test Auth: http://localhost:${PORT}/test-auth`);
-    console.log(`⚙️  Ambiente: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 Porta: ${PORT}`);
-    console.log(`🔍 Host: 0.0.0.0`);
-    console.log(`✅ Servidor pronto para receber conexões!`);
-    console.log(`🎉 Deploy bem-sucedido!`);
+  console.log(`📱 URL: http://localhost:${PORT}`);
+  console.log(`📋 API: http://localhost:${PORT}/api/test`);
+  console.log(`🎯 Meet: http://localhost:${PORT}/meet`);
+  console.log(`🔐 Test Auth: http://localhost:${PORT}/test-auth`);
+  console.log(`⚙️  Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Porta: ${PORT}`);
+  console.log(`🔍 Host: 0.0.0.0`);
+  console.log(`✅ Servidor pronto para receber conexões!`);
+  console.log(`🎉 Deploy bem-sucedido!`);
     console.log(`🗄️  Banco de dados: MongoDB`);
     console.log(`📁 Versão: COMPLETA COM INTERFACE`);
     console.log(`🧹 Limpeza Automática: Ativa`);
@@ -292,10 +302,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 // Tratamento de erros do servidor
 server.on('error', (err) => {
-    console.error('❌ Erro no servidor:', err);
-    if (err.code === 'EADDRINUSE') {
-        console.error('❌ Porta já está em uso:', PORT);
-    }
+  console.error('❌ Erro no servidor:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error('❌ Porta já está em uso:', PORT);
+  }
 });
 
 // Função para iniciar limpeza automática
@@ -330,9 +340,9 @@ function startAutomaticCleanup() {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-    console.log('🛑 Recebido SIGTERM, encerrando servidor...');
-    server.close(() => {
-        console.log('✅ Servidor encerrado.');
+  console.log('🛑 Recebido SIGTERM, encerrando servidor...');
+  server.close(() => {
+    console.log('✅ Servidor encerrado.');
         mongoose.connection.close()
             .then(() => {
                 console.log('✅ Conexão com MongoDB fechada.');
@@ -340,7 +350,7 @@ process.on('SIGTERM', () => {
             })
             .catch((error) => {
                 console.log('⚠️ Erro ao fechar conexão MongoDB:', error.message);
-                process.exit(0);
+    process.exit(0);
             });
-    });
+  });
 }); 
