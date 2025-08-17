@@ -3084,14 +3084,28 @@ function updateSummaryTab(data) {
         totalProfit.textContent = `R$ ${(data.totalProfit || 0).toFixed(2).replace('.', ',')}`;
     }
     
-    // Lucro de hoje
+    // Lucro de hoje - usar a função existente do updateFinancialDisplay
     const todayProfit = document.getElementById('todayProfit');
-    const todayDate = document.getElementById('todayDate');
     if (todayProfit && data.entries && data.entries.length > 0) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        
+        console.log('📅 [FINANCIAL] Debug - Data de hoje:', todayString);
+        console.log('📅 [FINANCIAL] Debug - Total de entradas:', data.entries.length);
+        
+        // Procurar por entradas de hoje
         const todayEntries = data.entries.filter(entry => {
-            const entryDate = new Date(entry.date).toISOString().split('T')[0];
-            return entryDate === today;
+            const entryDate = new Date(entry.date);
+            const entryString = entryDate.toISOString().split('T')[0];
+            
+            console.log('📅 [FINANCIAL] Debug - Comparando:', {
+                entryDate: entry.date,
+                entryString: entryString,
+                todayString: todayString,
+                match: entryString === todayString
+            });
+            
+            return entryString === todayString;
         });
         
         const todayProfitValue = todayEntries.reduce((total, entry) => {
@@ -3099,17 +3113,10 @@ function updateSummaryTab(data) {
         }, 0);
         
         todayProfit.textContent = `R$ ${todayProfitValue.toFixed(2).replace('.', ',')}`;
-        
-        if (todayDate) {
-            todayDate.textContent = `Hoje (${new Date().toLocaleDateString('pt-BR')})`;
-        }
-        
-        console.log('💰 [FRONTEND-RESUMO] Lucro de hoje calculado:', todayProfitValue);
+        console.log('💰 [FINANCIAL] Lucro de hoje calculado:', todayProfitValue, 'de', todayEntries.length, 'entradas');
     } else if (todayProfit) {
         todayProfit.textContent = 'R$ 0,00';
-        if (todayDate) {
-            todayDate.textContent = `Hoje (${new Date().toLocaleDateString('pt-BR')})`;
-        }
+        console.log('⚠️ [FINANCIAL] Nenhuma entrada disponível para calcular lucro de hoje');
     }
     
     // Faturamento total
