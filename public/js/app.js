@@ -3267,15 +3267,23 @@ function updateTrendsWithRealData(data) {
 
 // Adicionar entrada diária
 async function addDailyEntry() {
+    console.log('📝 [ENTRY] Iniciando adição de entrada diária');
+    
     // Usar data atual automaticamente
     const today = new Date().toISOString().split('T')[0];
     const revenue = parseFloat(entryRevenue.value) || 0;
     const expenses = parseFloat(entryExpenses.value) || 0;
     
+    console.log('📝 [ENTRY] Dados capturados:', { today, revenue, expenses });
+    
     if (revenue < 0 || expenses < 0) {
         showNotification('Valores não podem ser negativos', 'error');
         return;
     }
+    
+    const requestBody = { date: today, revenue, expenses };
+    console.log('📤 [ENTRY] Dados a serem enviados:', requestBody);
+    console.log('🌐 [ENTRY] URL da requisição:', `${API_BASE_URL}/financial/entry`);
     
     try {
         const response = await fetch(`${API_BASE_URL}/financial/entry`, {
@@ -3284,39 +3292,53 @@ async function addDailyEntry() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
-            body: JSON.stringify({ date: today, revenue, expenses })
+            body: JSON.stringify(requestBody)
         });
         
+        console.log('📥 [ENTRY] Resposta recebida - Status:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('✅ [ENTRY] Entrada salva com sucesso:', result);
             showNotification('Entrada adicionada com sucesso!', 'success');
             entryRevenue.value = '';
             entryExpenses.value = '';
-            loadFinancialData();
+            
+            // Recarregar dados financeiros e histórico
+            console.log('🔄 [ENTRY] Recarregando dados...');
+            await loadFinancialData();
+            await loadFinancialHistory();
         } else {
             const error = await response.json();
+            console.error('❌ [ENTRY] Erro na resposta:', error);
             showNotification(error.error, 'error');
         }
     } catch (error) {
-        console.error('Erro ao adicionar entrada:', error);
+        console.error('❌ [ENTRY] Erro ao adicionar entrada:', error);
         showNotification('Erro ao adicionar entrada', 'error');
     }
 }
 
 // Funções de histórico financeiro
 async function loadFinancialHistory() {
+    console.log('📋 [HISTORY] Iniciando carregamento do histórico financeiro');
+    
     const startDateElement = document.getElementById('startDate');
     const endDateElement = document.getElementById('endDate');
     const typeElement = document.getElementById('historyType');
     
     // Verificar se os elementos existem antes de acessar
     if (!startDateElement || !endDateElement || !typeElement) {
-        console.warn('Elementos de histórico financeiro não encontrados');
+        console.warn('❌ [HISTORY] Elementos de histórico financeiro não encontrados');
         return;
     }
     
     const startDate = startDateElement.value;
     const endDate = endDateElement.value;
     const type = typeElement.value;
+    
+    console.log('📋 [HISTORY] Parâmetros de busca:', { startDate, endDate, type });
+    console.log('🌐 [HISTORY] URL da requisição:', `${API_BASE_URL}/financial/history?startDate=${startDate}&endDate=${endDate}&type=${type}`);
     
     try {
         const response = await fetch(`${API_BASE_URL}/financial/history?startDate=${startDate}&endDate=${endDate}&type=${type}`, {
@@ -3325,15 +3347,20 @@ async function loadFinancialHistory() {
             }
         });
         
+        console.log('📥 [HISTORY] Resposta recebida - Status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 [HISTORY] Dados recebidos:', data);
+            console.log('📊 [HISTORY] Número de entradas:', data.entries ? data.entries.length : 0);
             renderFinancialHistory(data.entries);
         } else {
             const error = await response.json();
+            console.error('❌ [HISTORY] Erro na resposta:', error);
             showNotification(error.error, 'error');
         }
     } catch (error) {
-        console.error('Erro ao carregar histórico financeiro:', error);
+        console.error('❌ [HISTORY] Erro ao carregar histórico financeiro:', error);
         showNotification('Erro ao carregar histórico financeiro', 'error');
     }
 }
