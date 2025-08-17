@@ -3134,18 +3134,9 @@ function updateDashboardTab(data) {
 // Atualizar aba histórico
 function updateHistoryTab(data) {
     console.log('📝 [FRONTEND-HISTORY] Iniciando atualização do histórico');
-    console.log('📝 [FRONTEND-HISTORY] Dados recebidos:', {
-        entriesCount: data.entries?.length || 0,
-        entries: data.entries
-    });
     
-    if (data.entries && data.entries.length > 0) {
-        console.log('📝 [FRONTEND-HISTORY] Renderizando', data.entries.length, 'entradas');
-        renderFinancialHistory(data.entries);
-    } else {
-        console.log('📝 [FRONTEND-HISTORY] Nenhuma entrada encontrada, renderizando estado vazio');
-        renderFinancialHistory([]);
-    }
+    // Carregar dados específicos do histórico (não do resumo geral)
+    loadFinancialHistory();
 }
 
 // Calcular todas as métricas
@@ -3302,21 +3293,23 @@ async function addDailyEntry() {
 async function loadFinancialHistory() {
     console.log('📋 [HISTORY] Iniciando carregamento do histórico financeiro');
     
-    const startDateElement = document.getElementById('startDate');
-    const endDateElement = document.getElementById('endDate');
-    const typeElement = document.getElementById('historyType');
+    // Usar IDs corretos dos elementos HTML
+    const dateFilterElement = document.getElementById('dateFilter');
+    const typeFilterElement = document.getElementById('typeFilter');
     
     // Verificar se os elementos existem antes de acessar
-    if (!startDateElement || !endDateElement || !typeElement) {
+    if (!dateFilterElement || !typeFilterElement) {
         console.warn('❌ [HISTORY] Elementos de histórico financeiro não encontrados');
         return;
     }
     
-    const startDate = startDateElement.value;
-    const endDate = endDateElement.value;
-    const type = typeElement.value;
+    // Calcular datas baseadas no filtro de período
+    const daysBack = parseInt(dateFilterElement.value) || 30;
+    const endDate = new Date().toISOString().split('T')[0]; // Hoje
+    const startDate = new Date(Date.now() - (daysBack * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    const type = typeFilterElement.value || 'all';
     
-    console.log('📋 [HISTORY] Parâmetros de busca:', { startDate, endDate, type });
+    console.log('📋 [HISTORY] Parâmetros de busca:', { startDate, endDate, type, daysBack });
     console.log('🌐 [HISTORY] URL da requisição:', `${API_BASE_URL}/financial/history?startDate=${startDate}&endDate=${endDate}&type=${type}`);
     
     try {
