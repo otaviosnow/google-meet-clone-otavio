@@ -282,6 +282,22 @@ router.post('/create-meeting', async (req, res) => {
             });
         }
 
+        // Proteção contra criação de reuniões duplicadas muito rapidamente
+        const fiveSecondsAgo = new Date(Date.now() - 5000);
+        const recentMeetings = await Meeting.countDocuments({
+            creator: integrationToken.user._id,
+            'integrationData.tokenId': integrationToken._id,
+            createdAt: { $gte: fiveSecondsAgo }
+        });
+
+        if (recentMeetings > 0) {
+            console.log('⚠️ [INTEGRATION] Tentativa de criação duplicada detectada');
+            return res.status(429).json({ 
+                error: 'Aguarde alguns segundos antes de criar outra reunião',
+                retryAfter: 5
+            });
+        }
+
         // Validar origem (se configurada)
         if (!integrationToken.isOriginAllowed(origin)) {
             console.log('❌ [INTEGRATION] Origem não permitida:', origin);
