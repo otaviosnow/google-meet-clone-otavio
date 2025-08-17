@@ -697,6 +697,14 @@ function switchTab(tabName) {
         
         // Carregar tokens de integração
         loadIntegrationTokens();
+        
+        // Forçar scroll para o topo
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }, 50);
+        
         return;
     }
     

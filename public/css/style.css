@@ -819,8 +819,10 @@ body {
 
 /* Forçar conteúdo da integração no topo */
 #integrationTab.active {
-    margin-top: -20px !important;
+    margin-top: -200px !important;
     padding-top: 0 !important;
+    position: relative !important;
+    top: 0 !important;
 }
 
 /* Esconder elementos que podem estar causando o problema */
