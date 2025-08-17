@@ -191,7 +191,7 @@ body {
 
 /* Título principal (sem bloco) */
 .hero-title {
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    background: transparent;
     padding: 80px 0 60px 0;
     position: relative;
     overflow: hidden;
