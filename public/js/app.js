@@ -148,28 +148,8 @@ async function checkAuth() {
                 showDashboard();
                 loadUserData();
                 
-                // Esconder todas as outras abas imediatamente
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    content.style.display = 'none';
-                });
-                
-                // Mostrar apenas a aba de integração
-                const integrationTab = document.getElementById('integrationTab');
-                if (integrationTab) {
-                    integrationTab.classList.add('active');
-                    integrationTab.style.display = 'block';
-                }
-                
-                // Marcar a aba como ativa no menu
-                const integrationMenuItem = document.querySelector('[data-tab="integration"]');
-                if (integrationMenuItem) {
-                    menuItems.forEach(item => item.classList.remove('active'));
-                    integrationMenuItem.classList.add('active');
-                }
-                
-                // Carregar dados da integração
-                loadIntegrationTokens();
+                // Usar o sistema normal de abas para mostrar integração
+                switchTab('integration');
             } else {
                 showDashboard();
                 loadUserData();
