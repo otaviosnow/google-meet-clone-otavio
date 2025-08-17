@@ -3151,6 +3151,14 @@ function updateSummaryTab(data) {
     // Dias restantes
     const daysRemaining = document.getElementById('daysRemaining');
     const deadlineDate = document.getElementById('deadlineDate');
+    
+    console.log('🔍 [FRONTEND-RESUMO] Debug daysRemaining:', {
+        elementExists: !!daysRemaining,
+        dataDaysRemaining: data.daysRemaining,
+        dataDaysRemainingType: typeof data.daysRemaining,
+        dataDeadlineDate: data.deadlineDate
+    });
+    
     if (daysRemaining) {
         if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
             daysRemaining.textContent = `${data.daysRemaining} dias`;
@@ -3167,6 +3175,7 @@ function updateSummaryTab(data) {
             if (deadlineDate) {
                 deadlineDate.textContent = 'Meta não configurada';
             }
+            console.log('⚠️ [FRONTEND-RESUMO] DaysRemaining é null/undefined');
         }
     }
     

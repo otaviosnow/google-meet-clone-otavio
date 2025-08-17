@@ -172,6 +172,14 @@ router.get('/summary', authenticateToken, async (req, res) => {
       console.log('⚠️ [RESUMO] Nenhuma data limite configurada');
     }
     
+    // Log adicional para debug do daysRemaining
+    console.log('🔍 [RESUMO] Debug daysRemaining:', {
+      goalExists: !!goal,
+      deadlineDate: goal?.deadlineDate,
+      daysRemaining: daysRemaining,
+      type: typeof daysRemaining
+    });
+    
     const response = {
       monthlyGoal,
       deadlineDate: goal ? goal.deadlineDate : null,
@@ -770,7 +778,7 @@ router.put('/entry/:id', authenticateToken, entryValidation, handleValidationErr
     
     // Criar histórico de atualização
     console.log('📝 [ATUALIZAR] Criando histórico da atualização');
-    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
+    await FinancialHistory.createEntryHistory(req.user._id, entry, 'update', previousValues, newValues);
     console.log('✅ [ATUALIZAR] Histórico criado com sucesso');
     
     const response = {
@@ -868,7 +876,7 @@ router.delete('/entry/:id', authenticateToken, async (req, res) => {
     
     // Criar histórico da deleção
     console.log('📝 [DELETAR] Criando histórico da deleção');
-    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
+    await FinancialHistory.createEntryHistory(req.user._id, entry, 'delete', previousValues, newValues);
     console.log('✅ [DELETAR] Histórico criado com sucesso');
     
     res.json({
