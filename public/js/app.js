@@ -4603,6 +4603,9 @@ function showTokenAlreadyUsedError() {
     
     document.body.appendChild(modal);
 }
+
+// Atualizar estatísticas de integração
+function updateIntegrationStats(tokens) {
     // Garantir que tokens seja um array
     if (!Array.isArray(tokens)) {
         console.warn('⚠️ [INTEGRATION] Tokens não é um array em updateIntegrationStats:', tokens);

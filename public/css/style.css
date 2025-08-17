@@ -3122,6 +3122,78 @@ body {
         padding: 8px 12px;
         right: 15px !important;
     }
+    
+    /* Dashboard extra responsivo */
+    .dashboard-content {
+        padding: 8px 0;
+    }
+    
+    .tab-header {
+        padding: 8px;
+    }
+    
+    .tab-header h2 {
+        font-size: 16px;
+    }
+    
+    /* Cards extra compactos */
+    .video-card,
+    .meeting-card,
+    .overview-card {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .video-title,
+    .meeting-title {
+        font-size: 12px;
+    }
+    
+    .video-actions,
+    .meeting-actions {
+        gap: 4px;
+    }
+    
+    .video-actions .btn,
+    .meeting-action-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    /* Formulários extra compactos */
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    .form-group label {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    /* Indicador de progresso extra compacto */
+    .upload-progress {
+        padding: 12px;
+    }
+    
+    .progress-ring {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .progress-text span {
+        font-size: 12px;
+    }
+    
+    .progress-text small {
+        font-size: 8px;
+    }
 }
 
 /* Orientação Landscape em Mobile */
@@ -4118,5 +4190,174 @@ body {
     .batch-buttons .btn {
         flex: 1;
         min-width: 120px;
+    }
+    
+    /* Grid de vídeos responsivo */
+    .videos-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .video-card {
+        padding: 16px;
+    }
+    
+    .video-info {
+        padding: 12px;
+    }
+    
+    .video-title {
+        font-size: 16px;
+    }
+    
+    .video-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .video-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Grid de reuniões responsivo */
+    .meetings-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .meeting-card {
+        padding: 12px;
+        font-size: 12px;
+    }
+    
+    .meeting-title {
+        font-size: 14px;
+    }
+    
+    .meeting-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .meeting-action-btn {
+        width: 100%;
+        height: 32px;
+    }
+    
+    /* Tabelas responsivas */
+    .users-table {
+        font-size: 12px;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 8px 4px;
+    }
+    
+    .users-table th:nth-child(3),
+    .users-table td:nth-child(3),
+    .users-table th:nth-child(4),
+    .users-table td:nth-child(4) {
+        display: none;
+    }
+    
+    /* Modais responsivos */
+    .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    
+    .modal-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
+    
+    /* Formulários responsivos */
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    /* Dashboard responsivo */
+    .dashboard-content {
+        padding: 16px 0;
+    }
+    
+    .tab-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .tab-header h2 {
+        font-size: 18px;
+    }
+    
+    /* Abas de metas responsivas */
+    .goals-tabs .tab-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .goals-tabs .tab-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+    }
+    
+    /* Cards de resumo responsivos */
+    .overview-card {
+        padding: 16px;
+    }
+    
+    .overview-info h3 {
+        font-size: 16px;
+    }
+    
+    .overview-info p {
+        font-size: 14px;
+    }
+    
+    /* Indicador de progresso responsivo */
+    .upload-progress {
+        padding: 16px;
+    }
+    
+    .progress-ring {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .progress-text span {
+        font-size: 14px;
+    }
+    
+    .progress-text small {
+        font-size: 9px;
+    }
+    
+    .progress-info {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
     }
 }
