@@ -3059,20 +3059,25 @@ function updateSummaryTab(data) {
         console.log('📅 [FRONTEND-RESUMO] Dados recebidos para dias restantes:', {
             daysRemaining: data.daysRemaining,
             deadlineDate: data.deadlineDate,
-            monthlyGoal: data.monthlyGoal
+            monthlyGoal: data.monthlyGoal,
+            typeOfDaysRemaining: typeof data.daysRemaining,
+            isNull: data.daysRemaining === null,
+            isUndefined: data.daysRemaining === undefined
         });
         
         if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
             // Usar dados do backend (calculados baseados na data limite)
-            daysRemaining.textContent = `${data.daysRemaining} dias`;
-            console.log('📅 [FRONTEND-RESUMO] Dias restantes (backend):', data.daysRemaining);
+            const daysText = `${data.daysRemaining} dias`;
+            daysRemaining.textContent = daysText;
+            console.log('📅 [FRONTEND-RESUMO] Dias restantes definidos como:', daysText);
+            console.log('📅 [FRONTEND-RESUMO] Valor original do backend:', data.daysRemaining);
         } else {
             // Se não há data limite configurada, mostrar mensagem
             daysRemaining.textContent = 'Não configurado';
-            console.log('⚠️ [FRONTEND-RESUMO] Data limite não configurada');
+            console.log('⚠️ [FRONTEND-RESUMO] Data limite não configurada - valor recebido:', data.daysRemaining);
         }
     } else {
-        console.log('⚠️ [FRONTEND-RESUMO] Elemento daysRemaining não encontrado');
+        console.log('⚠️ [FRONTEND-RESUMO] Elemento daysRemaining não encontrado no DOM');
     }
     
     // Projeção mensal
