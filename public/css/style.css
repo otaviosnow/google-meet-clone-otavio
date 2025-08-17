@@ -819,7 +819,44 @@ body {
 
 /* Remover padding do dashboard-content para a aba de integração */
 #integrationTab .dashboard-content {
-    padding: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Forçar posicionamento no topo para a aba de integração */
+#integrationTab {
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+#integrationTab .integration-container {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+}
+
+/* Remover qualquer scroll forçado */
+#integrationTab * {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+}
+
+/* Garantir que o container principal não force scroll */
+.dashboard-content {
+    overflow: visible !important;
+}
+
+#integrationTab .dashboard-content {
+    overflow: visible !important;
+    min-height: auto !important;
+    height: auto !important;
 }
 
 /* ===== NOVA ABA DE INTEGRAÇÃO ===== */
