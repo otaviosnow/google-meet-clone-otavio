@@ -655,6 +655,46 @@ function switchTab(tabName) {
         console.log('🔗 [SWITCH-TAB] Mostrando aba de integração...');
         selectedMenuItem.classList.add('active');
         selectedTabContent.classList.add('active');
+        
+        // Debug: Inspecionar elementos que podem estar causando o problema
+        setTimeout(() => {
+            console.log('🔍 [DEBUG] Inspecionando elementos da aba integração...');
+            
+            const integrationTab = document.getElementById('integrationTab');
+            const integrationContent = document.querySelector('.integration-content');
+            const dashboardContent = document.querySelector('.dashboard-content');
+            
+            console.log('📊 [DEBUG] Alturas dos elementos:');
+            console.log('   - integrationTab height:', integrationTab?.offsetHeight);
+            console.log('   - integrationContent height:', integrationContent?.offsetHeight);
+            console.log('   - dashboardContent height:', dashboardContent?.offsetHeight);
+            console.log('   - window innerHeight:', window.innerHeight);
+            
+            // Verificar se há elementos invisíveis ocupando espaço
+            const allElements = integrationTab?.querySelectorAll('*');
+            console.log('🔍 [DEBUG] Elementos dentro da aba integração:', allElements?.length);
+            
+            if (allElements) {
+                allElements.forEach((el, index) => {
+                    const rect = el.getBoundingClientRect();
+                    const styles = window.getComputedStyle(el);
+                    
+                    if (rect.height > 0 || styles.marginTop !== '0px' || styles.paddingTop !== '0px') {
+                        console.log(`📏 [DEBUG] Elemento ${index}:`, {
+                            tag: el.tagName,
+                            id: el.id,
+                            class: el.className,
+                            height: rect.height,
+                            marginTop: styles.marginTop,
+                            paddingTop: styles.paddingTop,
+                            display: styles.display,
+                            position: styles.position
+                        });
+                    }
+                });
+            }
+        }, 100);
+        
         // Carregar tokens de integração
         loadIntegrationTokens();
         return;
