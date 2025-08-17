@@ -39,6 +39,10 @@ const registerValidation = [
     .isEmail()
     .normalizeEmail()
     .withMessage('Email inválido'),
+  body('cpf')
+    .trim()
+    .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
+    .withMessage('CPF deve estar no formato 000.000.000-00'),
   body('password')
     .isLength({ min: 6 })
     .withMessage('Senha deve ter pelo menos 6 caracteres')
@@ -99,28 +103,44 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
     console.log('🌐 IP:', req.ip || req.connection.remoteAddress);
     console.log('👤 User-Agent:', req.get('User-Agent'));
     
-    const { name, email, password } = req.body;
+    const { name, email, cpf, password } = req.body;
     
     console.log('📋 Dados recebidos:');
     console.log('   👤 Nome:', name);
     console.log('   📧 Email:', email);
+    console.log('   🆔 CPF:', cpf);
     console.log('   🔑 Senha:', password ? 'Fornecida' : 'Não fornecida');
     console.log('   📧 Email normalizado:', email ? email.toLowerCase().trim() : 'N/A');
 
     // Verificar se o email já existe
     console.log('\n🔍 Verificando se email já existe...');
-    const existingUser = await User.findOne({ email });
+    const existingUserByEmail = await User.findOne({ email });
     
-    if (existingUser) {
+    if (existingUserByEmail) {
       console.log('❌ Email já existe no banco:');
-      console.log('   👤 Nome existente:', existingUser.name);
-      console.log('   📧 Email existente:', existingUser.email);
-      console.log('   ✅ Ativo:', existingUser.isActive);
-      console.log('   👑 Admin:', existingUser.isAdmin);
-      console.log('   📅 Criado em:', existingUser.createdAt);
+      console.log('   👤 Nome existente:', existingUserByEmail.name);
+      console.log('   📧 Email existente:', existingUserByEmail.email);
+      console.log('   ✅ Ativo:', existingUserByEmail.isActive);
+      console.log('   👑 Admin:', existingUserByEmail.isAdmin);
+      console.log('   📅 Criado em:', existingUserByEmail.createdAt);
       
       return res.status(400).json({
         error: 'Email já está em uso'
+      });
+    }
+    
+    // Verificar se o CPF já existe
+    console.log('\n🔍 Verificando se CPF já existe...');
+    const existingUserByCpf = await User.findOne({ cpf });
+    
+    if (existingUserByCpf) {
+      console.log('❌ CPF já existe no banco:');
+      console.log('   👤 Nome existente:', existingUserByCpf.name);
+      console.log('   📧 Email existente:', existingUserByCpf.email);
+      console.log('   🆔 CPF existente:', existingUserByCpf.cpf);
+      
+      return res.status(400).json({
+        error: 'CPF já está em uso'
       });
     }
     
@@ -131,6 +151,7 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
     const user = new User({
       name,
       email,
+      cpf,
       password
     });
     

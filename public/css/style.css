@@ -684,6 +684,39 @@ body {
     color: #6b7280;
 }
 
+/* Terms checkbox */
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.terms-checkbox input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    margin-top: 2px;
+}
+
+.terms-checkbox label {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #e8eaed;
+}
+
+.terms-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.terms-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
 /* Dashboard */
 .dashboard {
     min-height: 100vh;

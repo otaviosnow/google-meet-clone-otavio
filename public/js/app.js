@@ -147,9 +147,27 @@ async function checkAuth() {
                 // Se estiver na URL de integração, mostrar dashboard com aba de integração ativa
                 showDashboard();
                 loadUserData();
-                
-                // Usar o sistema normal de abas para mostrar integração
                 switchTab('integration');
+            } else if (window.location.pathname === '/videos') {
+                // Se estiver na URL de vídeos, mostrar dashboard com aba de vídeos ativa
+                showDashboard();
+                loadUserData();
+                switchTab('videos');
+            } else if (window.location.pathname === '/meetings') {
+                // Se estiver na URL de reuniões, mostrar dashboard com aba de reuniões ativa
+                showDashboard();
+                loadUserData();
+                switchTab('meetings');
+            } else if (window.location.pathname === '/profile') {
+                // Se estiver na URL de perfil, mostrar dashboard com aba de perfil ativa
+                showDashboard();
+                loadUserData();
+                switchTab('profile');
+            } else if (window.location.pathname === '/financial') {
+                // Se estiver na URL financeira, mostrar dashboard com aba de metas ativa
+                showDashboard();
+                loadUserData();
+                switchTab('goals');
             } else {
                 showDashboard();
                 loadUserData();
@@ -210,6 +228,21 @@ function initializeEventListeners() {
     registerForm.addEventListener('submit', handleRegister);
     forgotPasswordForm.addEventListener('submit', handleForgotPassword);
     resetPasswordForm.addEventListener('submit', handleResetPassword);
+    
+    // CPF formatting
+    const cpfInput = document.getElementById('registerCpf');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (value.length <= 11) {
+                // Formata o CPF: 000.000.000-00
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+    }
     
     // Dashboard
     logoutBtn.addEventListener('click', handleLogout);
@@ -387,10 +420,29 @@ async function handleRegister(e) {
     e.preventDefault();
     
     const formData = new FormData(registerForm);
+    const name = formData.get('name') || document.getElementById('registerName').value;
+    const email = formData.get('email') || document.getElementById('registerEmail').value;
+    const cpf = document.getElementById('registerCpf').value.replace(/\D/g, ''); // Remove caracteres não numéricos
+    const password = formData.get('password') || document.getElementById('registerPassword').value;
+    const acceptTerms = document.getElementById('acceptTerms').checked;
+    
+    // Validação dos termos
+    if (!acceptTerms) {
+        showNotification('Você deve aceitar os termos de uso para continuar', 'error');
+        return;
+    }
+    
+    // Validação do CPF
+    if (cpf.length !== 11) {
+        showNotification('CPF deve ter 11 dígitos', 'error');
+        return;
+    }
+    
     const data = {
-        name: formData.get('name') || document.getElementById('registerName').value,
-        email: formData.get('email') || document.getElementById('registerEmail').value,
-        password: formData.get('password') || document.getElementById('registerPassword').value
+        name,
+        email,
+        cpf,
+        password
     };
     
     console.log('🔍 Dados do registro:', data);
@@ -631,6 +683,27 @@ function showDashboard() {
 function switchTab(tabName) {
     console.log('🔄 [SWITCH-TAB] Alternando para aba:', tabName);
     
+    // Mapeamento de abas para URLs
+    const tabUrls = {
+        'videos': '/videos',
+        'meetings': '/meetings', 
+        'profile': '/profile',
+        'goals': '/financial',
+        'integration': '/integration',
+        'analytics': '/analytics',
+        'admin': '/admin'
+    };
+    
+    // Se a aba tem uma URL específica, redirecionar
+    if (tabUrls[tabName]) {
+        console.log(`🌐 [SWITCH-TAB] Redirecionando para ${tabUrls[tabName]}...`);
+        window.location.href = tabUrls[tabName];
+        return;
+    }
+    
+    // Para abas que não têm URL específica, usar o sistema antigo
+    console.log('⚠️ [SWITCH-TAB] Aba sem URL específica, usando sistema antigo:', tabName);
+    
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
     tabContents.forEach(content => content.classList.remove('active'));
@@ -639,32 +712,6 @@ function switchTab(tabName) {
     const selectedMenuItem = document.querySelector(`[data-tab="${tabName}"]`);
     const selectedTabContent = document.getElementById(`${tabName}Tab`);
     
-    console.log('🎯 [SWITCH-TAB] Elementos encontrados:');
-    console.log('   - Menu item:', selectedMenuItem ? 'Sim' : 'Não');
-    console.log('   - Tab content:', selectedTabContent ? 'Sim' : 'Não');
-    
-    // Para analytics e admin, não precisamos de selectedTabContent
-    if (tabName === 'analytics') {
-        console.log('📈 [SWITCH-TAB] Redirecionando para /analytics...');
-        selectedMenuItem.classList.add('active');
-        window.location.href = '/analytics';
-        return;
-    }
-    
-    if (tabName === 'admin') {
-        console.log('⚙️ [SWITCH-TAB] Mostrando painel admin...');
-        selectedMenuItem.classList.add('active');
-        showAdminTab();
-        return;
-    }
-    
-    if (tabName === 'integration') {
-        console.log('🔗 [SWITCH-TAB] Redirecionando para /integration...');
-        window.location.href = '/integration';
-        return;
-    }
-    
-    // Para outras abas, verificar se o conteúdo existe
     if (selectedMenuItem && selectedTabContent) {
         selectedMenuItem.classList.add('active');
         selectedTabContent.classList.add('active');

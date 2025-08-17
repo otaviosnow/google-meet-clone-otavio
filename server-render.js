@@ -146,7 +146,29 @@ app.use('/api/integration', integrationRoutes);
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 
+    // Rota para vídeos
+    app.get('/videos', (req, res) => {
+        console.log('🎥 GET /videos - Página de vídeos acessada');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
 
+    // Rota para reuniões
+    app.get('/meetings', (req, res) => {
+        console.log('📞 GET /meetings - Página de reuniões acessada');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+
+    // Rota para perfil
+    app.get('/profile', (req, res) => {
+        console.log('👤 GET /profile - Página de perfil acessada');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+
+    // Rota para financeiro
+    app.get('/financial', (req, res) => {
+        console.log('💰 GET /financial - Página financeira acessada');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
 
     // Rota para o Google Meet
     app.get('/meet', (req, res) => {
@@ -176,6 +198,12 @@ app.use('/api/integration', integrationRoutes);
     app.get('/reset-password', (req, res) => {
         console.log('🔑 GET /reset-password - Página de reset de senha acessada');
         res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+    });
+
+    // Rota para página de termos de uso
+    app.get('/termos-uso', (req, res) => {
+        console.log('📋 GET /termos-uso - Página de termos de uso acessada');
+        res.sendFile(path.join(__dirname, 'public', 'termos-uso.html'));
     });
 
     // Rota para página de analytics
