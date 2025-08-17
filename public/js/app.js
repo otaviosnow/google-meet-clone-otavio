@@ -653,6 +653,12 @@ function switchTab(tabName) {
         selectedMenuItem.classList.add('active');
         selectedTabContent.classList.add('active');
         
+        // Limpar intervalo de atualização de reuniões se existir
+        if (window.meetingsUpdateInterval) {
+            clearInterval(window.meetingsUpdateInterval);
+            window.meetingsUpdateInterval = null;
+        }
+        
         // Carregar dados específicos da aba
         switch(tabName) {
             case 'videos':
@@ -662,6 +668,15 @@ function switchTab(tabName) {
             case 'meetings':
                 console.log('🎬 [SWITCH-TAB] Carregando reuniões...');
                 loadMeetings();
+                // Atualizar reuniões periodicamente para refletir mudanças de status
+                if (window.meetingsUpdateInterval) {
+                    clearInterval(window.meetingsUpdateInterval);
+                }
+                window.meetingsUpdateInterval = setInterval(() => {
+                    if (document.querySelector('[data-tab="meetings"]').classList.contains('active')) {
+                        loadMeetings();
+                    }
+                }, 10000); // Atualizar a cada 10 segundos
                 break;
             case 'goals':
                 console.log('📊 [SWITCH-TAB] Carregando metas...');
