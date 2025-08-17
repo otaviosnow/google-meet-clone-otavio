@@ -906,6 +906,20 @@ body {
     gap: 12px;
     margin-bottom: 30px;
     justify-content: center;
+    flex-wrap: wrap;
+}
+
+.integration-actions .btn-outline {
+    background: transparent;
+    border: 2px solid #3b82f6;
+    color: #3b82f6;
+    transition: all 0.3s ease;
+}
+
+.integration-actions .btn-outline:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
 }
 
 
