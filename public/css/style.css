@@ -817,6 +817,11 @@ body {
     padding: 40px 0;
 }
 
+/* Remover padding do dashboard-content para a aba de integração */
+#integrationTab .dashboard-content {
+    padding: 0;
+}
+
 /* ===== NOVA ABA DE INTEGRAÇÃO ===== */
 
 /* Container principal da integração */
