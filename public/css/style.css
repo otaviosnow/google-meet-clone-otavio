@@ -537,8 +537,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -645,12 +645,12 @@ body {
 
 /* Forms */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 500;
     color: #e8eaed;
     font-size: 14px;
@@ -660,7 +660,7 @@ body {
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     font-size: 14px;
@@ -688,8 +688,8 @@ body {
 .terms-checkbox {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 6px;
 }
 
 .terms-checkbox input[type="checkbox"] {
