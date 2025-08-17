@@ -173,15 +173,16 @@ body {
 .hero-content {
     position: relative;
     z-index: 1;
-    width: 100%;
-    max-width: none;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
 }
 
 .hero-blocks {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    overflow: hidden;
+    width: 100% !important;
+    overflow: visible !important;
 }
 
 .hero-block {
@@ -238,10 +239,12 @@ body {
     position: relative;
     overflow: hidden;
     text-align: center;
-    width: 100vw;
-    box-sizing: border-box;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
+    width: 100vw !important;
+    box-sizing: border-box !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    left: 0 !important;
+    right: 0 !important;
 }
 
 .hero-description-card::before {
