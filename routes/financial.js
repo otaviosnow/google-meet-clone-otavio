@@ -154,24 +154,43 @@ router.get('/summary', authenticateToken, async (req, res) => {
     const monthlyGoal = goal ? goal.monthlyGoal : 0;
     const goalProgress = monthlyGoal > 0 ? Math.min((totalProfit / monthlyGoal) * 100, 100) : 0;
     
-    // Usar dias restantes salvos no banco de dados
+    // Calcular dias restantes baseado na data limite configurada
     let daysRemaining = null;
-    if (goal && goal.daysRemaining !== undefined && goal.daysRemaining !== null) {
-      daysRemaining = goal.daysRemaining;
-      console.log('📅 [RESUMO] Dias restantes salvos no banco:', daysRemaining);
+    if (goal && goal.deadlineDate) {
+      const now = new Date();
+      const deadline = new Date(goal.deadlineDate);
+      
+      // Ajustar para considerar apenas a data (sem hora) usando timezone local
+      const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const deadlineDate = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
+      
+      const diffTime = deadlineDate - nowDate;
+      daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      daysRemaining = Math.max(0, daysRemaining); // Não pode ser negativo
+      
+      console.log('📅 [RESUMO] Dias restantes calculados:', {
+        now: now.toISOString(),
+        nowDate: nowDate.toISOString(),
+        deadline: deadline.toISOString(),
+        deadlineDate: deadlineDate.toISOString(),
+        diffTime: diffTime,
+        daysRemaining: daysRemaining
+      });
     } else {
-      console.log('⚠️ [RESUMO] Nenhum valor de dias restantes configurado');
+      console.log('⚠️ [RESUMO] Nenhuma data limite configurada');
     }
     
     // Log adicional para debug do daysRemaining
     console.log('🔍 [RESUMO] Debug daysRemaining:', {
       goalExists: !!goal,
+      deadlineDate: goal?.deadlineDate,
       daysRemaining: daysRemaining,
       type: typeof daysRemaining
     });
     
     const response = {
       monthlyGoal,
+      deadlineDate: goal ? goal.deadlineDate : null,
       daysRemaining,
       totalRevenue,
       totalExpenses,
@@ -218,16 +237,16 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
   console.log('📝 [META] Dados recebidos:', req.body);
   
   try {
-    const { monthlyGoal, daysRemaining } = req.body;
+    const { monthlyGoal, deadlineDate } = req.body;
     const currentMonth = new Date().toISOString().slice(0, 7);
     
-    // Validar dias restantes
-    const finalDaysRemaining = daysRemaining && !isNaN(daysRemaining) ? parseInt(daysRemaining) : 30;
+    // Usar data padrão se deadlineDate não for fornecida
+    const finalDeadlineDate = deadlineDate || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
     
     console.log('📅 [META] Mês atual:', currentMonth);
     console.log('💰 [META] Meta mensal:', monthlyGoal);
-    console.log('📅 [META] Dias restantes recebidos:', daysRemaining);
-    console.log('📅 [META] Dias restantes finais:', finalDaysRemaining);
+    console.log('📅 [META] Data limite original:', deadlineDate);
+    console.log('📅 [META] Data limite final:', finalDeadlineDate);
     
     // Buscar meta existente para calcular valores anteriores
     const existingGoal = await FinancialGoal.findOne({ user: req.user._id, currentMonth });
@@ -270,7 +289,7 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
       { user: req.user._id, currentMonth },
       { 
         monthlyGoal,
-        daysRemaining: finalDaysRemaining
+        deadlineDate: new Date(finalDeadlineDate)
       },
       { upsert: true, new: true }
     );
@@ -539,17 +558,37 @@ router.get('/history', authenticateToken, async (req, res) => {
   try {
     const { startDate, endDate, type } = req.query;
     
+    // Validar parâmetros
+    console.log('🔍 [HISTORY] Validando parâmetros:', {
+      startDate: startDate,
+      endDate: endDate,
+      type: type,
+      startDateValid: startDate ? !isNaN(new Date(startDate).getTime()) : true,
+      endDateValid: endDate ? !isNaN(new Date(endDate).getTime()) : true
+    });
+    
     let query = { user: req.user._id };
     console.log('🔍 [HISTORY] Query inicial:', query);
     
     if (startDate && endDate) {
+      // Validar se as datas são válidas
+      const startDateObj = new Date(startDate);
+      const endDateObj = new Date(endDate);
+      
+      if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+        console.log('❌ [HISTORY] Datas inválidas:', { startDate, endDate });
+        return res.status(400).json({
+          error: 'Datas inválidas'
+        });
+      }
+      
       query.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+        $gte: startDateObj,
+        $lte: endDateObj
       };
       console.log('📅 [HISTORY] Filtro de data aplicado:', {
-        startDate: new Date(startDate),
-        endDate: new Date(endDate)
+        startDate: startDateObj,
+        endDate: endDateObj
       });
     } else {
       console.log('⚠️ [HISTORY] Nenhum filtro de data aplicado');
@@ -570,6 +609,15 @@ router.get('/history', authenticateToken, async (req, res) => {
     
     console.log('🔍 [HISTORY] Query final:', JSON.stringify(query, null, 2));
     
+    // Verificar se o modelo FinancialEntry existe
+    if (!FinancialEntry) {
+      console.error('❌ [HISTORY] Modelo FinancialEntry não encontrado');
+      return res.status(500).json({
+        error: 'Erro interno do servidor - modelo não encontrado'
+      });
+    }
+    
+    console.log('🔍 [HISTORY] Executando query no MongoDB...');
     const entries = await FinancialEntry.find(query).sort({ date: -1 });
     console.log('📋 [HISTORY] Entradas encontradas:', entries.length);
     
@@ -601,8 +649,26 @@ router.get('/history', authenticateToken, async (req, res) => {
     
   } catch (error) {
     console.error('❌ [HISTORY] Erro ao obter histórico financeiro:', error);
+    console.error('❌ [HISTORY] Stack trace:', error.stack);
+    
+    // Verificar se é um erro de validação do MongoDB
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Dados inválidos',
+        details: error.message
+      });
+    }
+    
+    // Verificar se é um erro de conexão
+    if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+      return res.status(500).json({
+        error: 'Erro de conexão com o banco de dados'
+      });
+    }
+    
     res.status(500).json({
-      error: 'Erro interno do servidor'
+      error: 'Erro interno do servidor',
+      message: error.message
     });
   }
 });
@@ -888,6 +954,43 @@ router.get('/modifications', authenticateToken, async (req, res) => {
     
     let query = { user: req.user._id };
     
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+    
+    if (action && action !== 'all') {
+      query.action = action;
+    }
+    
+    const modifications = await FinancialHistory.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('relatedEntry', 'date grossRevenue netProfit')
+      .populate('relatedGoal', 'monthlyGoal deadlineDate');
+    
+    const total = await FinancialHistory.countDocuments(query);
+    
+    res.json({
+      modifications: modifications.map(mod => mod.toPublicJSON()),
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Erro ao listar modificações:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
+module.exports = router;
+
     if (type && type !== 'all') {
       query.type = type;
     }
