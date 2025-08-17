@@ -830,6 +830,21 @@ body {
     margin: 0 auto;
 }
 
+/* Quando estiver na URL /integrations, forçar posicionamento no topo */
+body[data-page="integrations"] .integration-container,
+body[data-page="integrations"] #integrationTab {
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Garantir que o dashboard-content não force scroll na página de integrações */
+body[data-page="integrations"] .dashboard-content {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
 /* Header da integração */
 .integration-header {
     margin-bottom: 40px;

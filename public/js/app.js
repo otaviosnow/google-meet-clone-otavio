@@ -145,19 +145,32 @@ async function checkAuth() {
                 loadUserData();
             } else if (window.location.pathname === '/integrations') {
                 // Se estiver na URL de integrações, mostrar dashboard com aba de integração ativa
+                document.body.setAttribute('data-page', 'integrations');
                 showDashboard();
                 loadUserData();
-                // Aguardar um pouco para garantir que o dashboard carregou
-                setTimeout(() => {
-                    showIntegrationTab();
-                    loadIntegrationTokens();
-                    // Marcar a aba como ativa
-                    const integrationMenuItem = document.querySelector('[data-tab="integration"]');
-                    if (integrationMenuItem) {
-                        menuItems.forEach(item => item.classList.remove('active'));
-                        integrationMenuItem.classList.add('active');
-                    }
-                }, 100);
+                
+                // Esconder todas as outras abas imediatamente
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    content.style.display = 'none';
+                });
+                
+                // Mostrar apenas a aba de integração
+                const integrationTab = document.getElementById('integrationTab');
+                if (integrationTab) {
+                    integrationTab.classList.add('active');
+                    integrationTab.style.display = 'block';
+                }
+                
+                // Marcar a aba como ativa no menu
+                const integrationMenuItem = document.querySelector('[data-tab="integration"]');
+                if (integrationMenuItem) {
+                    menuItems.forEach(item => item.classList.remove('active'));
+                    integrationMenuItem.classList.add('active');
+                }
+                
+                // Carregar dados da integração
+                loadIntegrationTokens();
             } else {
                 showDashboard();
                 loadUserData();
