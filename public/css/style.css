@@ -819,7 +819,24 @@ body {
 
 /* Integration Tab - remover padding do dashboard-content */
 #integrationTab .dashboard-content {
-    padding: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Integration Tab - remover todos os espaçamentos possíveis */
+#integrationTab {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#integrationTab .container {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#integrationTab .tab-header {
+    margin-top: 0 !important;
+    padding-top: 20px !important;
 }
 
 
