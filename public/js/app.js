@@ -2431,13 +2431,24 @@ function updateFinancialDisplay(data) {
     const todayProfitElement = document.getElementById('todayProfit');
     if (todayProfitElement && data.entries && data.entries.length > 0) {
         const today = new Date();
-        const todayEntry = data.entries.find(entry => {
+        const todayString = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        
+        // Procurar por entradas de hoje
+        const todayEntries = data.entries.filter(entry => {
             const entryDate = new Date(entry.date);
-            return entryDate.toDateString() === today.toDateString();
+            const entryString = entryDate.toISOString().split('T')[0];
+            return entryString === todayString;
         });
         
-        const todayProfit = todayEntry ? todayEntry.netProfit : 0;
+        // Somar o lucro de todas as entradas de hoje
+        const todayProfit = todayEntries.reduce((total, entry) => {
+            return total + (entry.netProfit || 0);
+        }, 0);
+        
         todayProfitElement.textContent = `R$ ${todayProfit.toFixed(2).replace('.', ',')}`;
+        console.log('💰 [FINANCIAL] Lucro de hoje calculado:', todayProfit, 'de', todayEntries.length, 'entradas');
+    } else if (todayProfitElement) {
+        todayProfitElement.textContent = 'R$ 0,00';
     }
     
     // Atualizar gráfico de progresso da meta
@@ -2861,8 +2872,18 @@ function updateDashboardTab(data) {
 
 // Atualizar aba histórico
 function updateHistoryTab(data) {
+    console.log('📝 [FRONTEND-HISTORY] Iniciando atualização do histórico');
+    console.log('📝 [FRONTEND-HISTORY] Dados recebidos:', {
+        entriesCount: data.entries?.length || 0,
+        entries: data.entries
+    });
+    
     if (data.entries && data.entries.length > 0) {
+        console.log('📝 [FRONTEND-HISTORY] Renderizando', data.entries.length, 'entradas');
         renderFinancialHistory(data.entries);
+    } else {
+        console.log('📝 [FRONTEND-HISTORY] Nenhuma entrada encontrada, renderizando estado vazio');
+        renderFinancialHistory([]);
     }
 }
 
@@ -3026,42 +3047,65 @@ async function loadFinancialHistory() {
 }
 
 function renderFinancialHistory(entries) {
+    console.log('📋 [RENDER-HISTORY] Iniciando renderização do histórico');
+    console.log('📋 [RENDER-HISTORY] Entradas recebidas:', entries);
+    
     const historyTableBody = document.getElementById('historyTableBody');
-    if (!historyTableBody) return;
+    if (!historyTableBody) {
+        console.error('❌ [RENDER-HISTORY] Elemento historyTableBody não encontrado');
+        return;
+    }
 
+    console.log('📋 [RENDER-HISTORY] Limpando tabela existente');
     historyTableBody.innerHTML = '';
 
-    if (entries.length === 0) {
+    if (!entries || entries.length === 0) {
+        console.log('📋 [RENDER-HISTORY] Nenhuma entrada, exibindo estado vazio');
         historyTableBody.innerHTML = `
             <tr>
                 <td colspan="6" style="text-align: center; padding: 40px; color: #9ca3af;">
                     <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5; display: block;"></i>
                     <p>Nenhum histórico financeiro encontrado</p>
+                    <small>Adicione dados na aba "Adicionar Dados" para ver o histórico aqui</small>
                 </td>
             </tr>
         `;
         return;
     }
 
-    entries.forEach(entry => {
+    console.log('📋 [RENDER-HISTORY] Renderizando', entries.length, 'entradas');
+    
+    // Ordenar entradas por data (mais recente primeiro)
+    const sortedEntries = entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    sortedEntries.forEach((entry, index) => {
+        console.log('📋 [RENDER-HISTORY] Processando entrada', index + 1, ':', entry);
+        
         const row = document.createElement('tr');
         const entryDate = new Date(entry.date);
         const formattedDate = entryDate.toLocaleDateString('pt-BR');
         
+        // Verificar se os valores existem antes de usar toFixed
+        const grossRevenue = entry.grossRevenue || 0;
+        const totalExpenses = entry.totalExpenses || 0;
+        const netProfit = entry.netProfit || 0;
+        
         row.innerHTML = `
             <td>${formattedDate}</td>
-            <td>R$ ${entry.grossRevenue.toFixed(2)}</td>
-            <td>R$ ${entry.totalExpenses.toFixed(2)}</td>
-            <td>R$ ${entry.netProfit.toFixed(2)}</td>
+            <td>R$ ${grossRevenue.toFixed(2).replace('.', ',')}</td>
+            <td>R$ ${totalExpenses.toFixed(2).replace('.', ',')}</td>
+            <td>R$ ${netProfit.toFixed(2).replace('.', ',')}</td>
             <td>${entry.notes || '-'}</td>
             <td>
-                <button class="btn btn-small btn-outline" onclick="deleteEntry('${entry.id}')">
+                <button class="btn btn-small btn-outline" onclick="deleteEntry('${entry._id || entry.id}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
         historyTableBody.appendChild(row);
     });
+    
+    console.log('✅ [RENDER-HISTORY] Renderização concluída');
 }
 
 // Função para atualizar entrada rápida existente
