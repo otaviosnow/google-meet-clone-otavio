@@ -19,9 +19,8 @@ const userSchema = new mongoose.Schema({
   },
   cpf: {
     type: String,
-    required: false, // Tornar opcional para usuários antigos
+    required: [true, 'CPF é obrigatório'],
     unique: true,
-    sparse: true, // Permite múltiplos valores null/undefined
     trim: true,
     match: [/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF deve estar no formato 000.000.000-00']
   },
