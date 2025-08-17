@@ -159,12 +159,20 @@ router.get('/summary', authenticateToken, async (req, res) => {
     if (goal && goal.deadlineDate) {
       const now = new Date();
       const deadline = new Date(goal.deadlineDate);
-      const diffTime = deadline - now;
+      
+      // Ajustar para considerar apenas a data (sem hora)
+      const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const deadlineDate = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
+      
+      const diffTime = deadlineDate - nowDate;
       daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       daysRemaining = Math.max(0, daysRemaining); // Não pode ser negativo
+      
       console.log('📅 [RESUMO] Dias restantes calculados:', {
         now: now.toISOString(),
+        nowDate: nowDate.toISOString(),
         deadline: deadline.toISOString(),
+        deadlineDate: deadlineDate.toISOString(),
         diffTime: diffTime,
         daysRemaining: daysRemaining
       });

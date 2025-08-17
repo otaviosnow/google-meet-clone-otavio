@@ -1996,24 +1996,24 @@ body {
     margin-bottom: 16px;
 }
 
-/* Foto de Perfil do Usuário no Gráfico */
-.user-profile-overlay {
+/* Foto de Perfil do Usuário no Anel de Progresso */
+.progress-ring {
+    position: relative;
+}
+
+.progress-ring .profile-image {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
-    pointer-events: none;
-}
-
-.profile-image {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    border: 4px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     object-fit: cover;
     background: var(--card-bg);
+    z-index: 10;
 }
 
 /* Análise de Tendências */
