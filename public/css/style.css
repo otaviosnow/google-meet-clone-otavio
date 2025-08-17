@@ -817,26 +817,100 @@ body {
     padding: 40px 0;
 }
 
-/* Integration Tab - remover padding do dashboard-content */
-#integrationTab .dashboard-content {
-    padding: 0 !important;
-    margin: 0 !important;
+/* ===== NOVA ABA DE INTEGRAÇÃO ===== */
+
+/* Container principal da integração */
+.integration-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Integration Tab - remover todos os espaçamentos possíveis */
-#integrationTab {
-    padding: 0 !important;
-    margin: 0 !important;
+/* Header da integração */
+.integration-header {
+    margin-bottom: 30px;
+    text-align: center;
 }
 
-#integrationTab .container {
-    padding: 0 !important;
-    margin: 0 !important;
+.integration-header h2 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #e8eaed;
+    margin-bottom: 10px;
 }
 
-#integrationTab .tab-header {
-    margin-top: 0 !important;
-    padding-top: 20px !important;
+.integration-header p {
+    color: #9ca3af;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Estatísticas da integração */
+.integration-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.integration-stats .stat-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.integration-stats .stat-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.integration-stats .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.integration-stats .stat-info h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #e8eaed;
+    margin: 0 0 5px 0;
+}
+
+.integration-stats .stat-info p {
+    color: #9ca3af;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Ações da integração */
+.integration-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+/* Lista de tokens */
+.tokens-list {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 200px;
 }
 
 
@@ -858,23 +932,7 @@ body {
     margin-bottom: 30px;
 }
 
-/* Integration Tab específico */
-#integrationTab .container {
-    padding-top: 0;
-}
-
-#integrationTab .tab-header {
-    margin-bottom: 15px;
-    padding-top: 10px;
-}
-
-#integrationTab .tab-header h2 {
-    margin-bottom: 5px;
-}
-
-#integrationTab .tab-header p {
-    margin-bottom: 0;
-}
+/* Removido - regras antigas da integração */
 
 .tab-header h2 {
     font-size: 32px;
@@ -1343,11 +1401,10 @@ body {
     color: #9ca3af;
 }
 
-/* Integration empty state específico */
-#integrationTab .empty-state {
-    padding: 20px;
-    margin-top: 0 !important;
-    padding-top: 20px !important;
+/* Empty state para integração */
+.integration-container .empty-state {
+    padding: 40px 20px;
+    text-align: center;
 }
 
 .empty-state-icon {
