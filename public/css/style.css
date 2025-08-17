@@ -848,24 +848,7 @@ body {
     margin: 0 auto;
 }
 
-/* Forçar aba integração no topo */
-#integrationTab {
-    position: relative !important;
-    top: 0 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    transform: translateY(0) !important;
-}
 
-#integrationTab .tab-header {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-#integrationTab .integration-content {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
 
 /* Estatísticas da integração */
 .integration-stats {
