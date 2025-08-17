@@ -2689,10 +2689,21 @@ function updateFinancialDisplay(data) {
         const today = new Date();
         const todayString = today.toISOString().split('T')[0]; // Formato YYYY-MM-DD
         
+        console.log('📅 [FINANCIAL] Debug - Data de hoje:', todayString);
+        console.log('📅 [FINANCIAL] Debug - Total de entradas:', data.entries.length);
+        
         // Procurar por entradas de hoje
         const todayEntries = data.entries.filter(entry => {
             const entryDate = new Date(entry.date);
             const entryString = entryDate.toISOString().split('T')[0];
+            
+            console.log('📅 [FINANCIAL] Debug - Comparando:', {
+                entryDate: entry.date,
+                entryString: entryString,
+                todayString: todayString,
+                match: entryString === todayString
+            });
+            
             return entryString === todayString;
         });
         
@@ -2705,6 +2716,7 @@ function updateFinancialDisplay(data) {
         console.log('💰 [FINANCIAL] Lucro de hoje calculado:', todayProfit, 'de', todayEntries.length, 'entradas');
     } else if (todayProfitElement) {
         todayProfitElement.textContent = 'R$ 0,00';
+        console.log('⚠️ [FINANCIAL] Nenhuma entrada disponível para calcular lucro de hoje');
     }
     
     // Atualizar gráfico de progresso da meta
