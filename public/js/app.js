@@ -725,16 +725,7 @@ function showIntegrationTab() {
     if (integrationTab) {
         integrationTab.style.display = 'block';
         
-        // Garantir posicionamento correto
-        integrationTab.style.position = 'relative';
-        integrationTab.style.top = '0';
-        integrationTab.style.marginTop = '0';
-        integrationTab.style.paddingTop = '0';
-        
-        // Forçar scroll para o topo
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
+
         
         console.log('✅ [INTEGRATION] Aba de integração exibida e posicionada');
         
@@ -1961,11 +1952,11 @@ async function loadUserData() {
             analyticsMenuItem.style.display = 'block';
         }
         
-        // Mostrar botão de admin
-        const adminMenuItem = document.getElementById('adminMenuItem');
-        if (adminMenuItem) {
-            adminMenuItem.style.display = 'block';
-        }
+            // Mostrar botão de admin
+    const adminMenuItem = document.getElementById('adminMenuItem');
+    if (adminMenuItem) {
+        adminMenuItem.style.display = 'block';
+    }
     }
     
     // Mostrar dashboard
@@ -1974,39 +1965,71 @@ async function loadUserData() {
 
 async function loadProfileStats() {
     try {
-        const response = await fetch(`${API_BASE_URL}/users/stats`, {
+        console.log('📊 [PROFILE] Carregando estatísticas do perfil...');
+        
+        // Carregar estatísticas básicas
+        const statsResponse = await fetch(`${API_BASE_URL}/users/stats`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
             }
         });
         
-        if (response.ok) {
-            const data = await response.json();
-            totalVideos.textContent = data.stats.videos.total;
-            totalMeetings.textContent = data.stats.meetings.total;
-            totalViews.textContent = data.stats.views.total;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
-    }
-}
-
-async function loadProfileStats() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/users/stats`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+        if (statsResponse.ok) {
+            const data = await statsResponse.json();
+            console.log('📊 [PROFILE] Dados recebidos:', data);
+            
+            // Atualizar contadores
+            const totalVideosElement = document.getElementById('totalVideos');
+            const totalMeetingsElement = document.getElementById('totalMeetings');
+            const totalTokensPurchasedElement = document.getElementById('totalTokensPurchased');
+            
+            if (totalVideosElement) {
+                totalVideosElement.textContent = data.stats.videos.total || 0;
             }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            totalVideos.textContent = data.stats.videos.total;
-            totalMeetings.textContent = data.stats.meetings.total;
-            totalViews.textContent = data.stats.views.total;
+            
+            if (totalMeetingsElement) {
+                totalMeetingsElement.textContent = data.stats.meetings.total || 0;
+            }
+            
+            // Carregar tokens comprados
+            const tokensResponse = await fetch(`${API_BASE_URL}/tokens/transactions`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            if (tokensResponse.ok) {
+                const tokensData = await tokensResponse.json();
+                console.log('💰 [PROFILE] Dados de tokens:', tokensData);
+                
+                // Calcular total de tokens comprados (apenas transações aprovadas)
+                const totalTokensPurchased = tokensData.transactions
+                    .filter(t => t.status === 'approved')
+                    .reduce((sum, t) => sum + t.tokens, 0);
+                
+                if (totalTokensPurchasedElement) {
+                    totalTokensPurchasedElement.textContent = totalTokensPurchased;
+                }
+                
+                console.log('💰 [PROFILE] Total de tokens comprados:', totalTokensPurchased);
+            } else {
+                console.log('⚠️ [PROFILE] Não foi possível carregar dados de tokens');
+                if (totalTokensPurchasedElement) {
+                    totalTokensPurchasedElement.textContent = '0';
+                }
+            }
         }
     } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
+        console.error('❌ [PROFILE] Erro ao carregar estatísticas:', error);
+        
+        // Definir valores padrão em caso de erro
+        const totalVideosElement = document.getElementById('totalVideos');
+        const totalMeetingsElement = document.getElementById('totalMeetings');
+        const totalTokensPurchasedElement = document.getElementById('totalTokensPurchased');
+        
+        if (totalVideosElement) totalVideosElement.textContent = '0';
+        if (totalMeetingsElement) totalMeetingsElement.textContent = '0';
+        if (totalTokensPurchasedElement) totalTokensPurchasedElement.textContent = '0';
     }
 }
 
