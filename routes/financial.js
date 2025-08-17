@@ -610,6 +610,52 @@ router.get('/history', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/financial/entry/:id - Obter entrada específica
+router.get('/entry/:id', authenticateToken, async (req, res) => {
+  console.log('📋 [OBTER] GET /entry/:id - Usuário:', req.user._id, 'ID:', req.params.id);
+  
+  try {
+    const entry = await FinancialEntry.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+    
+    if (!entry) {
+      console.log('❌ [OBTER] Entrada não encontrada - ID:', req.params.id);
+      return res.status(404).json({
+        error: 'Entrada não encontrada'
+      });
+    }
+    
+    console.log('✅ [OBTER] Entrada encontrada:', {
+      id: entry._id,
+      date: entry.date,
+      grossRevenue: entry.grossRevenue,
+      netProfit: entry.netProfit
+    });
+    
+    res.json({
+      entry: {
+        id: entry._id,
+        date: entry.date,
+        grossRevenue: entry.grossRevenue,
+        chipCost: entry.chipCost,
+        additionalCost: entry.additionalCost,
+        adsCost: entry.adsCost,
+        totalExpenses: entry.totalExpenses,
+        netProfit: entry.netProfit,
+        notes: entry.notes
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ [OBTER] Erro ao obter entrada:', error);
+    res.status(500).json({
+      error: 'Erro interno do servidor'
+    });
+  }
+});
+
 // PUT /api/financial/entry/:id - Atualizar entrada
 router.put('/entry/:id', authenticateToken, entryValidation, handleValidationErrors, async (req, res) => {
   console.log('🔄 [ATUALIZAR] PUT /entry/:id - Usuário:', req.user._id, 'ID:', req.params.id);
