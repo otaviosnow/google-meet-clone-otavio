@@ -135,8 +135,18 @@ async function checkAuth() {
         if (response.ok) {
             const data = await response.json();
             currentUser = data.user;
-            showDashboard();
-            loadUserData();
+            
+            // Se não estiver na página do dashboard, redirecionar
+            if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                window.location.href = '/dashboard';
+            } else if (window.location.pathname === '/dashboard') {
+                // Se já estiver na URL do dashboard, apenas mostrar o dashboard
+                showDashboard();
+                loadUserData();
+            } else {
+                showDashboard();
+                loadUserData();
+            }
         } else {
             // Token inválido, limpar
             localStorage.removeItem('authToken');
@@ -647,6 +657,8 @@ function switchTab(tabName) {
         showIntegrationTab();
         // Carregar tokens de integração
         loadIntegrationTokens();
+        // Forçar scroll para o topo
+        window.scrollTo(0, 0);
         return;
     }
     

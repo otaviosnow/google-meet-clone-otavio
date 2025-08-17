@@ -134,6 +134,12 @@ app.use('/api/integration', integrationRoutes);
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
 
+    // Rota para dashboard (mesma página, mas URL diferente)
+    app.get('/dashboard', (req, res) => {
+        console.log('📊 GET /dashboard - Dashboard acessado');
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+
     // Rota para o Google Meet
     app.get('/meet', (req, res) => {
         console.log('🎯 GET /meet - Página do Meet acessada');

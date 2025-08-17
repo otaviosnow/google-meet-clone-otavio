@@ -834,6 +834,14 @@ body {
     overflow: visible !important;
 }
 
+/* Quando a aba de integração estiver ativa, forçar scroll para o topo */
+#integrationTab.active {
+    position: relative !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
 #integrationTab .integration-container {
     margin-top: 0 !important;
     padding-top: 0 !important;
@@ -868,7 +876,6 @@ body {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
-    margin-top: -2800px;
 }
 
 /* Header da integração */
