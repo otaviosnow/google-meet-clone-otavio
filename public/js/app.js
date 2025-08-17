@@ -2747,9 +2747,20 @@ function updateFinancialDisplay(data) {
     
     // Atualizar tendências
     updateTrends(data);
+    
+    // Atualizar foto de perfil do usuário no gráfico
+    const userProfileImage = document.getElementById('userProfileImage');
+    if (userProfileImage && currentUser && currentUser.avatar) {
+        userProfileImage.src = currentUser.avatar;
+        console.log('👤 [FRONTEND-RESUMO] Foto de perfil carregada no gráfico');
+    } else if (userProfileImage) {
+        // Usar avatar padrão se não houver foto
+        userProfileImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMzc0MTUxIi8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iMzUiIHI9IjE1IiBmaWxsPSIjNmI3MjgwIi8+CjxyZWN0IHg9IjMwIiB5PSI2MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjNmI3MjgwIi8+Cjwvc3ZnPgo=';
+        console.log('👤 [FRONTEND-RESUMO] Avatar padrão carregado no gráfico');
+    }
 }
 
-// Atualizar gráfico de progresso da meta - Gráfico de área horizontal
+// Atualizar gráfico de progresso da meta - Gráfico de linha horizontal (montanha)
 function updateGoalProgressChart(data) {
     const canvas = document.getElementById('goalProgressChart');
     const progressText = document.getElementById('progressText');
@@ -2773,114 +2784,117 @@ function updateGoalProgressChart(data) {
     }
     
     // Configurações do gráfico
-    const padding = 20;
+    const padding = 30;
     const chartWidth = width - (padding * 2);
     const chartHeight = height - (padding * 2);
-    const barHeight = 30;
-    const y = (height - barHeight) / 2;
+    const y = height - padding;
     
-    // Desenhar fundo da barra
-    ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-    ctx.fillRect(padding, y, chartWidth, barHeight);
+    // Desenhar linha base
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.2)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(padding + chartWidth, y);
+    ctx.stroke();
     
-    // Desenhar borda da barra
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(padding, y, chartWidth, barHeight);
+    // Calcular pontos para o gráfico de montanha
+    const points = [];
+    const segments = 20; // Número de segmentos para criar a curva
     
-    // Calcular largura do progresso
-    const progressWidth = (progressPercent / 100) * chartWidth;
+    for (let i = 0; i <= segments; i++) {
+        const x = padding + (i / segments) * chartWidth;
+        const progressAtPoint = (i / segments) * progressPercent;
+        
+        // Criar efeito de montanha com curva suave
+        let mountainHeight = 0;
+        if (progressAtPoint > 0) {
+            // Usar função seno para criar picos e vales
+            const sineWave = Math.sin((i / segments) * Math.PI * 2) * 0.3;
+            const baseHeight = (progressAtPoint / 100) * chartHeight * 0.8;
+            mountainHeight = baseHeight + (sineWave * baseHeight * 0.2);
+        }
+        
+        points.push({
+            x: x,
+            y: y - mountainHeight
+        });
+    }
     
-    // Criar gradiente para o progresso
-    const gradient = ctx.createLinearGradient(padding, 0, padding + progressWidth, 0);
-    gradient.addColorStop(0, '#3b82f6');
-    gradient.addColorStop(1, '#6366f1');
+    // Desenhar área da montanha
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
     
-    // Desenhar barra de progresso
+    // Desenhar linha superior da montanha
+    for (let i = 0; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+    }
+    
+    // Fechar o caminho
+    ctx.lineTo(padding + chartWidth, y);
+    ctx.closePath();
+    
+    // Criar gradiente para a montanha
+    const gradient = ctx.createLinearGradient(padding, y - chartHeight, padding, y);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.6)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.3)');
+    
     ctx.fillStyle = gradient;
-    ctx.fillRect(padding, y, progressWidth, barHeight);
+    ctx.fill();
     
-    // Adicionar efeito de brilho
-    const highlightGradient = ctx.createLinearGradient(padding, y, padding, y + barHeight);
-    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
-    highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
-    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    // Desenhar borda da montanha
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
     
-    ctx.fillStyle = highlightGradient;
-    ctx.fillRect(padding, y, progressWidth, barHeight);
+    for (let i = 0; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.stroke();
+    
+    // Adicionar pontos de destaque nos picos
+    for (let i = 1; i < points.length - 1; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const next = points[i + 1];
+        
+        // Verificar se é um pico local
+        if (curr.y < prev.y && curr.y < next.y) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.beginPath();
+            ctx.arc(curr.x, curr.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
     
     // Desenhar linha de meta (100%)
     if (progressPercent < 100) {
+        const targetX = padding + chartWidth;
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
-        ctx.moveTo(padding + chartWidth, y - 5);
-        ctx.lineTo(padding + chartWidth, y + barHeight + 5);
+        ctx.moveTo(targetX, y - chartHeight);
+        ctx.lineTo(targetX, y + 10);
         ctx.stroke();
         ctx.setLineDash([]);
+        
+        // Adicionar texto da meta
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('META', targetX, y + 25);
     }
     
-    // Adicionar texto de porcentagem no final da barra
-    if (progressWidth > 50) { // Só mostrar se houver espaço suficiente
+    // Adicionar texto de porcentagem no topo da montanha
+    if (progressPercent > 5) {
+        const maxPoint = points.reduce((max, point) => point.y < max.y ? point : max);
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 14px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`${progressPercent.toFixed(1)}%`, padding + progressWidth - 30, y + barHeight/2 + 5);
+        ctx.fillText(`${progressPercent.toFixed(1)}%`, maxPoint.x, maxPoint.y - 10);
     }
-    
-    // Atualizar texto
-    if (progressText) {
-        progressText.textContent = `${progressPercent.toFixed(1)}% da meta atingida`;
-    }
-    
-    // Destruir gráfico existente se houver
-    if (window.goalProgressChart && typeof window.goalProgressChart.destroy === 'function') {
-        window.goalProgressChart.destroy();
-    }
-    
-    // Criar dados para o gráfico
-    const chartData = {
-        labels: ['Meta', 'Atual'],
-        datasets: [{
-            data: [data.monthlyGoal || 0, data.totalProfit || 0],
-            backgroundColor: [
-                'rgba(59, 130, 246, 0.2)', // Azul claro para meta
-                'rgba(34, 197, 94, 0.8)'   // Verde para atual
-            ],
-            borderColor: [
-                'rgba(59, 130, 246, 1)',
-                'rgba(34, 197, 94, 1)'
-            ],
-            borderWidth: 2
-        }]
-    };
-    
-    // Configurações do gráfico
-    const config = {
-        type: 'doughnut',
-        data: chartData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: R$ ${context.parsed.toFixed(2)}`;
-                        }
-                    }
-                }
-            },
-            cutout: '70%'
-        }
-    };
-    
-    // Criar gráfico
-    window.goalProgressChart = new Chart(canvas, config);
 }
 
 // Atualizar tendências
