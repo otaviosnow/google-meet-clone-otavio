@@ -33,18 +33,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listeners para os botões de quantidade
     increaseBtn.addEventListener('click', function() {
+        console.log('🔺 Botão aumentar clicado');
         const currentValue = parseInt(tokenQuantity.value) || 0;
-        tokenQuantity.value = currentValue + 1;
+        const newValue = currentValue + 1;
+        tokenQuantity.value = newValue;
         updateTotal();
+        updateButtonStates();
+        
+        // Feedback visual
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            this.style.transform = '';
+        }, 150);
     });
 
     decreaseBtn.addEventListener('click', function() {
+        console.log('🔻 Botão diminuir clicado');
         const currentValue = parseInt(tokenQuantity.value) || 0;
         if (currentValue > MIN_QUANTITY) {
-            tokenQuantity.value = currentValue - 1;
+            const newValue = currentValue - 1;
+            tokenQuantity.value = newValue;
             updateTotal();
+            updateButtonStates();
+            
+            // Feedback visual
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
         }
     });
+
+    // Função para atualizar estados dos botões
+    function updateButtonStates() {
+        const currentValue = parseInt(tokenQuantity.value) || 0;
+        
+        // Desabilitar botão de diminuir se estiver no mínimo
+        if (currentValue <= MIN_QUANTITY) {
+            decreaseBtn.disabled = true;
+        } else {
+            decreaseBtn.disabled = false;
+        }
+    }
 
     // Event listener para mudança no input
     tokenQuantity.addEventListener('input', function() {
@@ -294,8 +324,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Inicializar valor total
+    // Inicializar valor total e estados dos botões
     updateTotal();
+    updateButtonStates();
 
     // Adicionar animação de loading ao botão
     generatePixBtn.addEventListener('click', function() {

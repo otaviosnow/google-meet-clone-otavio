@@ -184,16 +184,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
+    position: relative;
 }
 
 .quantity-btn:hover {
     background: rgba(59, 130, 246, 0.3);
     border-color: rgba(59, 130, 246, 0.5);
     transform: scale(1.1);
+    color: #60a5fa;
 }
 
 .quantity-btn:active {
     transform: scale(0.95);
+}
+
+.quantity-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(107, 114, 128, 0.2);
+    border-color: rgba(107, 114, 128, 0.3);
+    color: #6b7280;
+}
+
+.quantity-btn:disabled:hover {
+    transform: none;
+    background: rgba(107, 114, 128, 0.2);
+    border-color: rgba(107, 114, 128, 0.3);
+    color: #6b7280;
 }
 
 .total-section {

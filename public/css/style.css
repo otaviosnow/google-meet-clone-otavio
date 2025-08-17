@@ -913,6 +913,125 @@ body {
     min-height: 200px;
 }
 
+/* ===== MODAL DE CONFIRMAÇÃO PARA SUBSTITUIR ENTRADA ===== */
+
+.warning-message {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.warning-message i {
+    color: #f59e0b;
+    font-size: 20px;
+}
+
+.warning-message p {
+    color: #e8eaed;
+    margin: 0;
+    font-weight: 500;
+}
+
+.entry-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.entry-old, .entry-new {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.entry-old {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.entry-new {
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.entry-old h3, .entry-new h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.entry-old h3 {
+    color: #ef4444;
+}
+
+.entry-new h3 {
+    color: #22c55e;
+}
+
+.entry-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.entry-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.entry-detail:last-child {
+    border-bottom: none;
+}
+
+.entry-detail-label {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.entry-detail-value {
+    color: #e8eaed;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-actions .btn {
+    min-width: 120px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .entry-comparison {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+    }
+}
+
 
 
 

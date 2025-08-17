@@ -1004,6 +1004,48 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação para Substituir Entrada -->
+    <div id="replaceEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Entrada Já Existe</h2>
+                <button class="modal-close" id="closeReplaceModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="warning-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Já existe uma entrada para esta data. Deseja substituir a entrada existente?</p>
+                </div>
+                
+                <div class="entry-comparison">
+                    <div class="entry-old">
+                        <h3><i class="fas fa-history"></i> Entrada Atual</h3>
+                        <div class="entry-details" id="oldEntryDetails">
+                            <!-- Detalhes da entrada atual serão inseridos aqui -->
+                        </div>
+                    </div>
+                    
+                    <div class="entry-new">
+                        <h3><i class="fas fa-plus"></i> Nova Entrada</h3>
+                        <div class="entry-details" id="newEntryDetails">
+                            <!-- Detalhes da nova entrada serão inseridos aqui -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="cancelReplace" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button id="confirmReplace" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Substituir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js?v=1.1"></script>
 </body>
 </html> 
