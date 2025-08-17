@@ -502,7 +502,7 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     
     // Criar histórico
     console.log('📝 [ENTRADA] Criando histórico da entrada');
-    await FinancialHistory.createEntryHistory(req.user._id, entry, previousValues, newValues);
+    await FinancialHistory.createEntryHistory(req.user._id, entry, 'create', previousValues, newValues);
     console.log('✅ [ENTRADA] Histórico criado com sucesso');
     
     const response = {
