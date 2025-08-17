@@ -398,7 +398,17 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
       
       res.json({
         message: 'Entrada atualizada com sucesso',
-        entry: existingEntry.toPublicJSON(),
+        entry: {
+          id: existingEntry._id,
+          date: existingEntry.date,
+          grossRevenue: existingEntry.grossRevenue,
+          chipCost: existingEntry.chipCost,
+          additionalCost: existingEntry.additionalCost,
+          adsCost: existingEntry.adsCost,
+          totalExpenses: existingEntry.totalExpenses,
+          netProfit: existingEntry.netProfit,
+          notes: existingEntry.notes
+        },
         totals: {
           totalRevenue: newTotalRevenue,
           totalExpenses: newTotalExpenses,
