@@ -819,7 +819,7 @@ body {
 
 /* Forçar conteúdo da integração no topo */
 #integrationTab.active {
-    margin-top: -200px !important;
+    margin-top: -600px !important;
     padding-top: 0 !important;
     position: relative !important;
     top: 0 !important;
