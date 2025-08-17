@@ -82,11 +82,22 @@ router.get('/tokens', authenticateToken, async (req, res) => {
     try {
         console.log('🔗 [INTEGRATION] Listando tokens do usuário:', req.user._id);
         
+        // Primeiro, vamos verificar se existem tokens sem populate
+        const rawTokens = await IntegrationToken.find({ user: req.user._id });
+        console.log(`🔍 [INTEGRATION] Tokens brutos encontrados: ${rawTokens.length}`);
+        console.log('🔍 [INTEGRATION] IDs dos tokens brutos:', rawTokens.map(t => t._id));
+        
         const tokens = await IntegrationToken.find({ user: req.user._id })
             .populate('videos.video', 'title url')
             .sort({ createdAt: -1 });
 
-        console.log(`✅ [INTEGRATION] ${tokens.length} tokens encontrados`);
+        console.log(`✅ [INTEGRATION] ${tokens.length} tokens encontrados após populate`);
+        console.log('🔍 [INTEGRATION] Tokens encontrados:', tokens.map(t => ({
+            id: t._id,
+            name: t.name,
+            token: t.token,
+            user: t.user
+        })));
 
         res.json({
             tokens: tokens.map(token => token.toPublicJSON())
@@ -143,6 +154,17 @@ router.post('/tokens', authenticateToken, tokenValidation, handleValidationError
         await token.save();
 
         console.log('✅ [INTEGRATION] Token criado com sucesso:', token._id);
+        console.log('🔍 [INTEGRATION] Token salvo:', {
+            id: token._id,
+            name: token.name,
+            token: token.token,
+            user: token.user,
+            createdAt: token.createdAt
+        });
+        
+        // Verificar se o token foi realmente salvo
+        const savedToken = await IntegrationToken.findById(token._id);
+        console.log('🔍 [INTEGRATION] Token verificado após salvar:', savedToken ? 'ENCONTRADO' : 'NÃO ENCONTRADO');
 
         res.status(201).json({
             message: 'Token de integração criado com sucesso',
