@@ -2472,7 +2472,7 @@ function calculateMonthlyProjection(data) {
     const today = new Date();
     const currentDay = today.getDate();
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const daysRemaining = daysInMonth - currentDay;
+    const localDaysRemaining = daysInMonth - currentDay; // Usar variável local para evitar conflito
     
     // Calcular média diária atual (usando lucro em vez de receita)
     const currentProfit = data.totalProfit || 0;
@@ -2482,20 +2482,20 @@ function calculateMonthlyProjection(data) {
     // Calcular projeção considerando diminuição nos últimos 10 dias
     let projectedProfit = currentProfit;
     
-    if (daysRemaining > 0) {
+    if (localDaysRemaining > 0) {
         const last10DaysStart = daysInMonth - 9; // Últimos 10 dias do mês
         
         if (currentDay < last10DaysStart) {
             // Ainda não chegou nos últimos 10 dias
             const normalDays = last10DaysStart - currentDay;
-            const last10Days = Math.min(daysRemaining, 10);
+            const last10Days = Math.min(localDaysRemaining, 10);
             
             // Projeção normal + projeção com diminuição
             projectedProfit += (currentDailyAverage * normalDays);
             projectedProfit += (currentDailyAverage * last10Days * 0.75); // 25% de diminuição média
         } else {
             // Já está nos últimos 10 dias
-            const remainingLast10Days = Math.min(daysRemaining, daysInMonth - currentDay + 1);
+            const remainingLast10Days = Math.min(localDaysRemaining, daysInMonth - currentDay + 1);
             projectedProfit += (currentDailyAverage * remainingLast10Days * 0.75);
         }
     }
@@ -2509,11 +2509,16 @@ function calculateMonthlyProjection(data) {
     // NOTA: Os dias restantes são calculados pelo backend baseado na data limite configurada
     // Não sobrescrever aqui para evitar conflitos
     
-    // Atualizar média diária necessária para atingir a meta
-    const monthlyGoal = parseFloat(document.getElementById('monthlyGoal')?.value || 0);
+    // Atualizar média diária necessária para atingir a meta (usar dados do backend se disponível)
+    const monthlyGoal = data.monthlyGoal || parseFloat(document.getElementById('monthlyGoal')?.value || 0);
     if (monthlyGoal > 0) {
         const remainingToGoal = monthlyGoal - currentProfit;
-        const dailyNeeded = remainingToGoal / daysRemaining;
+        // Usar dados do backend se disponível, senão usar cálculo local
+        const daysForCalculation = (data.daysRemaining !== undefined && data.daysRemaining !== null) 
+            ? data.daysRemaining 
+            : localDaysRemaining;
+        
+        const dailyNeeded = daysForCalculation > 0 ? remainingToGoal / daysForCalculation : 0;
         
         const dailyNeededElement = document.getElementById('dailyNeeded');
         if (dailyNeededElement) {
@@ -3184,18 +3189,28 @@ function calculateAllMetrics(data) {
     // Calcular projeção mensal
     const projection = calculateMonthlyProjection(data);
     
-    // Calcular média diária necessária
-    if (data.monthlyGoal > 0) {
-        const today = new Date();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const daysRemaining = daysInMonth - today.getDate();
+    // Calcular média diária necessária usando dados do backend
+    if (data.monthlyGoal > 0 && data.daysRemaining !== undefined && data.daysRemaining !== null) {
         const remainingToGoal = data.monthlyGoal - data.totalProfit;
-        const dailyNeeded = daysRemaining > 0 ? remainingToGoal / daysRemaining : 0;
+        const dailyNeeded = data.daysRemaining > 0 ? remainingToGoal / data.daysRemaining : 0;
         
         const dailyNeededElement = document.getElementById('dailyNeeded');
         if (dailyNeededElement) {
             dailyNeededElement.textContent = `R$ ${dailyNeeded.toFixed(2).replace('.', ',')}`;
         }
+        
+        console.log('📊 [METRICS] Média diária necessária calculada:', {
+            monthlyGoal: data.monthlyGoal,
+            totalProfit: data.totalProfit,
+            daysRemaining: data.daysRemaining,
+            remainingToGoal: remainingToGoal,
+            dailyNeeded: dailyNeeded
+        });
+    } else {
+        console.log('⚠️ [METRICS] Dados insuficientes para calcular média diária necessária:', {
+            monthlyGoal: data.monthlyGoal,
+            daysRemaining: data.daysRemaining
+        });
     }
 }
 
