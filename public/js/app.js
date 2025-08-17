@@ -3031,6 +3031,7 @@ function updateSummaryTab(data) {
         totalRevenue: data.totalRevenue,
         totalExpenses: data.totalExpenses,
         daysRemaining: data.daysRemaining,
+        deadlineDate: data.deadlineDate,
         entriesCount: data.entries?.length || 0
     });
     
@@ -3040,8 +3041,6 @@ function updateSummaryTab(data) {
         const monthlyGoalValue = data.monthlyGoal || 0;
         monthlyGoalDisplay.textContent = `R$ ${monthlyGoalValue.toFixed(2).replace('.', ',')}`;
         console.log('💰 [FRONTEND-RESUMO] Meta mensal atualizada:', monthlyGoalValue);
-    } else {
-        console.log('⚠️ [FRONTEND-RESUMO] Elemento monthlyGoalDisplay não encontrado');
     }
     
     // Progresso da meta
@@ -3051,65 +3050,108 @@ function updateSummaryTab(data) {
         const progressPercent = Math.min(progress, 100);
         goalProgressDisplay.textContent = `${progressPercent.toFixed(1)}%`;
         
-        console.log('📈 [FRONTEND-RESUMO] Progresso calculado:', {
-            totalProfit: data.totalProfit,
-            monthlyGoal: data.monthlyGoal,
-            progress: progress,
-            progressPercent: progressPercent
-        });
+        console.log('📈 [FRONTEND-RESUMO] Progresso calculado:', progressPercent);
         
         // Atualizar anel de progresso
-        console.log('🔄 [FRONTEND-RESUMO] Atualizando anel de progresso');
-        updateProgressRing(progress);
-    } else {
-        console.log('⚠️ [FRONTEND-RESUMO] Elemento goalProgressDisplay não encontrado ou meta zero');
+        updateProgressRing(progressPercent);
     }
     
-    // Dias restantes - sempre usar dados do backend
+    // Dias restantes
     const daysRemaining = document.getElementById('daysRemaining');
+    const deadlineDate = document.getElementById('deadlineDate');
     if (daysRemaining) {
-        console.log('📅 [FRONTEND-RESUMO] Dados recebidos para dias restantes:', {
-            daysRemaining: data.daysRemaining,
-            deadlineDate: data.deadlineDate,
-            monthlyGoal: data.monthlyGoal,
-            typeOfDaysRemaining: typeof data.daysRemaining,
-            isNull: data.daysRemaining === null,
-            isUndefined: data.daysRemaining === undefined
+        if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
+            daysRemaining.textContent = `${data.daysRemaining} dias`;
+            
+            // Atualizar data limite
+            if (deadlineDate && data.deadlineDate) {
+                const deadline = new Date(data.deadlineDate);
+                deadlineDate.textContent = `Meta até ${deadline.toLocaleDateString('pt-BR')}`;
+            }
+            
+            console.log('📅 [FRONTEND-RESUMO] Dias restantes atualizados:', data.daysRemaining);
+        } else {
+            daysRemaining.textContent = 'Não configurado';
+            if (deadlineDate) {
+                deadlineDate.textContent = 'Meta não configurada';
+            }
+        }
+    }
+    
+    // Lucro total
+    const totalProfit = document.getElementById('totalProfit');
+    if (totalProfit) {
+        totalProfit.textContent = `R$ ${(data.totalProfit || 0).toFixed(2).replace('.', ',')}`;
+    }
+    
+    // Lucro de hoje
+    const todayProfit = document.getElementById('todayProfit');
+    const todayDate = document.getElementById('todayDate');
+    if (todayProfit && data.entries && data.entries.length > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const todayEntries = data.entries.filter(entry => {
+            const entryDate = new Date(entry.date).toISOString().split('T')[0];
+            return entryDate === today;
         });
         
-        console.log('📅 [FRONTEND-RESUMO] Valor atual do elemento antes da mudança:', daysRemaining.textContent);
+        const todayProfitValue = todayEntries.reduce((total, entry) => {
+            return total + (entry.netProfit || 0);
+        }, 0);
         
-        if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
-            // Usar dados do backend (calculados baseados na data limite)
-            const daysText = `${data.daysRemaining} dias`;
-            daysRemaining.textContent = daysText;
-            console.log('📅 [FRONTEND-RESUMO] Dias restantes definidos como:', daysText);
-            console.log('📅 [FRONTEND-RESUMO] Valor original do backend:', data.daysRemaining);
-            
-            // Verificar se o valor foi realmente definido
-            setTimeout(() => {
-                const currentValue = daysRemaining.textContent;
-                console.log('📅 [FRONTEND-RESUMO] Valor atual após definição:', currentValue);
-                console.log('📅 [FRONTEND-RESUMO] Elemento ainda existe no DOM:', document.body.contains(daysRemaining));
-            }, 100);
-        } else {
-            // Se não há data limite configurada, mostrar mensagem
-            daysRemaining.textContent = 'Não configurado';
-            console.log('⚠️ [FRONTEND-RESUMO] Data limite não configurada - valor recebido:', data.daysRemaining);
+        todayProfit.textContent = `R$ ${todayProfitValue.toFixed(2).replace('.', ',')}`;
+        
+        if (todayDate) {
+            todayDate.textContent = `Hoje (${new Date().toLocaleDateString('pt-BR')})`;
         }
-    } else {
-        console.log('⚠️ [FRONTEND-RESUMO] Elemento daysRemaining não encontrado no DOM');
+        
+        console.log('💰 [FRONTEND-RESUMO] Lucro de hoje calculado:', todayProfitValue);
+    } else if (todayProfit) {
+        todayProfit.textContent = 'R$ 0,00';
+        if (todayDate) {
+            todayDate.textContent = `Hoje (${new Date().toLocaleDateString('pt-BR')})`;
+        }
+    }
+    
+    // Faturamento total
+    const totalRevenue = document.getElementById('totalRevenue');
+    if (totalRevenue) {
+        totalRevenue.textContent = `R$ ${(data.totalRevenue || 0).toFixed(2).replace('.', ',')}`;
     }
     
     // Projeção mensal
     const monthlyProjection = document.getElementById('monthlyProjection');
     if (monthlyProjection) {
-        console.log('📊 [FRONTEND-RESUMO] Calculando projeção mensal');
         const projection = calculateMonthlyProjection(data);
         monthlyProjection.textContent = `R$ ${projection.toFixed(2).replace('.', ',')}`;
         console.log('📈 [FRONTEND-RESUMO] Projeção mensal calculada:', projection);
-    } else {
-        console.log('⚠️ [FRONTEND-RESUMO] Elemento monthlyProjection não encontrado');
+    }
+    
+    // Métricas adicionais
+    const dailyNeeded = document.getElementById('dailyNeeded');
+    const entriesCount = document.getElementById('entriesCount');
+    const bestDay = document.getElementById('bestDay');
+    const worstDay = document.getElementById('worstDay');
+    
+    if (dailyNeeded && data.monthlyGoal > 0 && data.daysRemaining > 0) {
+        const remainingToGoal = data.monthlyGoal - data.totalProfit;
+        const dailyNeededValue = remainingToGoal / data.daysRemaining;
+        dailyNeeded.textContent = `R$ ${dailyNeededValue.toFixed(2).replace('.', ',')}`;
+    }
+    
+    if (entriesCount) {
+        entriesCount.textContent = data.entries?.length || 0;
+    }
+    
+    if (bestDay && data.entries && data.entries.length > 0) {
+        const profits = data.entries.map(entry => entry.netProfit || 0);
+        const bestDayValue = Math.max(...profits);
+        bestDay.textContent = `R$ ${bestDayValue.toFixed(2).replace('.', ',')}`;
+    }
+    
+    if (worstDay && data.entries && data.entries.length > 0) {
+        const profits = data.entries.map(entry => entry.netProfit || 0);
+        const worstDayValue = Math.min(...profits);
+        worstDay.textContent = `R$ ${worstDayValue.toFixed(2).replace('.', ',')}`;
     }
     
     console.log('✅ [FRONTEND-RESUMO] Atualização do resumo geral concluída');
@@ -3197,12 +3239,12 @@ function calculateAllMetrics(data) {
 
 // Atualizar anel de progresso
 function updateProgressRing(progress) {
-    const progressRing = document.querySelector('.ring-progress');
-    if (progressRing) {
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
         const circumference = 2 * Math.PI * 45; // r = 45
         const offset = circumference - (progress / 100) * circumference;
-        progressRing.style.strokeDasharray = circumference;
-        progressRing.style.strokeDashoffset = offset;
+        progressFill.style.strokeDasharray = circumference;
+        progressFill.style.strokeDashoffset = offset;
     }
 }
 

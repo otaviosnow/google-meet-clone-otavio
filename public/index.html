@@ -6,7 +6,7 @@
     <title>CALLX</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -351,58 +351,122 @@
                             
                             <!-- Aba 2: Resumo Geral -->
                             <div id="summary-tab" class="tab-panel">
-                                <div class="goals-overview">
-                                    <div class="overview-card cosmic-card">
-                                        <div class="card-glow"></div>
-                                        <div class="overview-icon cosmic-icon">
-                                            <i class="fas fa-bullseye"></i>
-                                            <div class="icon-rings"></div>
+                                <div class="summary-container">
+                                    <!-- Cards Principais -->
+                                    <div class="summary-grid">
+                                        <!-- Meta Mensal -->
+                                        <div class="summary-card primary-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-bullseye"></i>
+                                                <h3>Meta Mensal</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="monthlyGoalDisplay">R$ 0,00</span>
+                                            </div>
+                                            <div class="card-progress">
+                                                <div class="progress-ring">
+                                                    <svg viewBox="0 0 100 100">
+                                                        <circle class="progress-bg" cx="50" cy="50" r="45"></circle>
+                                                        <circle class="progress-fill" cx="50" cy="50" r="45"></circle>
+                                                    </svg>
+                                                    <div class="progress-text">
+                                                        <span id="goalProgressDisplay">0%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="overview-info">
-                                            <h3>Meta Mensal</h3>
-                                            <p id="monthlyGoalDisplay" class="cosmic-text">R$ 0,00</p>
-                                            <div class="progress-ring">
-                                                <svg class="ring-svg" viewBox="0 0 100 100">
-                                                    <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                                                    <circle class="ring-progress" cx="50" cy="50" r="45"></circle>
-                                                </svg>
+
+                                        <!-- Dias Restantes -->
+                                        <div class="summary-card info-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-clock"></i>
+                                                <h3>Dias Restantes</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="daysRemaining">0 dias</span>
+                                            </div>
+                                            <div class="card-subtitle">
+                                                <span id="deadlineDate">Meta não configurada</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Lucro Total -->
+                                        <div class="summary-card success-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-chart-line"></i>
+                                                <h3>Lucro Total</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="totalProfit">R$ 0,00</span>
+                                            </div>
+                                            <div class="card-subtitle">
+                                                <span>Este mês</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Lucro de Hoje -->
+                                        <div class="summary-card today-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-sun"></i>
+                                                <h3>Lucro de Hoje</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="todayProfit">R$ 0,00</span>
+                                            </div>
+                                            <div class="card-subtitle">
+                                                <span id="todayDate">Hoje</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Faturamento Total -->
+                                        <div class="summary-card revenue-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-dollar-sign"></i>
+                                                <h3>Faturamento Total</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="totalRevenue">R$ 0,00</span>
+                                            </div>
+                                            <div class="card-subtitle">
+                                                <span>Este mês</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Projeção Mensal -->
+                                        <div class="summary-card projection-card">
+                                            <div class="card-header">
+                                                <i class="fas fa-rocket"></i>
+                                                <h3>Projeção Mensal</h3>
+                                            </div>
+                                            <div class="card-value">
+                                                <span id="monthlyProjection">R$ 0,00</span>
+                                            </div>
+                                            <div class="card-subtitle">
+                                                <span>Baseado no desempenho atual</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="overview-card cosmic-card">
-                                        <div class="card-glow"></div>
-                                        <div class="overview-icon cosmic-icon">
-                                            <i class="fas fa-chart-line"></i>
-                                            <div class="icon-rings"></div>
-                                        </div>
-                                        <div class="overview-info">
-                                            <h3>Progresso</h3>
-                                            <p id="goalProgressDisplay" class="cosmic-text">0%</p>
-                                            <div class="floating-particles"></div>
-                                        </div>
-                                    </div>
-                                    <div class="overview-card cosmic-card">
-                                        <div class="card-glow"></div>
-                                        <div class="overview-icon cosmic-icon">
-                                            <i class="fas fa-clock"></i>
-                                            <div class="icon-rings"></div>
-                                        </div>
-                                        <div class="overview-info">
-                                            <h3>Dias Restantes</h3>
-                                            <p id="daysRemaining" class="cosmic-text">0 dias</p>
-                                            <div class="time-waves"></div>
-                                        </div>
-                                    </div>
-                                    <div class="overview-card cosmic-card">
-                                        <div class="card-glow"></div>
-                                        <div class="overview-icon cosmic-icon">
-                                            <i class="fas fa-chart-line"></i>
-                                            <div class="icon-rings"></div>
-                                        </div>
-                                        <div class="overview-info">
-                                            <h3>PROJEÇÃO MENSAL</h3>
-                                            <p id="monthlyProjection" class="cosmic-text">R$ 0,00</p>
-                                            <small class="projection-note">*Considera diminuição nos últimos 10 dias</small>
+
+                                    <!-- Métricas Adicionais -->
+                                    <div class="metrics-section">
+                                        <h3>Métricas de Performance</h3>
+                                        <div class="metrics-grid">
+                                            <div class="metric-item">
+                                                <div class="metric-label">Média Diária Necessária</div>
+                                                <div class="metric-value" id="dailyNeeded">R$ 0,00</div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="metric-label">Entradas no Mês</div>
+                                                <div class="metric-value" id="entriesCount">0</div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="metric-label">Melhor Dia</div>
+                                                <div class="metric-value" id="bestDay">R$ 0,00</div>
+                                            </div>
+                                            <div class="metric-item">
+                                                <div class="metric-label">Pior Dia</div>
+                                                <div class="metric-value" id="worstDay">R$ 0,00</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
