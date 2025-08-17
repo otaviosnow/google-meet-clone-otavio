@@ -346,70 +346,12 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     });
     
     if (existingEntry) {
-      console.log('⚠️ [ENTRADA] Entrada já existe para esta data, substituindo...');
+      console.log('⚠️ [ENTRADA] Entrada já existe para esta data, retornando erro para confirmação...');
       
-      // Calcular valores anteriores para histórico
-      const previousValues = {
-        grossRevenue: existingEntry.grossRevenue,
-        chipCost: existingEntry.chipCost,
-        additionalCost: existingEntry.additionalCost,
-        adsCost: existingEntry.adsCost,
-        totalExpenses: existingEntry.totalExpenses,
-        netProfit: existingEntry.netProfit,
-        notes: existingEntry.notes
-      };
-      
-      console.log('📊 [ENTRADA] Valores anteriores:', previousValues);
-      
-      // Atualizar entrada existente
-      existingEntry.grossRevenue = grossRevenue || 0;
-      existingEntry.chipCost = chipCost || 0;
-      existingEntry.additionalCost = additionalCost || 0;
-      existingEntry.adsCost = adsCost || 0;
-      existingEntry.notes = notes;
-      
-      // Recalcular valores derivados
-      existingEntry.totalExpenses = (chipCost || 0) + (additionalCost || 0) + (adsCost || 0);
-      existingEntry.netProfit = (grossRevenue || 0) - existingEntry.totalExpenses;
-      
-      await existingEntry.save();
-      
-      console.log('✅ [ENTRADA] Entrada atualizada:', {
-        id: existingEntry._id,
-        date: existingEntry.date,
-        grossRevenue: existingEntry.grossRevenue,
-        chipCost: existingEntry.chipCost,
-        additionalCost: existingEntry.additionalCost,
-        adsCost: existingEntry.adsCost,
-        totalExpenses: existingEntry.totalExpenses,
-        netProfit: existingEntry.netProfit
-      });
-      
-      // Registrar no histórico de modificações
-      await FinancialHistory.createEntryHistory(req.user._id, existingEntry, 'update', previousValues);
-      
-      // Calcular novos totais do mês
-      const startOfMonth = new Date(new Date(date).getFullYear(), new Date(date).getMonth(), 1);
-      const endOfMonth = new Date(new Date(date).getFullYear(), new Date(date).getMonth() + 1, 0);
-      
-      const allEntries = await FinancialEntry.find({
-        user: req.user._id,
-        date: { $gte: startOfMonth, $lte: endOfMonth }
-      });
-      
-      const newTotalRevenue = allEntries.reduce((sum, entry) => sum + entry.grossRevenue, 0);
-      const newTotalExpenses = allEntries.reduce((sum, entry) => sum + entry.totalExpenses, 0);
-      const newTotalProfit = allEntries.reduce((sum, entry) => sum + entry.netProfit, 0);
-      
-      console.log('📈 [ENTRADA] Novos totais após atualização:', {
-        totalRevenue: newTotalRevenue,
-        totalExpenses: newTotalExpenses,
-        totalProfit: newTotalProfit
-      });
-      
-      res.json({
-        message: 'Entrada atualizada com sucesso',
-        entry: {
+      // Retornar erro com dados da entrada existente para o frontend perguntar
+      return res.status(409).json({
+        error: 'Já existe uma entrada para esta data',
+        existingEntry: {
           id: existingEntry._id,
           date: existingEntry.date,
           grossRevenue: existingEntry.grossRevenue,
@@ -419,15 +361,8 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
           totalExpenses: existingEntry.totalExpenses,
           netProfit: existingEntry.netProfit,
           notes: existingEntry.notes
-        },
-        totals: {
-          totalRevenue: newTotalRevenue,
-          totalExpenses: newTotalExpenses,
-          totalProfit: newTotalProfit
         }
       });
-      
-      return;
     }
     
     console.log('✅ [ENTRADA] Nenhuma entrada existente encontrada para esta data');

@@ -3077,6 +3077,8 @@ function updateSummaryTab(data) {
             isUndefined: data.daysRemaining === undefined
         });
         
+        console.log('📅 [FRONTEND-RESUMO] Valor atual do elemento antes da mudança:', daysRemaining.textContent);
+        
         if (data.daysRemaining !== undefined && data.daysRemaining !== null) {
             // Usar dados do backend (calculados baseados na data limite)
             const daysText = `${data.daysRemaining} dias`;
@@ -3088,6 +3090,7 @@ function updateSummaryTab(data) {
             setTimeout(() => {
                 const currentValue = daysRemaining.textContent;
                 console.log('📅 [FRONTEND-RESUMO] Valor atual após definição:', currentValue);
+                console.log('📅 [FRONTEND-RESUMO] Elemento ainda existe no DOM:', document.body.contains(daysRemaining));
             }, 100);
         } else {
             // Se não há data limite configurada, mostrar mensagem
@@ -3152,6 +3155,11 @@ function updateDashboardTab(data) {
 // Atualizar aba histórico
 function updateHistoryTab(data) {
     console.log('📝 [FRONTEND-HISTORY] Iniciando atualização do histórico');
+    console.log('📝 [FRONTEND-HISTORY] Dados recebidos:', {
+        entriesCount: data.entries?.length || 0,
+        totalProfit: data.totalProfit,
+        totalRevenue: data.totalRevenue
+    });
     
     // Carregar dados específicos do histórico (não do resumo geral)
     loadFinancialHistory();
@@ -3358,6 +3366,9 @@ async function loadFinancialHistory() {
 function renderFinancialHistory(entries) {
     console.log('📋 [RENDER-HISTORY] Iniciando renderização do histórico');
     console.log('📋 [RENDER-HISTORY] Entradas recebidas:', entries);
+    console.log('📋 [RENDER-HISTORY] Tipo de entries:', typeof entries);
+    console.log('📋 [RENDER-HISTORY] É array?', Array.isArray(entries));
+    console.log('📋 [RENDER-HISTORY] Comprimento:', entries ? entries.length : 'null/undefined');
     
     const historyTableBody = document.getElementById('historyTableBody');
     if (!historyTableBody) {
@@ -3365,7 +3376,7 @@ function renderFinancialHistory(entries) {
         return;
     }
 
-    console.log('📋 [RENDER-HISTORY] Limpando tabela existente');
+    console.log('📋 [RENDER-HISTORY] Elemento historyTableBody encontrado, limpando tabela existente');
     historyTableBody.innerHTML = '';
 
     if (!entries || entries.length === 0) {
