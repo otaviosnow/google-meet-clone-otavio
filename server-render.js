@@ -263,7 +263,6 @@ app.get('/test-auth', (req, res) => {
     console.log('📂 Diretório atual:', __dirname);
     
     // Verificar se o diretório existe e listar arquivos
-    const fs = require('fs');
     if (fs.existsSync(uploadsPath)) {
         try {
             const files = fs.readdirSync(uploadsPath);
@@ -279,7 +278,6 @@ app.get('/test-auth', (req, res) => {
 
     // Middleware para verificar se arquivo existe
     app.use('/uploads/*', (req, res, next) => {
-        const fs = require('fs');
         const filePath = path.join(uploadsPath, req.params[0]);
         console.log('📁 Verificando arquivo:', filePath);
         
@@ -301,7 +299,6 @@ app.get('/test-auth', (req, res) => {
         console.log('📥 GET /api/test - API de teste acessada');
         
         // Verificar status do disco persistente
-        const fs = require('fs');
         let uploadsStatus = 'unknown';
         let fileCount = 0;
         
