@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Obter dados da reunião da URL
     const urlParams = new URLSearchParams(window.location.search);
     const meetingIdFromUrl = urlParams.get('meetingId');
-    const videoUrl = urlParams.get('video');
     const demoParam = urlParams.get('demo');
     
     // Verificar se é modo demonstração
@@ -62,7 +61,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('🔍 Parâmetros da URL:', {
         meetingIdFromUrl,
-        videoUrl,
         demoParam,
         isDemoMode,
         fullUrl: window.location.href
@@ -88,7 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (isInCall === 'true') {
             console.log('🔄 Usuário já estava na chamada - restaurando...');
             showCallScreen();
-            startCall(videoUrl);
+            // Buscar vídeo da reunião via API
+            loadMeetingVideo();
         } else {
             console.log('🆕 Primeira vez - mostrando tela de nome');
             showNameScreen();
@@ -353,10 +352,50 @@ function joinCall() {
     // Mostrar tela de chamada
     showCallScreen();
     
-    // Iniciar chamada
-    startCall();
+    // Carregar vídeo da reunião via API
+    if (!isDemoMode && meetingId) {
+        loadMeetingVideo();
+    } else {
+        // Para demonstração ou sem meeting ID, usar vídeo padrão
+        startCall();
+    }
     
     console.log('✅ Usuário entrou na chamada');
+}
+
+// Função para carregar o vídeo da reunião via API
+async function loadMeetingVideo() {
+    if (!meetingId) {
+        console.error('❌ Meeting ID não encontrado');
+        return;
+    }
+    
+    try {
+        console.log('🔍 [VIDEO] Buscando dados da reunião:', meetingId);
+        
+        const response = await fetch(`/api/meetings/${meetingId}`);
+        
+        if (!response.ok) {
+            console.error('❌ [VIDEO] Erro ao buscar reunião:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        console.log('✅ [VIDEO] Dados da reunião obtidos:', data);
+        
+        if (data.meeting && data.meeting.video) {
+            const videoUrl = data.meeting.video.url;
+            console.log('🎬 [VIDEO] URL do vídeo encontrada:', videoUrl);
+            startCall(videoUrl);
+        } else {
+            console.warn('⚠️ [VIDEO] Nenhum vídeo encontrado na reunião');
+            startCall(); // Usar vídeo padrão
+        }
+        
+    } catch (error) {
+        console.error('❌ [VIDEO] Erro ao carregar vídeo da reunião:', error);
+        startCall(); // Usar vídeo padrão em caso de erro
+    }
 }
 
 // Função para iniciar a chamada
@@ -394,12 +433,19 @@ function startVSL(videoUrl = null) {
     vslVideo.volume = 1.0; // Volume máximo
     
     // Definir fonte do vídeo
-    if (videoUrl) {
+    if (videoUrl && videoUrl.trim() !== '') {
         console.log('🎬 Carregando vídeo da URL:', videoUrl);
         vslVideo.src = videoUrl;
     } else {
         console.log('🎬 Usando vídeo padrão');
-        vslVideo.src = 'CRIATIVO 6.mp4';
+        // Usar um vídeo de exemplo que existe ou criar um placeholder
+        vslVideo.src = '/uploads/default-video.mp4';
+        
+        // Se o vídeo padrão não existir, criar um vídeo placeholder
+        vslVideo.addEventListener('error', function(e) {
+            console.warn('⚠️ Vídeo padrão não encontrado, criando placeholder...');
+            createVideoPlaceholder();
+        });
     }
     
     vslVideo.addEventListener('loadstart', function() {
@@ -446,6 +492,52 @@ function startVSL(videoUrl = null) {
     setTimeout(function() {
         attemptAutoplay();
     }, 500);
+}
+
+// Função para criar um vídeo placeholder quando não há vídeo disponível
+function createVideoPlaceholder() {
+    console.log('🎬 Criando vídeo placeholder...');
+    
+    // Criar um canvas com texto
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    
+    // Fundo escuro
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Texto central
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Vídeo não disponível', canvas.width / 2, canvas.height / 2 - 20);
+    
+    ctx.font = '16px Arial';
+    ctx.fillText('Adicione um vídeo para começar', canvas.width / 2, canvas.height / 2 + 20);
+    
+    // Converter canvas para blob e criar URL
+    canvas.toBlob(function(blob) {
+        const videoUrl = URL.createObjectURL(blob);
+        vslVideo.src = videoUrl;
+        
+        // Configurar o vídeo placeholder
+        vslVideo.loop = true;
+        vslVideo.muted = true;
+        vslVideo.volume = 0;
+        
+        console.log('✅ Vídeo placeholder criado com sucesso');
+        
+        // Tentar reproduzir o placeholder
+        setTimeout(function() {
+            vslVideo.play().then(function() {
+                console.log('✅ Placeholder reproduzindo com sucesso');
+            }).catch(function(error) {
+                console.warn('⚠️ Erro ao reproduzir placeholder:', error);
+            });
+        }, 100);
+    }, 'image/png');
 }
 
 // Função para notificar o backend sobre a duração do vídeo

@@ -1935,6 +1935,10 @@ async function handleAddVideo(e) {
     }
     
     try {
+        console.log('🎬 [VIDEO] Iniciando upload de vídeo...');
+        console.log('📁 [VIDEO] Tipo:', type);
+        console.log('📊 [VIDEO] Tamanho do FormData:', formData.entries().length);
+        
         const response = await fetch(`${API_BASE_URL}/videos`, {
             method: 'POST',
             headers: {
@@ -1943,22 +1947,53 @@ async function handleAddVideo(e) {
             body: formData
         });
         
-        const result = await response.json();
+        console.log('📡 [VIDEO] Response status:', response.status);
+        console.log('📡 [VIDEO] Response headers:', response.headers);
         
-        if (response.ok) {
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ [VIDEO] Erro na resposta:', errorText);
+            
+            let errorMessage = 'Erro ao adicionar vídeo';
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                errorMessage = errorText || errorMessage;
+            }
+            
             hideUploadProgress();
-            hideModal(addVideoModal);
-            addVideoForm.reset();
-            loadVideos();
-            showNotification('Vídeo adicionado com sucesso!', 'success');
-        } else {
-            hideUploadProgress();
-            showNotification(result.error, 'error');
+            showNotification(errorMessage, 'error');
+            return;
         }
-    } catch (error) {
-        console.error('Erro ao adicionar vídeo:', error);
+        
+        const result = await response.json();
+        console.log('✅ [VIDEO] Upload bem-sucedido:', result);
+        
         hideUploadProgress();
-        showNotification('Erro ao adicionar vídeo', 'error');
+        hideModal(addVideoModal);
+        addVideoForm.reset();
+        loadVideos();
+        showNotification('Vídeo adicionado com sucesso!', 'success');
+        
+    } catch (error) {
+        console.error('❌ [VIDEO] Erro ao adicionar vídeo:', error);
+        console.error('❌ [VIDEO] Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        hideUploadProgress();
+        
+        let errorMessage = 'Erro ao adicionar vídeo';
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        } else if (error.name === 'AbortError') {
+            errorMessage = 'Upload cancelado ou interrompido.';
+        }
+        
+        showNotification(errorMessage, 'error');
     }
 }
 

@@ -56,6 +56,10 @@ const meetingSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    linkExpiresAt: {
+        type: Date,
+        default: null // Será definido quando a reunião for encerrada
+    },
     maxDuration: {
         type: Number,
         default: 20 * 60 * 1000 // 20 minutos em milissegundos (fallback)
@@ -90,9 +94,14 @@ const meetingSchema = new mongoose.Schema({
 
 // Método para verificar se um IP pode acessar a reunião
 meetingSchema.methods.canAccess = function(ip) {
-    // Se a reunião foi encerrada, ninguém pode acessar
+    // Se a reunião foi encerrada, verificar se o link expirou
     if (this.status === 'ended') {
-        return false;
+        // Se o link expirou (5 minutos após encerramento), ninguém pode acessar
+        if (this.linkExpiresAt && new Date() > this.linkExpiresAt) {
+            return false;
+        }
+        // Se ainda não expirou, permitir acesso para ver a tela de encerramento
+        return true;
     }
     
     // Verificar se a reunião expirou por tempo
@@ -173,6 +182,8 @@ meetingSchema.methods.authorizeAccess = function(ip) {
 meetingSchema.methods.endMeeting = function() {
     this.status = 'ended';
     this.endedAt = new Date();
+    // Definir expiração do link para 5 minutos após encerramento
+    this.linkExpiresAt = new Date(this.endedAt.getTime() + (5 * 60 * 1000));
     return this.save();
 };
 
