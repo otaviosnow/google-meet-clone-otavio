@@ -285,10 +285,40 @@ function initializeEventListeners() {
     });
     
     // Forms
+console.log('🔍 [FORMS] Verificando formulários:', {
+    loginForm: !!loginForm,
+    registerForm: !!registerForm,
+    forgotPasswordForm: !!forgotPasswordForm,
+    resetPasswordForm: !!resetPasswordForm
+});
+
+if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
+    console.log('✅ [FORMS] Event listener adicionado ao loginForm');
+} else {
+    console.error('❌ [FORMS] loginForm não encontrado');
+}
+
+if (registerForm) {
     registerForm.addEventListener('submit', handleRegister);
+    console.log('✅ [FORMS] Event listener adicionado ao registerForm');
+} else {
+    console.error('❌ [FORMS] registerForm não encontrado');
+}
+
+if (forgotPasswordForm) {
     forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    console.log('✅ [FORMS] Event listener adicionado ao forgotPasswordForm');
+} else {
+    console.error('❌ [FORMS] forgotPasswordForm não encontrado');
+}
+
+if (resetPasswordForm) {
     resetPasswordForm.addEventListener('submit', handleResetPassword);
+    console.log('✅ [FORMS] Event listener adicionado ao resetPasswordForm');
+} else {
+    console.error('❌ [FORMS] resetPasswordForm não encontrado');
+}
     
     // Controle do botão de registrar baseado no aceite dos termos
     const acceptTermsCheckbox = document.getElementById('acceptTerms');
@@ -553,11 +583,21 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
     
+    console.log('🔍 [REGISTER] Função handleRegister iniciada');
+    console.log('🔍 [REGISTER] Formulário:', registerForm);
+    
     const formData = new FormData(registerForm);
     const name = formData.get('name') || document.getElementById('registerName').value;
     const email = formData.get('email') || document.getElementById('registerEmail').value;
     const password = formData.get('password') || document.getElementById('registerPassword').value;
     const acceptTerms = document.getElementById('acceptTerms').checked;
+    
+    console.log('🔍 [REGISTER] Valores extraídos:', {
+        name: name,
+        email: email,
+        password: password ? '***' : 'vazio',
+        acceptTerms: acceptTerms
+    });
     
     const data = {
         name,
@@ -566,8 +606,8 @@ async function handleRegister(e) {
         acceptTerms: acceptTerms
     };
     
-    console.log('🔍 Dados do registro:', data);
-    console.log('🔗 API URL:', `${API_BASE_URL}/auth/register`);
+    console.log('🔍 [REGISTER] Dados do registro:', data);
+    console.log('🔗 [REGISTER] API URL:', `${API_BASE_URL}/auth/register`);
     
     try {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
