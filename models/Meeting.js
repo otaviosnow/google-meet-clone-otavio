@@ -94,14 +94,9 @@ const meetingSchema = new mongoose.Schema({
 
 // Método para verificar se um IP pode acessar a reunião
 meetingSchema.methods.canAccess = function(ip) {
-    // Se a reunião foi encerrada, verificar se o link expirou
+    // Se a reunião foi encerrada, ninguém pode acessar
     if (this.status === 'ended') {
-        // Se o link expirou (5 minutos após encerramento), ninguém pode acessar
-        if (this.linkExpiresAt && new Date() > this.linkExpiresAt) {
-            return false;
-        }
-        // Se ainda não expirou, permitir acesso para ver a tela de encerramento
-        return true;
+        return false;
     }
     
     // Verificar se a reunião expirou por tempo
