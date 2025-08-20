@@ -192,7 +192,9 @@ router.put('/tokens/:tokenId', authenticateToken, async (req, res) => {
         }
 
         // Verificar se o vídeo pertence ao usuário (se fornecido)
-        if (videoId) {
+        if (videoId && videoId !== 'undefined' && videoId !== 'null') {
+            console.log('🎬 [INTEGRATION] Atualizando vídeo do token:', videoId);
+            
             const video = await Video.findOne({ _id: videoId, user: req.user._id });
             if (!video) {
                 return res.status(400).json({ 
@@ -210,6 +212,8 @@ router.put('/tokens/:tokenId', authenticateToken, async (req, res) => {
             }];
             
             console.log('✅ [INTEGRATION] Vídeo atualizado:', video.title);
+        } else {
+            console.log('⚠️ [INTEGRATION] Nenhum vídeo fornecido ou valor inválido:', videoId);
         }
 
         // Atualizar campos

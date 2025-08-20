@@ -4945,7 +4945,7 @@ async function saveTokenEdit(tokenId) {
     try {
         const name = document.getElementById('editTokenName').value.trim();
         const website = document.getElementById('editTokenWebsite').value.trim();
-        const videoId = document.getElementById('editTokenVideo').value;
+        const videoId = document.getElementById('editTokenVideo').value || null;
         const isActive = document.getElementById('editTokenActive').checked;
 
         if (!name) {
