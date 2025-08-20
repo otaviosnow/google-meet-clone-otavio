@@ -989,41 +989,4 @@ router.get('/modifications', authenticateToken, async (req, res) => {
   }
 });
 
-module.exports = router;
 
-    if (type && type !== 'all') {
-      query.type = type;
-    }
-    
-    if (action && action !== 'all') {
-      query.action = action;
-    }
-    
-    const modifications = await FinancialHistory.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit))
-      .populate('relatedEntry', 'date grossRevenue netProfit')
-      .populate('relatedGoal', 'monthlyGoal deadlineDate');
-    
-    const total = await FinancialHistory.countDocuments(query);
-    
-    res.json({
-      modifications: modifications.map(mod => mod.toPublicJSON()),
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-    
-  } catch (error) {
-    console.error('Erro ao listar modificações:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-module.exports = router;
