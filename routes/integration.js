@@ -178,10 +178,10 @@ router.post('/tokens', authenticateToken, tokenValidation, handleValidationError
 });
 
 // PUT /api/integration/tokens/:tokenId - Atualizar token
-router.put('/tokens/:tokenId', authenticateToken, tokenValidation, handleValidationErrors, async (req, res) => {
+router.put('/tokens/:tokenId', authenticateToken, async (req, res) => {
     try {
         const { tokenId } = req.params;
-        const { name, description, website, allowedOrigins, webhookUrl, videos, isActive } = req.body;
+        const { name, description, website, videoId, isActive } = req.body;
 
         console.log('🔗 [INTEGRATION] Atualizando token:', tokenId);
         console.log('📝 [INTEGRATION] Dados recebidos:', req.body);
@@ -191,27 +191,31 @@ router.put('/tokens/:tokenId', authenticateToken, tokenValidation, handleValidat
             return res.status(404).json({ error: 'Token não encontrado' });
         }
 
-        // Verificar se os vídeos pertencem ao usuário (se fornecidos)
-        if (videos && videos.length > 0) {
-            for (const videoConfig of videos) {
-                if (videoConfig.video) {
-                    const video = await Video.findOne({ _id: videoConfig.video, user: req.user._id });
-                    if (!video) {
-                        return res.status(400).json({ 
-                            error: `Vídeo ${videoConfig.video} não encontrado ou não pertence ao usuário` 
-                        });
-                    }
-                }
+        // Verificar se o vídeo pertence ao usuário (se fornecido)
+        if (videoId) {
+            const video = await Video.findOne({ _id: videoId, user: req.user._id });
+            if (!video) {
+                return res.status(400).json({ 
+                    error: `Vídeo ${videoId} não encontrado ou não pertence ao usuário` 
+                });
             }
+            
+            // Atualizar vídeos do token com o novo vídeo como padrão
+            token.videos = [{
+                video: videoId,
+                name: video.title,
+                description: video.description || '',
+                isDefault: true,
+                order: 0
+            }];
+            
+            console.log('✅ [INTEGRATION] Vídeo atualizado:', video.title);
         }
 
         // Atualizar campos
         if (name !== undefined) token.name = name;
         if (description !== undefined) token.description = description;
         if (website !== undefined) token.website = website;
-        if (allowedOrigins !== undefined) token.allowedOrigins = allowedOrigins;
-        if (webhookUrl !== undefined) token.webhookUrl = webhookUrl;
-        if (videos !== undefined) token.videos = videos;
         if (isActive !== undefined) token.isActive = isActive;
 
         await token.save();
