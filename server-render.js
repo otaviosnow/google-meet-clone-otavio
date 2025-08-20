@@ -316,13 +316,18 @@ function startAutomaticCleanup() {
     const CLEANUP_INTERVAL = 6 * 60 * 60 * 1000; // 6 horas em milissegundos
     
     // Executar limpeza imediatamente na inicialização
-    runCompleteCleanup().then(result => {
-        if (result.success) {
-            console.log(`✅ Limpeza inicial concluída: ${result.markedAsExpired} marcadas como expiradas, ${result.removedCount} removidas`);
-        } else {
-            console.error('❌ Erro na limpeza inicial:', result.error);
+    (async () => {
+        try {
+            const result = await runCompleteCleanup();
+            if (result.success) {
+                console.log(`✅ Limpeza inicial concluída: ${result.markedAsExpired} marcadas como expiradas, ${result.removedCount} removidas`);
+            } else {
+                console.error('❌ Erro na limpeza inicial:', result.error);
+            }
+        } catch (error) {
+            console.error('❌ Erro na limpeza inicial:', error);
         }
-    });
+    })();
     
     // Agendar limpeza periódica
     setInterval(async () => {

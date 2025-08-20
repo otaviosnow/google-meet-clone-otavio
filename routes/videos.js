@@ -332,26 +332,4 @@ router.post('/:id/increment-views', async (req, res) => {
   }
 });
 
-module.exports = router; 
-    if (!video) {
-      return res.status(404).json({
-        error: 'Vídeo não encontrado'
-      });
-    }
-
-    await video.incrementViews();
-
-    res.json({
-      message: 'Visualização registrada',
-      views: video.views
-    });
-
-  } catch (error) {
-    console.error('Erro ao incrementar visualizações:', error);
-    res.status(500).json({
-      error: 'Erro interno do servidor'
-    });
-  }
-});
-
-module.exports = router; 
+ 
