@@ -39,12 +39,20 @@ const registerValidation = [
     .isEmail()
     .normalizeEmail()
     .withMessage('Email inválido'),
-
   body('password')
     .isLength({ min: 6 })
     .withMessage('Senha deve ter pelo menos 6 caracteres')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número')
+    .withMessage('Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número'),
+  body('acceptTerms')
+    .isBoolean()
+    .custom((value) => {
+      if (!value) {
+        throw new Error('Você deve aceitar os termos de uso para continuar');
+      }
+      return true;
+    })
+    .withMessage('Você deve aceitar os termos de uso para continuar')
 ];
 
 // Validações para login
@@ -100,12 +108,13 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
     console.log('🌐 IP:', req.ip || req.connection.remoteAddress);
     console.log('👤 User-Agent:', req.get('User-Agent'));
     
-    const { name, email, password } = req.body;
+    const { name, email, password, acceptTerms } = req.body;
     
     console.log('📋 Dados recebidos:');
     console.log('   👤 Nome:', name);
     console.log('   📧 Email:', email);
     console.log('   🔑 Senha:', password ? 'Fornecida' : 'Não fornecida');
+    console.log('   ✅ Termos aceitos:', acceptTerms);
     console.log('   📧 Email normalizado:', email ? email.toLowerCase().trim() : 'N/A');
 
     // Verificar se o email já existe

@@ -496,7 +496,8 @@ async function handleRegister(e) {
     const data = {
         name,
         email,
-        password
+        password,
+        acceptTerms: acceptTerms
     };
     
     console.log('🔍 Dados do registro:', data);
