@@ -332,4 +332,5 @@ router.post('/:id/increment-views', async (req, res) => {
   }
 });
 
+module.exports = router;
  
