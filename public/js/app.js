@@ -4817,6 +4817,12 @@ function showTokenAlreadyUsedError() {
 async function editToken(tokenId) {
     try {
         console.log('✏️ [INTEGRATION] Editando token:', tokenId);
+        console.log('🔑 [INTEGRATION] Auth token:', authToken ? 'Presente' : 'Ausente');
+        console.log('👤 [INTEGRATION] Usuário atual:', currentUser ? currentUser.email : 'Nenhum');
+        
+        if (!authToken) {
+            throw new Error('Token de autenticação não encontrado');
+        }
         
         // Buscar dados do token
         const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
@@ -4825,8 +4831,13 @@ async function editToken(tokenId) {
             }
         });
 
+        console.log('📡 [INTEGRATION] Status da resposta:', response.status);
+        console.log('📡 [INTEGRATION] Headers da resposta:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
-            throw new Error('Erro ao buscar dados do token');
+            const errorText = await response.text();
+            console.error('❌ [INTEGRATION] Resposta de erro:', errorText);
+            throw new Error(`Erro ${response.status}: ${errorText}`);
         }
 
         const token = await response.json();
