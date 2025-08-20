@@ -260,7 +260,22 @@ function initializeEventListeners() {
     forgotPasswordForm.addEventListener('submit', handleForgotPassword);
     resetPasswordForm.addEventListener('submit', handleResetPassword);
     
-
+    // Controle do botão de registrar baseado no aceite dos termos
+    const acceptTermsCheckbox = document.getElementById('acceptTerms');
+    const registerBtn = document.getElementById('registerBtn');
+    
+    if (acceptTermsCheckbox && registerBtn) {
+        acceptTermsCheckbox.addEventListener('change', function() {
+            registerBtn.disabled = !this.checked;
+            if (this.checked) {
+                registerBtn.classList.remove('btn-disabled');
+                registerBtn.classList.add('btn-primary');
+            } else {
+                registerBtn.classList.add('btn-disabled');
+                registerBtn.classList.remove('btn-primary');
+            }
+        });
+    }
     
     // Dashboard
     logoutBtn.addEventListener('click', handleLogout);
@@ -486,12 +501,6 @@ async function handleRegister(e) {
     const email = formData.get('email') || document.getElementById('registerEmail').value;
     const password = formData.get('password') || document.getElementById('registerPassword').value;
     const acceptTerms = document.getElementById('acceptTerms').checked;
-    
-    // Validação dos termos
-    if (!acceptTerms) {
-        showNotification('Você deve aceitar os termos de uso para continuar', 'error');
-        return;
-    }
     
     const data = {
         name,
