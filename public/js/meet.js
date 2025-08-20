@@ -91,9 +91,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('🎭 MODO DEMONSTRAÇÃO - Sempre mostrar tela de nome');
         showNameScreen();
     } else {
-        // Verificar se já está na chamada ou encerrada (apenas para reuniões reais)
-        const isInCall = localStorage.getItem('googleMeetInCall');
-        const isEnded = localStorage.getItem('googleMeetEnded');
+        // Verificar se já está na chamada ou encerrada (específico para esta reunião)
+        const isInCall = localStorage.getItem(`googleMeetInCall_${meetingId}`);
+        const isEnded = localStorage.getItem(`googleMeetEnded_${meetingId}`);
         
         if (isEnded === 'true') {
             console.log('🔄 Chamada foi encerrada - mostrando tela de encerramento');
@@ -359,9 +359,9 @@ function joinCall() {
     if (isDemoMode) {
         console.log('🎭 MODO DEMONSTRAÇÃO - Não salvando no cache');
     } else {
-        // Salvar no localStorage apenas para reuniões reais
-        localStorage.setItem('googleMeetInCall', 'true');
-        localStorage.removeItem('googleMeetEnded');
+        // Salvar no localStorage específico da reunião
+        localStorage.setItem(`googleMeetInCall_${meetingId}`, 'true');
+        localStorage.removeItem(`googleMeetEnded_${meetingId}`);
     }
     
     // Mostrar tela de chamada
@@ -739,9 +739,9 @@ async function endCall() {
         localStorage.removeItem('videoLastUpdate');
         localStorage.removeItem('cameraEnabled');
     } else {
-        // Para reuniões reais, salvar no cache normalmente
-        localStorage.removeItem('googleMeetInCall');
-        localStorage.setItem('googleMeetEnded', 'true');
+        // Para reuniões reais, salvar no cache específico da reunião
+        localStorage.removeItem(`googleMeetInCall_${meetingId}`);
+        localStorage.setItem(`googleMeetEnded_${meetingId}`, 'true');
         
         // Limpar posição do vídeo quando a chamada terminar
         localStorage.removeItem('videoPosition');

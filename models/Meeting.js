@@ -184,6 +184,9 @@ meetingSchema.methods.endMeeting = function() {
     this.endedAt = new Date();
     // Definir expiração do link para 5 minutos após encerramento
     this.linkExpiresAt = new Date(this.endedAt.getTime() + (5 * 60 * 1000));
+    // Resetar acesso para permitir novo cliente
+    this.additionalAccessIP = null;
+    this.accessCount = 0;
     return this.save();
 };
 
@@ -198,6 +201,11 @@ meetingSchema.methods.endByVideoCompletion = function() {
     if (this.status === 'active') {
         this.status = 'ended';
         this.endedAt = new Date();
+        // Definir expiração do link para 5 minutos após encerramento
+        this.linkExpiresAt = new Date(this.endedAt.getTime() + (5 * 60 * 1000));
+        // Resetar acesso para permitir novo cliente
+        this.additionalAccessIP = null;
+        this.accessCount = 0;
         return this.save();
     }
     return Promise.resolve(this);
