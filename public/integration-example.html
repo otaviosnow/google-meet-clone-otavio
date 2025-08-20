@@ -381,23 +381,62 @@ async function createCallXMeeting(buttonElement = null) {
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('callx-integration');
     if (container) {
-        const button = document.createElement('button');
-        button.textContent = '🚀 Iniciar Reunião';
-        button.style.cssText = `
-            background: #007bff;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
-        `;
-        button.onmouseover = () => button.style.background = '#0056b3';
-        button.onmouseout = () => button.style.background = '#007bff';
-        button.onclick = () => createCallXMeeting(button);
+        // Verificar se já foi criada uma reunião
+        const meetingCreated = localStorage.getItem('callx_meeting_created');
+        const meetingId = localStorage.getItem('callx_meeting_id');
         
-        container.appendChild(button);
+        if (meetingCreated === 'true' && meetingId) {
+            // Reunião já foi criada - mostrar botão bloqueado
+            const button = document.createElement('button');
+            button.textContent = '✅ Reunião já criada!';
+            button.disabled = true;
+            button.style.cssText = `
+                background: #28a745;
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                cursor: not-allowed;
+                opacity: 0.8;
+            `;
+            
+            // Adicionar link para a reunião
+            const link = document.createElement('a');
+            link.href = `https://google-meet-saas-v2.onrender.com/meet/${meetingId}`;
+            link.target = '_blank';
+            link.textContent = 'Abrir Reunião';
+            link.style.cssText = `
+                display: block;
+                margin-top: 10px;
+                color: #007bff;
+                text-decoration: none;
+                font-weight: bold;
+                text-align: center;
+            `;
+            
+            container.appendChild(button);
+            container.appendChild(link);
+        } else {
+            // Criar botão ativo
+            const button = document.createElement('button');
+            button.textContent = '🚀 Iniciar Reunião';
+            button.style.cssText = `
+                background: #007bff;
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                cursor: pointer;
+                transition: background 0.3s;
+            `;
+            button.onmouseover = () => button.style.background = '#0056b3';
+            button.onmouseout = () => button.style.background = '#007bff';
+            button.onclick = () => createCallXMeeting(button);
+            
+            container.appendChild(button);
+        }
     }
 });
 &lt;/script&gt;</code></pre>
