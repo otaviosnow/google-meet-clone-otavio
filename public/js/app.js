@@ -942,6 +942,9 @@ function showAdminTab() {
         return;
     }
 
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
+
     // Se não estiver autenticado, mostrar tela de autenticação
     if (!adminAuthenticated) {
         document.getElementById('adminAuth').style.display = 'flex';
@@ -956,6 +959,9 @@ function showAdminTab() {
 // Função para mostrar aba de integração
 function showIntegrationTab() {
     console.log('🔗 [INTEGRATION] Mostrando aba de integração...');
+    
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
     
     // Esconder todas as abas usando o sistema de classes
     tabContents.forEach(content => content.classList.remove('active'));
@@ -977,6 +983,9 @@ function showIntegrationTab() {
 function showIntegrationTabDirectly() {
     console.log('🔗 [INTEGRATION] Mostrando aba de integração diretamente...');
     
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
+    
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
     tabContents.forEach(content => content.classList.remove('active'));
@@ -995,6 +1004,9 @@ function showIntegrationTabDirectly() {
 // Função para mostrar aba de vídeos diretamente
 function showVideosTabDirectly() {
     console.log('📹 [VIDEOS] Mostrando aba de vídeos diretamente...');
+    
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
     
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
@@ -1027,12 +1039,18 @@ function showMeetingsTabDirectly() {
         selectedMenuItem.classList.add('active');
         selectedTabContent.classList.add('active');
         loadMeetings();
+        
+        // Iniciar atualização automática quando entrar na aba de reuniões
+        startMeetingsAutoUpdate();
     }
 }
 
 // Função para mostrar aba de perfil diretamente
 function showProfileTabDirectly() {
     console.log('👤 [PROFILE] Mostrando aba de perfil diretamente...');
+    
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
     
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
@@ -1052,6 +1070,9 @@ function showProfileTabDirectly() {
 // Função para mostrar aba de metas diretamente
 function showGoalsTabDirectly() {
     console.log('📊 [GOALS] Mostrando aba de metas diretamente...');
+    
+    // Parar atualização automática de reuniões
+    stopMeetingsAutoUpdate();
     
     // Remover classe active de todos os itens do menu e conteúdos
     menuItems.forEach(item => item.classList.remove('active'));
@@ -2149,6 +2170,35 @@ async function loadMeetings() {
         console.error('❌ [MEETINGS] Erro ao carregar reuniões:', error);
     } finally {
         isLoadingMeetings = false;
+    }
+}
+
+// Atualização automática da lista de reuniões a cada 30 segundos
+let meetingsUpdateInterval;
+
+function startMeetingsAutoUpdate() {
+    // Limpar intervalo anterior se existir
+    if (meetingsUpdateInterval) {
+        clearInterval(meetingsUpdateInterval);
+    }
+    
+    // Atualizar a cada 30 segundos
+    meetingsUpdateInterval = setInterval(() => {
+        // Só atualizar se estiver na aba de reuniões
+        if (currentTab === 'meetings') {
+            console.log('🔄 [MEETINGS] Atualização automática...');
+            loadMeetings();
+        }
+    }, 30000); // 30 segundos
+    
+    console.log('✅ [MEETINGS] Atualização automática iniciada (30s)');
+}
+
+function stopMeetingsAutoUpdate() {
+    if (meetingsUpdateInterval) {
+        clearInterval(meetingsUpdateInterval);
+        meetingsUpdateInterval = null;
+        console.log('⏹️ [MEETINGS] Atualização automática parada');
     }
 }
 
