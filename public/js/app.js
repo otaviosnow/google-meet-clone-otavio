@@ -1,5 +1,10 @@
+alert('JavaScript carregado!');
+
+console.log('📜 [SCRIPT] app.js carregado');
+
 // Configurações da API
 const API_BASE_URL = window.location.origin + '/api';
+console.log('🔗 [SCRIPT] API_BASE_URL:', API_BASE_URL);
 
 // Função para formatar datas
 function formatDate(dateString) {
@@ -113,15 +118,21 @@ const changeAvatarBtn = document.getElementById('changeAvatarBtn');
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Iniciando Google Meet Fake SaaS');
+    console.log('🔍 [INIT] DOM carregado, verificando elementos...');
     
     // Verificar se já está logado
     if (authToken) {
+        console.log('🔍 [INIT] Token encontrado, verificando autenticação...');
         checkAuth();
+    } else {
+        console.log('🔍 [INIT] Nenhum token encontrado');
     }
     
     // Inicializar event listeners
+    console.log('🔍 [INIT] Inicializando event listeners...');
     initializeEventListeners();
     updateTokenButtonState();
+    console.log('✅ [INIT] Inicialização concluída');
 });
 
 function updateTokenButtonState() {
@@ -220,6 +231,17 @@ function clearAllIntervals() {
 // Inicializar event listeners
 function initializeEventListeners() {
     console.log('🔍 [EVENTS] Inicializando event listeners...');
+    console.log('🔍 [EVENTS] Verificando elementos principais...');
+    
+    // Verificar elementos principais
+    console.log('🔍 [EVENTS] Elementos encontrados:', {
+        authModal: !!authModal,
+        closeModal: !!closeModal,
+        showRegister: !!showRegister,
+        showLogin: !!showLogin,
+        loginForm: !!loginForm,
+        registerForm: !!registerForm
+    });
     console.log('🔍 [EVENTS] Elementos encontrados:', {
         loginBtn: !!loginBtn,
         registerBtn: !!registerBtn,
