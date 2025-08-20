@@ -45,9 +45,10 @@ const registerValidation = [
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
     .withMessage('Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número'),
   body('acceptTerms')
-    .isBoolean()
     .custom((value) => {
-      if (!value) {
+      // Converte string para boolean se necessário
+      const boolValue = value === true || value === 'true' || value === 1 || value === '1';
+      if (!boolValue) {
         throw new Error('Você deve aceitar os termos de uso para continuar');
       }
       return true;
