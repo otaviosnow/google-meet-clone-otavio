@@ -15,8 +15,11 @@ console.log('📊 Configuração: Máximo 300MB por arquivo, 3 arquivos por vez'
 // Configuração do Multer para arquivos grandes
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Criar pasta uploads se não existir
-    const uploadDir = './uploads';
+    // Usar disco persistente no Render ou pasta local em desenvolvimento
+    const uploadDir = process.env.NODE_ENV === 'production' 
+        ? '/opt/render/project/src/uploads'  // Render com disco persistente
+        : './uploads';                       // Desenvolvimento local
+    
     console.log('📁 Verificando diretório de upload:', uploadDir);
     
     if (!fs.existsSync(uploadDir)) {

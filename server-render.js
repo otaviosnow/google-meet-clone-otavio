@@ -227,12 +227,19 @@ app.get('/test-auth', (req, res) => {
     app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
     app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
     app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
-    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+    // Configurar pasta de uploads para usar disco persistente no Render
+    const uploadsPath = process.env.NODE_ENV === 'production' 
+        ? '/opt/render/project/src/uploads'  // Render com disco persistente
+        : path.join(__dirname, 'uploads');   // Desenvolvimento local
+    
+    console.log('📁 Pasta de uploads configurada:', uploadsPath);
+    
+    app.use('/uploads', express.static(uploadsPath));
 
     // Middleware para verificar se arquivo existe
     app.use('/uploads/*', (req, res, next) => {
         const fs = require('fs');
-        const filePath = path.join(__dirname, 'uploads', req.params[0]);
+        const filePath = path.join(uploadsPath, req.params[0]);
         console.log('📁 Verificando arquivo:', filePath);
         
         if (!fs.existsSync(filePath)) {
