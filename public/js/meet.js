@@ -51,10 +51,21 @@ let isDemoMode = false;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INICIANDO GOOGLE MEET CLONE - CALLX ===');
     
+    // Tratar erros de extensões do navegador
+    window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('Receiving end does not exist')) {
+            console.warn('⚠️ Erro de extensão do navegador detectado - ignorando:', e.message);
+            return false; // Prevenir que o erro apareça no console
+        }
+    });
+    
     // Obter dados da reunião da URL
     const urlParams = new URLSearchParams(window.location.search);
-    const meetingIdFromUrl = urlParams.get('meetingId');
     const demoParam = urlParams.get('demo');
+    
+    // Extrair meetingId da URL (formato: /meet/meetingId)
+    const pathSegments = window.location.pathname.split('/');
+    const meetingIdFromUrl = pathSegments[pathSegments.length - 1];
     
     // Verificar se é modo demonstração
     isDemoMode = demoParam === 'true';
@@ -63,12 +74,16 @@ document.addEventListener('DOMContentLoaded', function() {
         meetingIdFromUrl,
         demoParam,
         isDemoMode,
-        fullUrl: window.location.href
+        fullUrl: window.location.href,
+        pathSegments: pathSegments
     });
     
-    if (meetingIdFromUrl) {
+    if (meetingIdFromUrl && meetingIdFromUrl !== 'meet') {
         meetingId = meetingIdFromUrl;
         meetingIdElement.textContent = meetingId;
+        console.log('✅ Meeting ID extraído da URL:', meetingId);
+    } else {
+        console.log('❌ Meeting ID não encontrado na URL');
     }
     
     // Se for demonstração, sempre mostrar tela de nome (não usar cache)
@@ -95,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Gerar ID da reunião se não vier da URL
-    if (!meetingIdFromUrl) {
+    if (!meetingIdFromUrl || meetingIdFromUrl === 'meet') {
         generateMeetingId();
     }
     
