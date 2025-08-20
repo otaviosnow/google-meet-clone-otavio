@@ -4501,6 +4501,9 @@ function renderIntegrationTokens(tokens) {
                 <button class="btn btn-secondary" onclick="copyToken('${token.token}')">
                     <i class="fas fa-copy"></i> Copiar Token
                 </button>
+                <button class="btn btn-primary" onclick="editToken('${token.id}')">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
                 <button class="btn btn-secondary" onclick="toggleTokenStatus('${token.id}', ${token.isActive})">
                     <i class="fas fa-${token.isActive ? 'pause' : 'play'}"></i> ${token.isActive ? 'Desativar' : 'Ativar'}
                 </button>
@@ -4810,300 +4813,172 @@ function showTokenAlreadyUsedError() {
     document.body.appendChild(modal);
 }
 
-// Atualizar estatísticas de integração
-function updateIntegrationStats(tokens) {
-    // Garantir que tokens seja um array
-    if (!Array.isArray(tokens)) {
-        console.warn('⚠️ [INTEGRATION] Tokens não é um array em updateIntegrationStats:', tokens);
-        tokens = [];
-    }
-    
-    const totalTokens = document.getElementById('totalTokens');
-    const totalIntegrations = document.getElementById('totalIntegrations');
-    const activeWebsites = document.getElementById('activeWebsites');
-    
-    if (totalTokens) {
-        const activeCount = tokens.filter(t => t && t.isActive).length;
-        totalTokens.textContent = activeCount;
-        console.log('📊 [INTEGRATION] Tokens ativos:', activeCount);
-    }
-    
-    if (totalIntegrations) {
-        const totalUsage = tokens.reduce((sum, token) => sum + (token && token.usageCount ? token.usageCount : 0), 0);
-        totalIntegrations.textContent = totalUsage;
-        console.log('📊 [INTEGRATION] Total de usos:', totalUsage);
-    }
-    
-    if (activeWebsites) {
-        const uniqueWebsites = new Set(
-            tokens
-                .filter(t => t && t.isActive && t.website)
-                .map(t => t.website)
-        );
-        activeWebsites.textContent = uniqueWebsites.size;
-        console.log('📊 [INTEGRATION] Sites ativos:', uniqueWebsites.size);
+// Editar token
+async function editToken(tokenId) {
+    try {
+        console.log('✏️ [INTEGRATION] Editando token:', tokenId);
+        
+        // Buscar dados do token
+        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar dados do token');
+        }
+
+        const token = await response.json();
+        console.log('📋 [INTEGRATION] Dados do token:', token);
+
+        // Mostrar modal de edição
+        showEditTokenModal(token);
+        
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao editar token:', error);
+        showNotification(`Erro ao editar token: ${error.message}`, 'error');
     }
 }
 
-// Carregar vídeos para seleção no token
-async function loadVideosForToken() {
+// Função para mostrar modal de edição de token
+function showEditTokenModal(token) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'editTokenModal';
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Token de Integração</h2>
+                <button class="modal-close" onclick="closeEditTokenModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="editTokenForm">
+                    <div class="form-group">
+                        <label for="editTokenName">Nome do Token</label>
+                        <input type="text" id="editTokenName" value="${token.name}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editTokenWebsite">Website</label>
+                        <input type="url" id="editTokenWebsite" value="${token.website || ''}" placeholder="https://exemplo.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editTokenVideo">Vídeo Associado</label>
+                        <select id="editTokenVideo" required>
+                            <option value="">Carregando vídeos...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="editTokenActive" ${token.isActive ? 'checked' : ''}>
+                            Token Ativo
+                        </label>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditTokenModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveTokenEdit('${token.id}')">Salvar Alterações</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Carregar vídeos para o select
+    loadVideosForEditToken(token.video ? token.video.id : null);
+}
+
+// Função para carregar vídeos no modal de edição
+async function loadVideosForEditToken(selectedVideoId = null) {
     try {
-        console.log('🎬 [INTEGRATION] Carregando vídeos para token...');
-        
         const response = await fetch(`${API_BASE_URL}/videos`, {
             headers: {
                 'Authorization': `Bearer ${authToken}`
             }
         });
-        
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
+            throw new Error('Erro ao carregar vídeos');
         }
-        
+
         const data = await response.json();
-        console.log('🎬 [INTEGRATION] Dados carregados:', data);
-        
-        // A API retorna { videos: [...], pagination: {...} }
         const videos = data.videos || [];
-        console.log('🎬 [INTEGRATION] Vídeos extraídos:', videos);
         
-        // Garantir que videos seja sempre um array
-        const videosArray = Array.isArray(videos) ? videos : [];
-        console.log('🎬 [INTEGRATION] Vídeos processados:', videosArray);
+        const select = document.getElementById('editTokenVideo');
+        select.innerHTML = '<option value="">Selecione um vídeo</option>';
         
-        renderVideosForToken(videosArray);
-        
-    } catch (error) {
-        console.error('❌ [INTEGRATION] Erro ao carregar vídeos:', error);
-        showNotification(`Erro ao carregar vídeos: ${error.message}`, 'error');
-        
-        // Renderizar estado de erro
-        const videosList = document.getElementById('tokenVideosList');
-        
-        if (videosList) {
-            videosList.innerHTML = `
-                <div class="empty-state">
-                    <p>Erro ao carregar vídeos: ${error.message}</p>
-                    <button class="btn btn-primary" onclick="loadVideosForToken()">
-                        <i class="fas fa-sync"></i> Tentar Novamente
-                    </button>
-                </div>
-            `;
-        }
-    }
-}
-
-// Renderizar vídeos para seleção
-function renderVideosForToken(videos) {
-    const videosList = document.getElementById('tokenVideosList');
-    
-    if (!videosList) {
-        console.error('❌ [INTEGRATION] Elemento tokenVideosList não encontrado');
-        return;
-    }
-    
-    // Verificar se videos é um array válido
-    if (!Array.isArray(videos)) {
-        console.error('❌ [INTEGRATION] Videos não é um array:', videos);
-        videosList.innerHTML = `
-            <div class="empty-state">
-                <p>Erro ao carregar vídeos. Tente novamente.</p>
-            </div>
-        `;
-        defaultVideoSelect.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
-        return;
-    }
-    
-    if (videos.length === 0) {
-        videosList.innerHTML = `
-            <div class="empty-state">
-                <p>Nenhum vídeo encontrado. Adicione vídeos primeiro.</p>
-            </div>
-        `;
-        return;
-    }
-    
-    console.log('🎬 [INTEGRATION] Renderizando vídeos:', videos);
-    
-    // Renderizar lista de checkboxes
-    videosList.innerHTML = videos.map(video => `
-        <div class="video-checkbox-item">
-            <input type="checkbox" id="video_${video._id}" value="${video._id}" name="videos">
-            <label for="video_${video._id}">${video.title}</label>
-            <span class="video-type">${video.type}</span>
-        </div>
-    `).join('');
-    
-    // Renderizar apenas a lista de checkboxes (sem vídeo padrão)
-    
-    console.log('✅ [INTEGRATION] Vídeos renderizados com sucesso');
-}
-
-// Criar novo token de integração
-async function handleCreateToken(e) {
-    e.preventDefault();
-    
-    try {
-        console.log('🔗 [INTEGRATION] Criando novo token...');
-        
-        const formData = new FormData(e.target);
-        const selectedVideos = Array.from(document.querySelectorAll('#tokenVideosList input[type="checkbox"]:checked'))
-            .map(checkbox => checkbox.value);
-        
-        const tokenData = {
-            name: formData.get('name'),
-            description: formData.get('description'),
-            website: formData.get('website'),
-            videos: selectedVideos.map(videoId => ({
-                video: videoId,
-                name: document.querySelector(`#video_${videoId} + label`).textContent,
-                isDefault: videoId === formData.get('defaultVideo')
-            }))
-        };
-        
-        console.log('🔗 [INTEGRATION] Dados do token:', tokenData);
-        
-        const response = await fetch(`${API_BASE_URL}/integration/tokens`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(tokenData)
+        videos.forEach(video => {
+            const option = document.createElement('option');
+            option.value = video.id;
+            option.textContent = video.title;
+            option.selected = video.id === selectedVideoId;
+            select.appendChild(option);
         });
         
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Erro ao criar token');
-        }
-        
-        const result = await response.json();
-        console.log('✅ [INTEGRATION] Token criado:', result);
-        
-        showNotification('Token de integração criado com sucesso!', 'success');
-        hideModal(document.getElementById('createTokenModal'));
-        loadIntegrationTokens();
-        
     } catch (error) {
-        console.error('❌ [INTEGRATION] Erro ao criar token:', error);
-        showNotification(error.message, 'error');
+        console.error('❌ [INTEGRATION] Erro ao carregar vídeos para edição:', error);
+        const select = document.getElementById('editTokenVideo');
+        select.innerHTML = '<option value="">Erro ao carregar vídeos</option>';
     }
 }
 
-// Copiar token para clipboard
-function copyToken(token) {
-    navigator.clipboard.writeText(token).then(() => {
-        showNotification('Token copiado para clipboard!', 'success');
-    }).catch(() => {
-        showNotification('Erro ao copiar token', 'error');
-    });
-}
-
-// Alternar status do token
-async function toggleTokenStatus(tokenId, currentStatus) {
+// Função para salvar edição do token
+async function saveTokenEdit(tokenId) {
     try {
-        console.log('🔗 [INTEGRATION] Alternando status do token:', tokenId);
-        
+        const name = document.getElementById('editTokenName').value.trim();
+        const website = document.getElementById('editTokenWebsite').value.trim();
+        const videoId = document.getElementById('editTokenVideo').value;
+        const isActive = document.getElementById('editTokenActive').checked;
+
+        if (!name) {
+            showNotification('Nome do token é obrigatório', 'error');
+            return;
+        }
+
+        if (!videoId) {
+            showNotification('Selecione um vídeo', 'error');
+            return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
-                isActive: !currentStatus
+                name,
+                website: website || null,
+                videoId,
+                isActive
             })
         });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao atualizar token');
+
+        if (response.ok) {
+            showNotification('Token atualizado com sucesso!', 'success');
+            closeEditTokenModal();
+            loadIntegrationTokens();
+        } else {
+            const error = await response.json();
+            showNotification(`Erro ao atualizar token: ${error.error}`, 'error');
         }
-        
-        showNotification(`Token ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
-        loadIntegrationTokens();
-        
     } catch (error) {
-        console.error('❌ [INTEGRATION] Erro ao alternar status:', error);
+        console.error('❌ [INTEGRATION] Erro ao salvar edição:', error);
         showNotification('Erro ao atualizar token', 'error');
     }
 }
 
-// Deletar token
-async function deleteToken(tokenId) {
-    if (!confirm('Tem certeza que deseja deletar este token? Esta ação não pode ser desfeita.')) {
-        return;
+// Função para fechar modal de edição
+function closeEditTokenModal() {
+    const modal = document.getElementById('editTokenModal');
+    if (modal) {
+        modal.remove();
     }
-    
-    try {
-        console.log('🔗 [INTEGRATION] Deletando token:', tokenId);
-        
-        const response = await fetch(`${API_BASE_URL}/integration/tokens/${tokenId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao deletar token');
-        }
-        
-        showNotification('Token deletado com sucesso!', 'success');
-        loadIntegrationTokens();
-        
-    } catch (error) {
-        console.error('❌ [INTEGRATION] Erro ao deletar token:', error);
-        showNotification('Erro ao deletar token', 'error');
-    }
-} 
-
-// Função para mostrar erro de token já usado
-function showTokenAlreadyUsedError() {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        ">
-            <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
-            <h3 style="color: #dc3545; margin-bottom: 15px;">Token Já Utilizado</h3>
-            <p style="color: #666; margin-bottom: 20px; line-height: 1.5;">
-                Este token de integração já foi utilizado por você. 
-                Cada pessoa só pode usar um token uma única vez.
-            </p>
-            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">
-                Se você precisa criar outra reunião, entre em contato com o administrador 
-                para obter um novo token.
-            </p>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: #dc3545;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 16px;
-            ">Entendi</button>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
 }

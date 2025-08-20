@@ -19,6 +19,32 @@ console.log('📅 Data/Hora:', new Date().toISOString());
 console.log('📂 Diretório atual:', __dirname);
 console.log('📊 Porta:', PORT);
 
+// Verificar e criar diretório de uploads se necessário
+const fs = require('fs');
+const uploadsPathCheck = process.env.NODE_ENV === 'production' 
+    ? '/opt/render/project/src/uploads'  // Render com disco persistente
+    : path.join(__dirname, 'uploads');   // Desenvolvimento local
+
+console.log('📁 Verificando diretório de uploads:', uploadsPathCheck);
+
+if (!fs.existsSync(uploadsPathCheck)) {
+    console.log('❌ Diretório não existe, criando...');
+    try {
+        fs.mkdirSync(uploadsPathCheck, { recursive: true });
+        console.log('✅ Diretório de uploads criado com sucesso!');
+    } catch (error) {
+        console.error('❌ Erro ao criar diretório de uploads:', error);
+    }
+} else {
+    console.log('✅ Diretório de uploads já existe');
+    try {
+        const files = fs.readdirSync(uploadsPathCheck);
+        console.log(`📄 ${files.length} arquivos encontrados no diretório de uploads`);
+    } catch (error) {
+        console.error('❌ Erro ao listar arquivos de uploads:', error);
+    }
+}
+
 // Conectar ao MongoDB
 console.log('🔗 Conectando ao MongoDB...');
 mongoose.connect(process.env.MONGODB_URI, {
