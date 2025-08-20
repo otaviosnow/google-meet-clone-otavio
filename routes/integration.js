@@ -447,6 +447,47 @@ router.post('/create-meeting', async (req, res) => {
     }
 });
 
+// GET /api/integration/tokens/:tokenId - Buscar token específico
+router.get('/tokens/:tokenId', authenticateToken, async (req, res) => {
+    try {
+        const { tokenId } = req.params;
+
+        console.log('🔍 [INTEGRATION] Buscando token:', tokenId);
+
+        const token = await IntegrationToken.findOne({ 
+            _id: tokenId, 
+            user: req.user._id 
+        }).populate('videos.video', 'title url type');
+
+        if (!token) {
+            console.log('❌ [INTEGRATION] Token não encontrado:', tokenId);
+            return res.status(404).json({ error: 'Token não encontrado' });
+        }
+
+        console.log('✅ [INTEGRATION] Token encontrado:', token.name);
+
+        res.json({
+            id: token._id,
+            name: token.name,
+            description: token.description,
+            website: token.website,
+            token: token.token,
+            isActive: token.isActive,
+            video: token.videos.find(v => v.isDefault)?.video || token.videos[0]?.video,
+            videos: token.videos.map(v => ({
+                id: v.video?._id,
+                title: v.video?.title,
+                isDefault: v.isDefault
+            })),
+            createdAt: token.createdAt
+        });
+
+    } catch (error) {
+        console.error('❌ [INTEGRATION] Erro ao buscar token:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 // GET /api/integration/tokens/:tokenId/videos - Listar vídeos disponíveis do token
 router.get('/tokens/:tokenId/videos', async (req, res) => {
     try {
