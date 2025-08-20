@@ -219,9 +219,32 @@ function clearAllIntervals() {
 
 // Inicializar event listeners
 function initializeEventListeners() {
+    console.log('🔍 [EVENTS] Inicializando event listeners...');
+    console.log('🔍 [EVENTS] Elementos encontrados:', {
+        loginBtn: !!loginBtn,
+        registerBtn: !!registerBtn,
+        closeModal: !!closeModal,
+        authModal: !!authModal
+    });
+    
     // Auth buttons
-    loginBtn.addEventListener('click', () => showAuthModal('login'));
-    registerBtn.addEventListener('click', () => showAuthModal('register'));
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            console.log('🔍 [EVENTS] Clique no botão login detectado');
+            showAuthModal('login');
+        });
+    } else {
+        console.error('❌ [EVENTS] loginBtn não encontrado');
+    }
+    
+    if (registerBtn) {
+        registerBtn.addEventListener('click', () => {
+            console.log('🔍 [EVENTS] Clique no botão register detectado');
+            showAuthModal('register');
+        });
+    } else {
+        console.error('❌ [EVENTS] registerBtn não encontrado');
+    }
     
     // Hero Demo Button
     const heroDemoBtn = document.getElementById('heroDemoBtn');
@@ -232,7 +255,14 @@ function initializeEventListeners() {
     }
     
     // Modal controls
-    closeModal.addEventListener('click', hideAuthModal);
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            console.log('🔍 [EVENTS] Clique no botão fechar detectado');
+            hideAuthModal();
+        });
+    } else {
+        console.error('❌ [EVENTS] closeModal não encontrado');
+    }
     showRegister.addEventListener('click', (e) => {
         e.preventDefault();
         showAuthModal('register');
@@ -408,41 +438,68 @@ function initializeEventListeners() {
 
 // Funções de autenticação
 function showAuthModal(type) {
+    console.log('🔍 [MODAL] Tentando mostrar modal:', type);
+    console.log('🔍 [MODAL] Elementos encontrados:', {
+        authModal: !!authModal,
+        loginForm: !!loginForm,
+        registerForm: !!registerForm,
+        forgotPasswordForm: !!forgotPasswordForm,
+        resetPasswordForm: !!resetPasswordForm,
+        modalTitle: !!modalTitle
+    });
+    
+    if (!authModal) {
+        console.error('❌ [MODAL] authModal não encontrado');
+        return;
+    }
+    
     // Esconder todos os formulários
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'none';
-    forgotPasswordForm.style.display = 'none';
-    resetPasswordForm.style.display = 'none';
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'none';
+    if (forgotPasswordForm) forgotPasswordForm.style.display = 'none';
+    if (resetPasswordForm) resetPasswordForm.style.display = 'none';
     
     // Mostrar formulário correto
     switch(type) {
         case 'login':
-            modalTitle.textContent = 'Entrar';
-            loginForm.style.display = 'block';
+            if (modalTitle) modalTitle.textContent = 'Entrar';
+            if (loginForm) loginForm.style.display = 'block';
             break;
         case 'register':
-            modalTitle.textContent = 'Registrar';
-            registerForm.style.display = 'block';
+            if (modalTitle) modalTitle.textContent = 'Registrar';
+            if (registerForm) registerForm.style.display = 'block';
             break;
         case 'forgot-password':
-            modalTitle.textContent = 'Recuperar Senha';
-            forgotPasswordForm.style.display = 'block';
+            if (modalTitle) modalTitle.textContent = 'Recuperar Senha';
+            if (forgotPasswordForm) forgotPasswordForm.style.display = 'block';
             break;
         case 'reset-password':
-            modalTitle.textContent = 'Redefinir Senha';
-            resetPasswordForm.style.display = 'block';
+            if (modalTitle) modalTitle.textContent = 'Redefinir Senha';
+            if (resetPasswordForm) resetPasswordForm.style.display = 'block';
             break;
     }
     
     authModal.classList.add('active');
+    console.log('✅ [MODAL] Modal ativado:', type);
 }
 
 function hideAuthModal() {
+    console.log('🔍 [MODAL] Tentando fechar modal');
+    
+    if (!authModal) {
+        console.error('❌ [MODAL] authModal não encontrado para fechar');
+        return;
+    }
+    
     authModal.classList.remove('active');
-    loginForm.reset();
-    registerForm.reset();
-    forgotPasswordForm.reset();
-    resetPasswordForm.reset();
+    
+    // Resetar formulários se existirem
+    if (loginForm) loginForm.reset();
+    if (registerForm) registerForm.reset();
+    if (forgotPasswordForm) forgotPasswordForm.reset();
+    if (resetPasswordForm) resetPasswordForm.reset();
+    
+    console.log('✅ [MODAL] Modal fechado');
 }
 
 async function handleLogin(e) {
