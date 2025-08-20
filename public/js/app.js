@@ -2303,9 +2303,24 @@ function renderMeetings(meetings) {
         const truncatedLink = link.length > 50 ? link.substring(0, 50) + '...' : link;
         
         // Determinar status da reunião
-        const statusText = meeting.status === 'ended' ? 'Encerrado' : 'Ativo';
-        const statusIcon = meeting.status === 'ended' ? 'fa-times-circle' : 'fa-check-circle';
-        const statusClass = meeting.status === 'ended' ? 'ended' : 'active';
+        let statusText, statusIcon, statusClass;
+        
+        if (meeting.status === 'ended') {
+            // Verificar se o link expirou
+            if (meeting.linkExpiresAt && new Date() > new Date(meeting.linkExpiresAt)) {
+                statusText = 'Finalizado';
+                statusIcon = 'fa-ban';
+                statusClass = 'expired';
+            } else {
+                statusText = 'Encerrado';
+                statusIcon = 'fa-times-circle';
+                statusClass = 'ended';
+            }
+        } else {
+            statusText = 'Ativo';
+            statusIcon = 'fa-check-circle';
+            statusClass = 'active';
+        }
         
         meetingCard.innerHTML = `
             <div class="meeting-title">${meeting.title}</div>

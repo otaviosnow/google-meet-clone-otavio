@@ -1483,6 +1483,11 @@ body {
     background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
+.meeting-status.expired {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    opacity: 0.8;
+}
+
 .meeting-status i {
     font-size: 8px;
 }
