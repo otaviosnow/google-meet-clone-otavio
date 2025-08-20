@@ -39,12 +39,7 @@ const registerValidation = [
     .isEmail()
     .normalizeEmail()
     .withMessage('Email inválido'),
-  body('cpf')
-    .trim()
-    .notEmpty()
-    .withMessage('CPF é obrigatório')
-    .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
-    .withMessage('CPF deve estar no formato 000.000.000-00'),
+
   body('password')
     .isLength({ min: 6 })
     .withMessage('Senha deve ter pelo menos 6 caracteres')
@@ -105,12 +100,11 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
     console.log('🌐 IP:', req.ip || req.connection.remoteAddress);
     console.log('👤 User-Agent:', req.get('User-Agent'));
     
-    const { name, email, cpf, password } = req.body;
+    const { name, email, password } = req.body;
     
     console.log('📋 Dados recebidos:');
     console.log('   👤 Nome:', name);
     console.log('   📧 Email:', email);
-    console.log('   🆔 CPF:', cpf);
     console.log('   🔑 Senha:', password ? 'Fornecida' : 'Não fornecida');
     console.log('   📧 Email normalizado:', email ? email.toLowerCase().trim() : 'N/A');
 
@@ -131,20 +125,7 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
       });
     }
     
-    // Verificar se o CPF já existe
-    console.log('\n🔍 Verificando se CPF já existe...');
-    const existingUserByCpf = await User.findOne({ cpf });
-    
-    if (existingUserByCpf) {
-      console.log('❌ CPF já existe no banco:');
-      console.log('   👤 Nome existente:', existingUserByCpf.name);
-      console.log('   📧 Email existente:', existingUserByCpf.email);
-      console.log('   🆔 CPF existente:', existingUserByCpf.cpf);
-      
-      return res.status(400).json({
-        error: 'CPF já está em uso'
-      });
-    }
+
     
     console.log('✅ Email não existe, prosseguindo com registro...');
 
@@ -153,7 +134,6 @@ router.post('/register', registerValidation, handleValidationErrors, async (req,
     const user = new User({
       name,
       email,
-      cpf,
       password
     });
     

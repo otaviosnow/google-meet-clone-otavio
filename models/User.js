@@ -17,13 +17,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email inválido']
   },
-  cpf: {
-    type: String,
-    required: [true, 'CPF é obrigatório'],
-    unique: true,
-    trim: true,
-    match: [/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, 'CPF deve estar no formato 000.000.000-00']
-  },
+
   password: {
     type: String,
     required: [true, 'Senha é obrigatória'],

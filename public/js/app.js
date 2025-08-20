@@ -260,20 +260,7 @@ function initializeEventListeners() {
     forgotPasswordForm.addEventListener('submit', handleForgotPassword);
     resetPasswordForm.addEventListener('submit', handleResetPassword);
     
-    // CPF formatting
-    const cpfInput = document.getElementById('registerCpf');
-    if (cpfInput) {
-        cpfInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
-            if (value.length <= 11) {
-                // Formata o CPF: 000.000.000-00
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                e.target.value = value;
-            }
-        });
-    }
+
     
     // Dashboard
     logoutBtn.addEventListener('click', handleLogout);
@@ -497,7 +484,6 @@ async function handleRegister(e) {
     const formData = new FormData(registerForm);
     const name = formData.get('name') || document.getElementById('registerName').value;
     const email = formData.get('email') || document.getElementById('registerEmail').value;
-    const cpf = document.getElementById('registerCpf').value.replace(/\D/g, ''); // Remove caracteres não numéricos
     const password = formData.get('password') || document.getElementById('registerPassword').value;
     const acceptTerms = document.getElementById('acceptTerms').checked;
     
@@ -507,16 +493,9 @@ async function handleRegister(e) {
         return;
     }
     
-    // Validação do CPF
-    if (cpf.length !== 11) {
-        showNotification('CPF deve ter 11 dígitos', 'error');
-        return;
-    }
-    
     const data = {
         name,
         email,
-        cpf,
         password
     };
     
