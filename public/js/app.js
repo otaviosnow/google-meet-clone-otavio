@@ -3297,7 +3297,7 @@ async function saveMonthlyGoal() {
         return;
     }
     
-    const deadlineDate = goalDeadline || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
+            const deadlineDate = goalDeadline || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59).toISOString();
     
     console.log('📅 [FRONTEND-META] Data limite calculada:', deadlineDate);
     

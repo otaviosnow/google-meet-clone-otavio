@@ -241,7 +241,7 @@ router.post('/goal', authenticateToken, goalValidation, handleValidationErrors, 
     const currentMonth = new Date().toISOString().slice(0, 7);
     
     // Usar data padrão se deadlineDate não for fornecida
-    const finalDeadlineDate = deadlineDate || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString();
+    const finalDeadlineDate = deadlineDate || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59).toISOString();
     
     console.log('📅 [META] Mês atual:', currentMonth);
     console.log('💰 [META] Meta mensal:', monthlyGoal);

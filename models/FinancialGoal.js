@@ -17,7 +17,7 @@ const financialGoalSchema = new mongoose.Schema({
     default: function() {
       // Por padrão, define como último dia do mês atual
       const now = new Date();
-      return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
     }
   },
   currentMonth: {
