@@ -2127,7 +2127,7 @@ function showUploadProgress(file) {
     const progressFill = document.querySelector('.progress-fill');
     
     // Mostrar container de progresso
-    progressContainer.style.display = 'block';
+    progressContainer.classList.add('show');
     
     // Atualizar informações do arquivo
     fileName.textContent = file.name;
@@ -2181,7 +2181,7 @@ function hideUploadProgress() {
     progressFill.classList.remove('uploading');
     
     // Esconder container
-    progressContainer.style.display = 'none';
+    progressContainer.classList.remove('show');
     
     // Resetar progresso
     updateProgressDisplay(0, 'Preparando upload...');
