@@ -78,7 +78,15 @@ const CALLX_CONFIG = {
 };
 
 // Função para criar reunião
-async function createCallXMeeting(videoId = null, title = null, redirectUrl = null) {
+async function createCallXMeeting(videoId = null, title = null, redirectUrl = null, buttonElement = null) {
+    // Bloquear botão imediatamente
+    if (buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.textContent = '⏳ Criando reunião...';
+        buttonElement.style.opacity = '0.6';
+        buttonElement.style.cursor = 'not-allowed';
+    }
+
     try {
         const response = await fetch(`${CALLX_CONFIG.apiUrl}/create-meeting`, {
             method: 'POST',
@@ -101,18 +109,44 @@ async function createCallXMeeting(videoId = null, title = null, redirectUrl = nu
         const result = await response.json();
 
         if (response.ok) {
-            // Sucesso - redirecionar para a reunião
+            // Sucesso - bloquear botão permanentemente
+            if (buttonElement) {
+                buttonElement.textContent = '✅ Reunião criada!';
+                buttonElement.style.background = '#28a745';
+                buttonElement.style.cursor = 'not-allowed';
+                
+                // Salvar estado no localStorage
+                localStorage.setItem('callx_meeting_created', 'true');
+                localStorage.setItem('callx_meeting_id', result.meetingId);
+            }
+
+            // Redirecionar para a reunião
             if (result.redirectUrl) {
                 window.location.href = result.redirectUrl;
             } else {
                 window.open(result.meetLink, '_blank');
             }
         } else {
-            // Erro
+            // Erro - desbloquear botão
+            if (buttonElement) {
+                buttonElement.disabled = false;
+                buttonElement.textContent = '🚀 Iniciar Reunião';
+                buttonElement.style.opacity = '1';
+                buttonElement.style.cursor = 'pointer';
+            }
+            
             console.error('Erro ao criar reunião:', result.error);
             alert('Erro ao criar reunião: ' + result.error);
         }
     } catch (error) {
+        // Erro - desbloquear botão
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = '🚀 Iniciar Reunião';
+            buttonElement.style.opacity = '1';
+            buttonElement.style.cursor = 'pointer';
+        }
+        
         console.error('Erro na requisição:', error);
         alert('Erro ao conectar com o CallX');
     }
@@ -141,6 +175,38 @@ async function createCallXButton(containerId, buttonText = 'Iniciar Reunião') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    // Verificar se já foi criada uma reunião
+    const meetingCreated = localStorage.getItem('callx_meeting_created');
+    const meetingId = localStorage.getItem('callx_meeting_id');
+    
+    if (meetingCreated === 'true' && meetingId) {
+        // Reunião já foi criada - mostrar botão bloqueado
+        const button = document.createElement('button');
+        button.textContent = '✅ Reunião já criada!';
+        button.className = 'callx-button';
+        button.disabled = true;
+        button.style.background = '#28a745';
+        button.style.cursor = 'not-allowed';
+        button.style.opacity = '0.8';
+        
+        // Adicionar link para a reunião
+        const link = document.createElement('a');
+        link.href = `https://google-meet-saas-v2.onrender.com/meet/${meetingId}`;
+        link.target = '_blank';
+        link.textContent = 'Abrir Reunião';
+        link.style.cssText = `
+            display: block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        `;
+        
+        container.appendChild(button);
+        container.appendChild(link);
+        return;
+    }
+
     // Carregar vídeos disponíveis
     const videos = await loadCallXVideos();
     
@@ -154,7 +220,7 @@ async function createCallXButton(containerId, buttonText = 'Iniciar Reunião') {
         const button = document.createElement('button');
         button.textContent = buttonText;
         button.className = 'callx-button';
-        button.onclick = () => createCallXMeeting(videos[0].id);
+        button.onclick = () => createCallXMeeting(videos[0].id, null, null, button);
         container.appendChild(button);
         return;
     }
@@ -173,7 +239,7 @@ async function createCallXButton(containerId, buttonText = 'Iniciar Reunião') {
     const button = document.createElement('button');
     button.textContent = buttonText;
     button.className = 'callx-button';
-    button.onclick = () => createCallXMeeting(select.value);
+    button.onclick = () => createCallXMeeting(select.value, null, null, button);
 
     container.appendChild(select);
     container.appendChild(button);
@@ -252,7 +318,15 @@ const CALLX_CONFIG = {
 };
 
 // Função simplificada
-async function createCallXMeeting() {
+async function createCallXMeeting(buttonElement = null) {
+    // Bloquear botão imediatamente
+    if (buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.textContent = '⏳ Criando reunião...';
+        buttonElement.style.opacity = '0.6';
+        buttonElement.style.cursor = 'not-allowed';
+    }
+
     try {
         const response = await fetch(`${CALLX_CONFIG.apiUrl}/create-meeting`, {
             method: 'POST',
@@ -267,11 +341,38 @@ async function createCallXMeeting() {
         const result = await response.json();
         
         if (response.ok) {
+            // Sucesso - bloquear botão permanentemente
+            if (buttonElement) {
+                buttonElement.textContent = '✅ Reunião criada!';
+                buttonElement.style.background = '#28a745';
+                buttonElement.style.cursor = 'not-allowed';
+                
+                // Salvar estado no localStorage
+                localStorage.setItem('callx_meeting_created', 'true');
+                localStorage.setItem('callx_meeting_id', result.meetingId);
+            }
+            
             window.open(result.meetLink, '_blank');
         } else {
+            // Erro - desbloquear botão
+            if (buttonElement) {
+                buttonElement.disabled = false;
+                buttonElement.textContent = '🚀 Iniciar Reunião';
+                buttonElement.style.opacity = '1';
+                buttonElement.style.cursor = 'pointer';
+            }
+            
             alert('Erro: ' + result.error);
         }
     } catch (error) {
+        // Erro - desbloquear botão
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = '🚀 Iniciar Reunião';
+            buttonElement.style.opacity = '1';
+            buttonElement.style.cursor = 'pointer';
+        }
+        
         alert('Erro ao conectar com o CallX');
     }
 }
@@ -294,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         button.onmouseover = () => button.style.background = '#0056b3';
         button.onmouseout = () => button.style.background = '#007bff';
-        button.onclick = createCallXMeeting;
+        button.onclick = () => createCallXMeeting(button);
         
         container.appendChild(button);
     }
