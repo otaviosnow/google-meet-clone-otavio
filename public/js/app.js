@@ -292,17 +292,17 @@ function initializeEventListeners() {
     
     // Controle do botão de registrar baseado no aceite dos termos
     const acceptTermsCheckbox = document.getElementById('acceptTerms');
-    const registerBtn = document.getElementById('registerBtn');
+    const registerBtnInForm = document.getElementById('registerBtn');
     
-    if (acceptTermsCheckbox && registerBtn) {
+    if (acceptTermsCheckbox && registerBtnInForm) {
         acceptTermsCheckbox.addEventListener('change', function() {
-            registerBtn.disabled = !this.checked;
+            registerBtnInForm.disabled = !this.checked;
             if (this.checked) {
-                registerBtn.classList.remove('btn-disabled');
-                registerBtn.classList.add('btn-primary');
+                registerBtnInForm.classList.remove('btn-disabled');
+                registerBtnInForm.classList.add('btn-primary');
             } else {
-                registerBtn.classList.add('btn-disabled');
-                registerBtn.classList.remove('btn-primary');
+                registerBtnInForm.classList.add('btn-disabled');
+                registerBtnInForm.classList.remove('btn-primary');
             }
         });
     }
