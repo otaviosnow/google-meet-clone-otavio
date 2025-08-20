@@ -1,5 +1,3 @@
-alert('JavaScript carregado!');
-
 console.log('📜 [SCRIPT] app.js carregado');
 
 // Configurações da API
@@ -344,7 +342,7 @@ if (resetPasswordForm) {
     
     // Controle do botão de registrar baseado no aceite dos termos
     const acceptTermsCheckbox = document.getElementById('acceptTerms');
-    const registerBtnInForm = document.getElementById('registerBtn');
+    const registerBtnInForm = document.getElementById('registerSubmitBtn');
     
     if (acceptTermsCheckbox && registerBtnInForm) {
         acceptTermsCheckbox.addEventListener('change', function() {
