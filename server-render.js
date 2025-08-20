@@ -259,6 +259,21 @@ app.get('/test-auth', (req, res) => {
         : path.join(__dirname, 'uploads');   // Desenvolvimento local
     
     console.log('📁 Pasta de uploads configurada:', uploadsPath);
+    console.log('🌍 Ambiente:', process.env.NODE_ENV);
+    console.log('📂 Diretório atual:', __dirname);
+    
+    // Verificar se o diretório existe e listar arquivos
+    const fs = require('fs');
+    if (fs.existsSync(uploadsPath)) {
+        try {
+            const files = fs.readdirSync(uploadsPath);
+            console.log(`📁 Diretório de uploads existe com ${files.length} arquivos:`, files.slice(0, 5));
+        } catch (error) {
+            console.error('❌ Erro ao listar arquivos de uploads:', error);
+        }
+    } else {
+        console.log('❌ Diretório de uploads não existe, será criado automaticamente');
+    }
     
     app.use('/uploads', express.static(uploadsPath));
 
@@ -284,11 +299,36 @@ app.get('/test-auth', (req, res) => {
     // ===== ROTA DE TESTE DA API =====
     app.get('/api/test', (req, res) => {
         console.log('📥 GET /api/test - API de teste acessada');
+        
+        // Verificar status do disco persistente
+        const fs = require('fs');
+        let uploadsStatus = 'unknown';
+        let fileCount = 0;
+        
+        try {
+            if (fs.existsSync(uploadsPath)) {
+                const files = fs.readdirSync(uploadsPath);
+                fileCount = files.length;
+                uploadsStatus = 'exists';
+            } else {
+                uploadsStatus = 'missing';
+            }
+        } catch (error) {
+            uploadsStatus = 'error';
+            console.error('❌ Erro ao verificar uploads:', error);
+        }
+        
         res.json({
             message: '✅ API funcionando - VERSÃO COMPLETA!',
             timestamp: new Date().toISOString(),
             version: 'COMPLETA - 14/08/2025 01:35 AM',
-            database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+            database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+            uploads: {
+                path: uploadsPath,
+                status: uploadsStatus,
+                fileCount: fileCount,
+                environment: process.env.NODE_ENV
+            }
         });
     });
 
