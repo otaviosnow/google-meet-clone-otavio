@@ -457,38 +457,70 @@ router.get('/tokens/:tokenId', authenticateToken, async (req, res) => {
         const { tokenId } = req.params;
 
         console.log('🔍 [INTEGRATION] Buscando token:', tokenId);
+        console.log('👤 [INTEGRATION] Usuário:', req.user._id);
 
+        // Primeiro buscar sem populate para verificar se existe
+        const tokenExists = await IntegrationToken.findOne({ 
+            _id: tokenId, 
+            user: req.user._id 
+        });
+
+        if (!tokenExists) {
+            console.log('❌ [INTEGRATION] Token não encontrado:', tokenId);
+            return res.status(404).json({ error: 'Token não encontrado' });
+        }
+
+        console.log('✅ [INTEGRATION] Token encontrado, fazendo populate...');
+
+        // Agora fazer populate
         const token = await IntegrationToken.findOne({ 
             _id: tokenId, 
             user: req.user._id 
         }).populate('videos.video', 'title url type');
 
-        if (!token) {
-            console.log('❌ [INTEGRATION] Token não encontrado:', tokenId);
-            return res.status(404).json({ error: 'Token não encontrado' });
-        }
-
         console.log('✅ [INTEGRATION] Token encontrado:', token.name);
+        console.log('📹 [INTEGRATION] Vídeos no token:', token.videos.length);
+        console.log('📹 [INTEGRATION] Dados dos vídeos:', token.videos.map(v => ({
+            videoId: v.video?._id,
+            videoTitle: v.video?.title,
+            isDefault: v.isDefault
+        })));
 
-        res.json({
+        // Encontrar vídeo padrão ou primeiro vídeo
+        const defaultVideo = token.videos.find(v => v.isDefault)?.video || token.videos[0]?.video;
+        console.log('🎬 [INTEGRATION] Vídeo padrão:', defaultVideo?._id);
+
+        const response = {
             id: token._id,
             name: token.name,
             description: token.description,
             website: token.website,
             token: token.token,
             isActive: token.isActive,
-            video: token.videos.find(v => v.isDefault)?.video || token.videos[0]?.video,
+            video: defaultVideo,
             videos: token.videos.map(v => ({
                 id: v.video?._id,
                 title: v.video?.title,
                 isDefault: v.isDefault
             })),
             createdAt: token.createdAt
+        };
+
+        console.log('📤 [INTEGRATION] Enviando resposta:', {
+            id: response.id,
+            name: response.name,
+            videoCount: response.videos.length
         });
+
+        res.json(response);
 
     } catch (error) {
         console.error('❌ [INTEGRATION] Erro ao buscar token:', error);
-        res.status(500).json({ error: 'Erro interno do servidor' });
+        console.error('❌ [INTEGRATION] Stack trace:', error.stack);
+        res.status(500).json({ 
+            error: 'Erro interno do servidor',
+            details: error.message 
+        });
     }
 });
 
