@@ -4928,11 +4928,11 @@ async function loadVideosForEditToken(selectedVideoId = null) {
         select.innerHTML = '<option value="">Selecione um vídeo</option>';
         
         videos.forEach(video => {
-            console.log('📹 [INTEGRATION] Criando opção para vídeo:', { id: video.id, title: video.title });
+            console.log('📹 [INTEGRATION] Criando opção para vídeo:', { id: video._id, title: video.title });
             const option = document.createElement('option');
-            option.value = video.id;
+            option.value = video._id;
             option.textContent = video.title;
-            option.selected = video.id === selectedVideoId;
+            option.selected = video._id === selectedVideoId;
             select.appendChild(option);
         });
         
