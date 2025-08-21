@@ -90,26 +90,57 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 const User = require('./models/User');
 const Meeting = require('./models/Meeting');
 
-// Job de limpeza automática para encerrar reuniões expiradas
+// Job de limpeza automática para EXCLUIR reuniões expiradas
 async function cleanupExpiredMeetings() {
     try {
         const now = new Date();
         const twentyMinutesAgo = new Date(now.getTime() - (20 * 60 * 1000));
+        const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
         
-        // Encontrar reuniões ativas que começaram há mais de 20 minutos
-        const expiredMeetings = await Meeting.find({
+        // EXCLUIR reuniões ativas que começaram há mais de 20 minutos
+        const expiredActiveMeetings = await Meeting.find({
             status: 'active',
             startedAt: { $lt: twentyMinutesAgo }
         });
         
-        if (expiredMeetings.length > 0) {
-            console.log(`🕐 Encontradas ${expiredMeetings.length} reuniões expiradas por tempo`);
+        if (expiredActiveMeetings.length > 0) {
+            console.log(`🗑️ Encontradas ${expiredActiveMeetings.length} reuniões ativas expiradas - EXCLUINDO`);
             
-            for (const meeting of expiredMeetings) {
-                await meeting.endMeeting();
-                console.log(`⏰ Reunião ${meeting.meetingId} encerrada automaticamente por timeout`);
+            for (const meeting of expiredActiveMeetings) {
+                await Meeting.deleteOne({ _id: meeting._id });
+                console.log(`✅ Reunião ativa ${meeting.meetingId} EXCLUÍDA por timeout`);
             }
         }
+        
+        // EXCLUIR reuniões finalizadas há mais de 1 hora
+        const oldEndedMeetings = await Meeting.find({
+            status: 'ended',
+            endedAt: { $lt: oneHourAgo }
+        });
+        
+        if (oldEndedMeetings.length > 0) {
+            console.log(`🗑️ Encontradas ${oldEndedMeetings.length} reuniões finalizadas antigas - EXCLUINDO`);
+            
+            for (const meeting of oldEndedMeetings) {
+                await Meeting.deleteOne({ _id: meeting._id });
+                console.log(`✅ Reunião finalizada ${meeting.meetingId} EXCLUÍDA por antiguidade`);
+            }
+        }
+        
+        // EXCLUIR reuniões com links expirados
+        const expiredLinkMeetings = await Meeting.find({
+            linkExpiresAt: { $lt: now }
+        });
+        
+        if (expiredLinkMeetings.length > 0) {
+            console.log(`🗑️ Encontradas ${expiredLinkMeetings.length} reuniões com links expirados - EXCLUINDO`);
+            
+            for (const meeting of expiredLinkMeetings) {
+                await Meeting.deleteOne({ _id: meeting._id });
+                console.log(`✅ Reunião com link expirado ${meeting.meetingId} EXCLUÍDA`);
+            }
+        }
+        
     } catch (error) {
         console.error('❌ Erro no job de limpeza de reuniões:', error);
     }
@@ -225,10 +256,81 @@ app.get('/meet', (req, res) => {
 });
 
     // Rota para reunião específica
-    app.get('/meet/:meetingId', (req, res) => {
-        console.log(`🎯 GET /meet/${req.params.meetingId} - Reunião específica acessada`);
-        res.sendFile(path.join(__dirname, 'public', 'meet.html'));
-});
+    app.get('/meet/:meetingId', async (req, res) => {
+        const { meetingId } = req.params;
+        console.log(`🎯 GET /meet/${meetingId} - Reunião específica acessada`);
+        
+        try {
+            // Buscar a reunião no banco de dados
+            const meeting = await Meeting.findOne({ meetingId });
+            
+            if (!meeting) {
+                console.log(`❌ Reunião não encontrada: ${meetingId}`);
+                return res.status(404).send(`
+                    <html>
+                        <head><title>Reunião não encontrada</title></head>
+                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                            <h1>❌ Reunião não encontrada</h1>
+                            <p>A reunião solicitada não existe ou foi removida.</p>
+                        </body>
+                    </html>
+                `);
+            }
+            
+            // Verificar se a reunião está finalizada - EXCLUIR DO SISTEMA
+            if (meeting.status === 'ended') {
+                console.log(`🗑️ Reunião finalizada - EXCLUINDO: ${meetingId}`);
+                
+                // Excluir a reunião do banco de dados
+                await Meeting.deleteOne({ meetingId });
+                console.log(`✅ Reunião excluída do sistema: ${meetingId}`);
+                
+                return res.status(404).send(`
+                    <html>
+                        <head><title>Reunião não encontrada</title></head>
+                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                            <h1>❌ Reunião não encontrada</h1>
+                            <p>Esta reunião foi encerrada e removida do sistema.</p>
+                        </body>
+                    </html>
+                `);
+            }
+            
+            // Verificar se o link expirou - EXCLUIR DO SISTEMA
+            if (meeting.linkExpiresAt && new Date() > meeting.linkExpiresAt) {
+                console.log(`🗑️ Link expirado - EXCLUINDO: ${meetingId}`);
+                
+                // Excluir a reunião do banco de dados
+                await Meeting.deleteOne({ meetingId });
+                console.log(`✅ Reunião expirada excluída do sistema: ${meetingId}`);
+                
+                return res.status(404).send(`
+                    <html>
+                        <head><title>Reunião não encontrada</title></head>
+                        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                            <h1>❌ Reunião não encontrada</h1>
+                            <p>Esta reunião expirou e foi removida do sistema.</p>
+                        </body>
+                    </html>
+                `);
+            }
+            
+            console.log(`✅ Reunião válida: ${meetingId} (Status: ${meeting.status})`);
+            res.sendFile(path.join(__dirname, 'public', 'meet.html'));
+            
+        } catch (error) {
+            console.error(`❌ Erro ao verificar reunião ${meetingId}:`, error);
+            res.status(500).send(`
+                <html>
+                    <head><title>Erro</title></head>
+                    <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+                        <h1>❌ Erro</h1>
+                        <p>Ocorreu um erro ao verificar a reunião.</p>
+                    </body>
+                </html>
+            `);
+        }
+    });
 
 // Rota para teste de autenticação
 app.get('/test-auth', (req, res) => {
