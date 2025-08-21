@@ -4945,7 +4945,7 @@ async function saveTokenEdit(tokenId) {
     try {
         const name = document.getElementById('editTokenName').value.trim();
         const website = document.getElementById('editTokenWebsite').value.trim();
-        const videoId = document.getElementById('editTokenVideo').value || null;
+        const videoId = document.getElementById('editTokenVideo').value;
         const isActive = document.getElementById('editTokenActive').checked;
 
         if (!name) {
@@ -4953,7 +4953,9 @@ async function saveTokenEdit(tokenId) {
             return;
         }
 
-        if (!videoId) {
+        console.log('📤 [INTEGRATION] Dados para atualização:', { name, website, videoId, isActive });
+
+        if (!videoId || videoId === '') {
             showNotification('Selecione um vídeo', 'error');
             return;
         }
