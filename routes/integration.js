@@ -281,6 +281,12 @@ router.post('/create-meeting', async (req, res) => {
             return res.status(401).json({ error: 'Token de integração inválido ou inativo' });
         }
 
+        console.log('🔍 [INTEGRATION] Token encontrado:', integrationToken.name);
+        console.log('🔍 [INTEGRATION] Dados brutos do token:', {
+            videos: integrationToken.videos,
+            videosLength: integrationToken.videos.length
+        });
+
         // Verificar se o usuário tem tokens suficientes
         if (integrationToken.user.visionTokens < 1) {
             return res.status(402).json({ 
@@ -373,8 +379,12 @@ router.post('/create-meeting', async (req, res) => {
         if (!videoToUse && integrationToken.videos.length > 0) {
             console.log('🎬 [INTEGRATION] Usando primeiro vídeo disponível...');
             videoConfig = integrationToken.videos[0];
-            videoToUse = videoConfig.video;
-            console.log('✅ [INTEGRATION] Primeiro vídeo usado:', videoToUse.title);
+            if (videoConfig && videoConfig.video) {
+                videoToUse = videoConfig.video;
+                console.log('✅ [INTEGRATION] Primeiro vídeo usado:', videoToUse.title);
+            } else {
+                console.log('❌ [INTEGRATION] Primeiro vídeo configurado é inválido');
+            }
         }
         
         if (!videoToUse) {
