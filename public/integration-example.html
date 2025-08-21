@@ -253,6 +253,135 @@ async function createCallXButton(containerId, buttonText = 'Iniciar Reunião') {
 
     <h2>3. Exemplos de Uso</h2>
 
+    <h3>Código Simplificado (Recomendado)</h3>
+    <div class="code-block">
+<pre><code>&lt;div style="text-align: center; padding: 40px;"&gt;
+    &lt;h2&gt;Clique no botão abaixo para fazer a chamada comigo​&lt;/h2&gt;
+    &lt;p&gt;Estou te esperando&lt;/p&gt;
+    &lt;div id="callx-integration"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// Configuração
+const CALLX_CONFIG = {
+    apiUrl: 'https://google-meet-saas-v2.onrender.com/api/integration',
+    token: 'SEU_TOKEN_AQUI'
+};
+
+// Função com bloqueio de botão
+async function createCallXMeeting(buttonElement) {
+    // Bloquear botão imediatamente
+    buttonElement.disabled = true;
+    buttonElement.textContent = '⏳ Criando reunião...';
+    buttonElement.style.opacity = '0.6';
+    buttonElement.style.cursor = 'not-allowed';
+
+    try {
+        const response = await fetch(`${CALLX_CONFIG.apiUrl}/create-meeting`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: CALLX_CONFIG.token,
+                title: 'Reunião via Site',
+                redirectUrl: window.location.href
+            })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Sucesso - bloquear permanentemente
+            buttonElement.textContent = '✅ Reunião criada!';
+            buttonElement.style.background = '#28a745';
+            buttonElement.style.opacity = '0.8';
+            
+            // Salvar no localStorage
+            localStorage.setItem('callx_meeting_created', 'true');
+            localStorage.setItem('callx_meeting_id', result.meetingId);
+            
+            // Abrir reunião
+            window.open(result.meetLink, '_blank');
+        } else {
+            // Erro - desbloquear
+            buttonElement.disabled = false;
+            buttonElement.textContent = '🚀 Iniciar Reunião';
+            buttonElement.style.opacity = '1';
+            buttonElement.style.cursor = 'pointer';
+            alert('Erro: ' + result.error);
+        }
+    } catch (error) {
+        // Erro - desbloquear
+        buttonElement.disabled = false;
+        buttonElement.textContent = '🚀 Iniciar Reunião';
+        buttonElement.style.opacity = '1';
+        buttonElement.style.cursor = 'pointer';
+        alert('Erro ao conectar com o CallX');
+    }
+}
+
+// Criar botão
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('callx-integration');
+    if (container) {
+        // Verificar se já foi criada uma reunião
+        const meetingCreated = localStorage.getItem('callx_meeting_created');
+        const meetingId = localStorage.getItem('callx_meeting_id');
+        
+        if (meetingCreated === 'true' && meetingId) {
+            // Reunião já criada - mostrar botão bloqueado
+            const button = document.createElement('button');
+            button.textContent = '✅ Reunião já criada!';
+            button.disabled = true;
+            button.style.cssText = `
+                background: #28a745;
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                cursor: not-allowed;
+                opacity: 0.8;
+            `;
+            
+            const link = document.createElement('a');
+            link.href = `https://google-meet-saas-v2.onrender.com/meet/${meetingId}`;
+            link.target = '_blank';
+            link.textContent = 'Abrir Reunião';
+            link.style.cssText = `
+                display: block;
+                margin-top: 10px;
+                color: #007bff;
+                text-decoration: none;
+                font-weight: bold;
+            `;
+            
+            container.appendChild(button);
+            container.appendChild(link);
+        } else {
+            // Criar botão normal
+            const button = document.createElement('button');
+            button.textContent = '🚀 Iniciar Reunião';
+            button.style.cssText = `
+                background: #007bff;
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                cursor: pointer;
+                transition: background 0.3s;
+            `;
+            button.onmouseover = () => button.style.background = '#0056b3';
+            button.onmouseout = () => button.style.background = '#007bff';
+            button.onclick = () => createCallXMeeting(button);
+            
+            container.appendChild(button);
+        }
+    }
+});
+&lt;/script&gt;</code></pre>
+    </div>
+
     <h3>Botão Simples</h3>
     <div class="code-block">
 <pre><code>&lt;!-- HTML --&gt;
@@ -268,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <h3>Botão com Vídeo Específico</h3>
     <div class="code-block">
-<pre><code>&lt;button onclick="createCallXMeeting('VIDEO_ID_AQUI', 'Reunião Personalizada')"&gt;
+<pre><code>&lt;button onclick="createCallXMeeting('VIDEO_ID_AQUI', 'Reunião Personalizada', null, this)"&gt;
     Iniciar Reunião Específica
 &lt;/button&gt;</code></pre>
     </div>
