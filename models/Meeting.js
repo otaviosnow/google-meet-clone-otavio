@@ -106,18 +106,13 @@ meetingSchema.methods.canAccess = function(ip) {
         return false;
     }
     
-    // O criador sempre pode acessar
-    if (ip === this.creatorIP) {
-        return true;
-    }
-    
-    // Se já existe um IP adicional autorizado, apenas ele pode acessar
+    // Se já existe um IP acessando, apenas ele pode continuar
     if (this.additionalAccessIP) {
         return ip === this.additionalAccessIP;
     }
     
-    // Se não há IP adicional, qualquer IP diferente do criador pode ser o primeiro
-    return ip !== this.creatorIP;
+    // Se não há ninguém acessando, qualquer pessoa pode ser a primeira
+    return true;
 };
 
 // Método para verificar se a reunião expirou por tempo
@@ -139,18 +134,9 @@ meetingSchema.methods.isExpired = function() {
 
 // Método para autorizar acesso de um novo IP
 meetingSchema.methods.authorizeAccess = function(ip) {
-    // Se é o criador, apenas incrementa o contador
-    if (ip === this.creatorIP) {
-        this.accessCount += 1;
-        // Marcar início da reunião se for o primeiro acesso do criador
-        if (!this.startedAt) {
-            this.startedAt = new Date();
-        }
-        return { authorized: true, isCreator: true };
-    }
-    
-    // Se já existe um IP adicional autorizado
+    // Se já existe um IP acessando
     if (this.additionalAccessIP) {
+        // Se é o mesmo IP, permite continuar
         if (ip === this.additionalAccessIP) {
             this.accessCount += 1;
             // Marcar início da reunião se for o primeiro acesso
@@ -159,11 +145,12 @@ meetingSchema.methods.authorizeAccess = function(ip) {
             }
             return { authorized: true, isCreator: false };
         } else {
+            // Se é um IP diferente, bloqueia
             return { authorized: false, reason: 'Reunião já está sendo utilizada por outra pessoa' };
         }
     }
     
-    // Se não há IP adicional, autoriza este IP
+    // Se não há ninguém acessando, autoriza este IP (qualquer pessoa)
     this.additionalAccessIP = ip;
     this.accessCount += 1;
     // Marcar início da reunião
