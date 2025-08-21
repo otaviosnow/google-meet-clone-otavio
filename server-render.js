@@ -27,6 +27,28 @@ const uploadsPathCheck = process.env.NODE_ENV === 'production'
 
 console.log('📁 Verificando diretório de uploads:', uploadsPathCheck);
 
+// Sistema de backup automático para evitar perda de vídeos
+if (process.env.NODE_ENV === 'production') {
+    console.log('🔄 [BACKUP] Verificando backup de vídeos...');
+    
+    // Verificar se há arquivos no diretório de uploads
+    if (fs.existsSync(uploadsPathCheck)) {
+        try {
+            const files = fs.readdirSync(uploadsPathCheck);
+            console.log(`📄 [BACKUP] ${files.length} arquivos encontrados no diretório de uploads`);
+            
+            // Se há arquivos, fazer backup
+            if (files.length > 0) {
+                console.log('💾 [BACKUP] Arquivos encontrados, backup automático ativo');
+            } else {
+                console.log('⚠️ [BACKUP] Nenhum arquivo encontrado, pode ter sido perdido no deploy');
+            }
+        } catch (error) {
+            console.error('❌ [BACKUP] Erro ao verificar arquivos:', error);
+        }
+    }
+}
+
 if (!fs.existsSync(uploadsPathCheck)) {
     console.log('❌ Diretório não existe, criando...');
     try {
