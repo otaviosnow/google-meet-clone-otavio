@@ -750,6 +750,23 @@ body {
     background-color: #0f0f23;
 }
 
+/* Barra de Avisos */
+.alert-banner {
+    background-color: #ffffff;
+    color: #000000;
+    padding: 8px 0;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+    z-index: 101;
+}
+
+.alert-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #000000;
+}
+
 .dashboard-header {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
     backdrop-filter: blur(20px);
@@ -4220,6 +4237,16 @@ body {
 
 /* Responsividade para ações em lote */
 @media (max-width: 768px) {
+    /* Barra de avisos responsiva */
+    .alert-banner {
+        padding: 6px 0;
+    }
+    
+    .alert-text {
+        font-size: 12px;
+        padding: 0 10px;
+    }
+    
     .batch-actions {
         flex-direction: column;
         align-items: stretch;
