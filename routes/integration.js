@@ -338,31 +338,51 @@ router.post('/create-meeting', async (req, res) => {
         let videoToUse = null;
         let videoConfig = null;
         
-        if (videoId) {
+        console.log('🎬 [INTEGRATION] Vídeos configurados no token:', integrationToken.videos.length);
+        console.log('🎬 [INTEGRATION] Dados dos vídeos:', integrationToken.videos.map(v => ({
+            videoId: v.video?._id,
+            videoTitle: v.video?.title,
+            isDefault: v.isDefault
+        })));
+        
+        if (videoId && videoId !== 'undefined' && videoId !== 'null') {
+            console.log('🎬 [INTEGRATION] Buscando vídeo específico:', videoId);
             // Buscar vídeo específico na lista de vídeos configurados
             videoConfig = integrationToken.videos.find(v => v.video._id.toString() === videoId);
             if (videoConfig) {
                 videoToUse = videoConfig.video;
+                console.log('✅ [INTEGRATION] Vídeo específico encontrado:', videoToUse.title);
+            } else {
+                console.log('⚠️ [INTEGRATION] Vídeo específico não encontrado');
             }
         }
         
         // Se não encontrou vídeo específico, usar o padrão
         if (!videoToUse) {
+            console.log('🎬 [INTEGRATION] Buscando vídeo padrão...');
             videoConfig = integrationToken.videos.find(v => v.isDefault);
             if (videoConfig) {
                 videoToUse = videoConfig.video;
+                console.log('✅ [INTEGRATION] Vídeo padrão encontrado:', videoToUse.title);
+            } else {
+                console.log('⚠️ [INTEGRATION] Nenhum vídeo padrão encontrado');
             }
         }
         
         // Se ainda não encontrou, usar o primeiro vídeo disponível
         if (!videoToUse && integrationToken.videos.length > 0) {
+            console.log('🎬 [INTEGRATION] Usando primeiro vídeo disponível...');
             videoConfig = integrationToken.videos[0];
             videoToUse = videoConfig.video;
+            console.log('✅ [INTEGRATION] Primeiro vídeo usado:', videoToUse.title);
         }
         
         if (!videoToUse) {
+            console.log('❌ [INTEGRATION] Nenhum vídeo disponível para a reunião');
             return res.status(400).json({ error: 'Nenhum vídeo disponível para a reunião' });
         }
+        
+        console.log('✅ [INTEGRATION] Vídeo final selecionado:', videoToUse.title);
 
         // Criar reunião
         const meetingId = 'ext-' + Math.random().toString(36).substr(2, 9);
