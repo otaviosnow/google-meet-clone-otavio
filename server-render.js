@@ -255,7 +255,41 @@ app.get('/meet', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'meet.html'));
 });
 
-    // Rota para reunião específica
+
+
+// Rota para teste de autenticação
+app.get('/test-auth', (req, res) => {
+  console.log('🔐 GET /test-auth - Página de teste de auth acessada');
+  res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
+});
+
+    // Rota para página de compra de tokens
+    app.get('/comprar-tokens', (req, res) => {
+        console.log('💰 GET /comprar-tokens - Página de compra de tokens acessada');
+        res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
+    });
+
+    // Rota para página de reset de senha
+    app.get('/reset-password', (req, res) => {
+        console.log('🔑 GET /reset-password - Página de reset de senha acessada');
+        res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+    });
+
+    // Rota para página de termos de uso
+    app.get('/termos-uso', (req, res) => {
+        console.log('📋 GET /termos-uso - Página de termos de uso acessada');
+        res.sendFile(path.join(__dirname, 'public', 'termos-uso.html'));
+    });
+
+    // Rota para página de analytics
+    app.get('/analytics', (req, res) => {
+        console.log('📊 GET /analytics - Página de analytics acessada');
+        res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
+    });
+
+    // ===== ROTAS ESPECÍFICAS (ANTES DOS ARQUIVOS ESTÁTICOS) =====
+    
+    // Rota para reunião específica - DEVE VIR ANTES DOS ARQUIVOS ESTÁTICOS
     app.get('/meet/:meetingId', async (req, res) => {
         const { meetingId } = req.params;
         console.log(`🎯 GET /meet/${meetingId} - Reunião específica acessada`);
@@ -330,36 +364,6 @@ app.get('/meet', (req, res) => {
                 </html>
             `);
         }
-    });
-
-// Rota para teste de autenticação
-app.get('/test-auth', (req, res) => {
-  console.log('🔐 GET /test-auth - Página de teste de auth acessada');
-  res.sendFile(path.join(__dirname, 'public', 'test-auth.html'));
-});
-
-    // Rota para página de compra de tokens
-    app.get('/comprar-tokens', (req, res) => {
-        console.log('💰 GET /comprar-tokens - Página de compra de tokens acessada');
-        res.sendFile(path.join(__dirname, 'public', 'comprar-tokens.html'));
-    });
-
-    // Rota para página de reset de senha
-    app.get('/reset-password', (req, res) => {
-        console.log('🔑 GET /reset-password - Página de reset de senha acessada');
-        res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
-    });
-
-    // Rota para página de termos de uso
-    app.get('/termos-uso', (req, res) => {
-        console.log('📋 GET /termos-uso - Página de termos de uso acessada');
-        res.sendFile(path.join(__dirname, 'public', 'termos-uso.html'));
-    });
-
-    // Rota para página de analytics
-    app.get('/analytics', (req, res) => {
-        console.log('📊 GET /analytics - Página de analytics acessada');
-        res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
     });
 
     // ===== ARQUIVOS ESTÁTICOS =====
