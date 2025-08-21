@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CALLX</title>
     <link rel="stylesheet" href="/css/meet.css">
+    
+    <!-- Proteções contra inspeção -->
+    <style>
+        /* Desabilitar seleção de texto */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Permitir seleção apenas em inputs */
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Desabilitar arrastar imagens */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Tela 1: Nome do Participante -->
@@ -173,5 +201,86 @@
     </div>
 
     <script src="/js/meet.js"></script>
+    
+    <!-- Proteções JavaScript contra inspeção -->
+    <script>
+        // Bloquear clique direito
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Bloquear F12
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+                (e.ctrlKey && e.shiftKey && e.key === 'J') || (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Bloquear DevTools (detecção básica)
+        function detectDevTools() {
+            const threshold = 160;
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            
+            if (widthThreshold || heightThreshold) {
+                document.body.innerHTML = '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;"><h1>🚫 Acesso Negado</h1><p>Ferramentas de desenvolvedor não são permitidas.</p></div>';
+            }
+        }
+        
+        // Verificar periodicamente
+        setInterval(detectDevTools, 1000);
+        
+        // Bloquear console
+        console.log = function() {};
+        console.warn = function() {};
+        console.error = function() {};
+        console.info = function() {};
+        
+        // Bloquear alertas de debug
+        window.alert = function() {};
+        
+        // Desabilitar algumas teclas de atalho
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Shift+C (inspecionar elemento)
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+R (recarregar ignorando cache)
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Bloquear arrastar elementos
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Bloquear copiar
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Bloquear recortar
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Bloquear colar (exceto em inputs)
+        document.addEventListener('paste', function(e) {
+            if (!e.target.matches('input, textarea')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </body>
 </html> 
