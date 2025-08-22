@@ -17,7 +17,7 @@ async function getPagarmeClient() {
 }
 
 // Criar pagamento PIX
-router.post('/pix', authenticateToken, async (req, res) => {
+router.post('/create-pix', authenticateToken, async (req, res) => {
     try {
         const { quantity, amount } = req.body;
         
@@ -29,7 +29,7 @@ router.post('/pix', authenticateToken, async (req, res) => {
         }
 
         // Obter dados do usuário
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).json({ 
                 success: false, 
