@@ -38,10 +38,15 @@ function initializeMercadoPago() {
             throw new Error('Access Token do Mercado Pago não configurado. Configure MERCADOPAGO_ACCESS_TOKEN no Render.');
         }
         
-        // Configurar o SDK do Mercado Pago
+        // Configurar o SDK do Mercado Pago (versão 2.8.0)
         mercadopago.configure({
             access_token: MERCADOPAGO_CONFIG.accessToken
         });
+        
+        // Verificar se a configuração funcionou
+        if (!mercadopago.payment) {
+            throw new Error('SDK do Mercado Pago não foi inicializado corretamente');
+        }
         
         console.log('✅ Mercado Pago inicializado com sucesso');
         console.log(`🌍 Ambiente: ${MERCADOPAGO_CONFIG.environment}`);
@@ -81,11 +86,14 @@ async function createPixPayment(amount, description, customerData = {}) {
         const payment = await mercadopago.payment.save(paymentData);
         console.log('✅ Pagamento PIX criado:', payment.body.id);
         
+        // Extrair dados do PIX da resposta
+        const pixData = payment.body.point_of_interaction?.transaction_data;
+        
         return {
             success: true,
             transactionId: payment.body.id,
-            pixQrCode: payment.body.point_of_interaction.transaction_data.qr_code,
-            pixQrCodeUrl: payment.body.point_of_interaction.transaction_data.qr_code_base64,
+            pixQrCode: pixData?.qr_code || '',
+            pixQrCodeUrl: pixData?.qr_code_base64 || '',
             pixExpiration: payment.body.date_of_expiration,
             amount: amount,
             status: payment.body.status
