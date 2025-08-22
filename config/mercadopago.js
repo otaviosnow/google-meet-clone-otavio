@@ -38,7 +38,7 @@ function initializeMercadoPago() {
             throw new Error('Access Token do Mercado Pago não configurado. Configure MERCADOPAGO_ACCESS_TOKEN no Render.');
         }
         
-        // Configurar o SDK do Mercado Pago (versão 2.8.0)
+        // Configurar o SDK do Mercado Pago (versão 1.5.8)
         mercadopago.configure({
             access_token: MERCADOPAGO_CONFIG.accessToken
         });
