@@ -30,6 +30,14 @@ const PAGARME_CONFIG = {
 // Função para inicializar o cliente Pagar.me
 function initializePagarme() {
     try {
+        console.log('🔧 [PAGARME] Iniciando configuração...');
+        console.log('🔑 [PAGARME] API Key:', PAGARME_CONFIG.apiKey ? 'Configurada' : 'NÃO CONFIGURADA');
+        console.log('🌍 [PAGARME] Ambiente:', PAGARME_CONFIG.environment);
+        
+        if (!PAGARME_CONFIG.apiKey || PAGARME_CONFIG.apiKey === 'ak_test_...') {
+            throw new Error('Chave API do Pagar.me não configurada. Configure PAGARME_API_KEY no Render.');
+        }
+        
         const client = pagarme.client.connect({
             api_key: PAGARME_CONFIG.apiKey
         });
