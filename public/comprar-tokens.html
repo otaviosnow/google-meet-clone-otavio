@@ -107,6 +107,25 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- Fallback para QR Code se o CDN falhar -->
+    <script>
+        // Verificar se a biblioteca QR Code carregou
+        if (typeof QRCode === 'undefined') {
+            console.warn('⚠️ QR Code library não carregou, tentando fallback...');
+            // Carregar versão alternativa
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js';
+            script.onload = function() {
+                console.log('✅ QR Code library carregada via fallback');
+            };
+            script.onerror = function() {
+                console.error('❌ Falha ao carregar QR Code library');
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log('✅ QR Code library carregada com sucesso');
+        }
+    </script>
     <script src="js/tokens.js"></script>
 </body>
 </html>
