@@ -1,19 +1,19 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { initializePagarme, createPixPayment, checkPaymentStatus, processWebhook } = require('../config/pagarme');
+const { initializeMercadoPago, createPixPayment, checkPaymentStatus, processWebhook } = require('../config/mercadopago');
 const User = require('../models/User');
 
 const router = express.Router();
 
-// Inicializar cliente Pagar.me
-let pagarmeClient = null;
+// Inicializar cliente Mercado Pago
+let mercadopagoClient = null;
 
 // Função para inicializar o cliente (será chamada quando necessário)
-async function getPagarmeClient() {
-    if (!pagarmeClient) {
-        pagarmeClient = await initializePagarme();
+async function getMercadoPagoClient() {
+    if (!mercadopagoClient) {
+        mercadopagoClient = await initializeMercadoPago();
     }
-    return pagarmeClient;
+    return mercadopagoClient;
 }
 
 // Criar pagamento PIX
@@ -37,10 +37,10 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             });
         }
 
-        // Inicializar cliente Pagar.me
-        const client = await getPagarmeClient();
+        // Inicializar cliente Mercado Pago
+        const client = await getMercadoPagoClient();
         
-        // Dados do cliente para o Pagar.me
+        // Dados do cliente para o Mercado Pago
         const customerData = {
             id: user._id.toString(),
             name: user.name || user.email,
@@ -52,7 +52,7 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
         const description = `${quantity} tokens CallX - ${user.email}`;
 
         // Criar pagamento PIX
-        const paymentResult = await createPixPayment(client, amount, description, customerData);
+        const paymentResult = await createPixPayment(amount, description, customerData);
         
         if (!paymentResult.success) {
             return res.status(500).json({
@@ -82,9 +82,9 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('❌ Erro ao criar pagamento PIX:', error);
         
-        // Verificar se é erro do Pagar.me
-        if (error.message && error.message.includes('Pagar.me API error')) {
-            console.error('🔍 Detalhes do erro Pagar.me:', {
+        // Verificar se é erro do Mercado Pago
+        if (error.message && error.message.includes('Mercado Pago API error')) {
+            console.error('🔍 Detalhes do erro Mercado Pago:', {
                 response: error.response,
                 errors: error.response?.errors,
                 status: error.response?.status
@@ -92,7 +92,7 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             
             res.status(500).json({
                 success: false,
-                error: `Erro do Pagar.me: ${error.response?.status || 'Desconhecido'} - ${error.response?.errors?.[0]?.message || error.message}`
+                error: `Erro do Mercado Pago: ${error.response?.status || 'Desconhecido'} - ${error.response?.errors?.[0]?.message || error.message}`
             });
         } else {
             res.status(500).json({
