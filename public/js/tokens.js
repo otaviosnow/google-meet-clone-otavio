@@ -390,16 +390,95 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTotal();
     updateButtonStates();
 
-    // Adicionar animação de loading ao botão
-    generatePixBtn.addEventListener('click', function() {
+    // Gerar QR Code PIX
+    generatePixBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        console.log('🔍 [TOKENS] Gerando QR Code PIX...');
+        
+        const quantity = parseInt(tokenQuantity.value) || 0;
+        const total = quantity * TOKEN_PRICE;
+        
+        if (quantity < MIN_QUANTITY) {
+            alert(`Quantidade mínima é ${MIN_QUANTITY} tokens`);
+            return;
+        }
+        
+        // Mostrar loading
         const originalText = this.innerHTML;
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
         this.disabled = true;
-
-        // Simular delay de geração
-        setTimeout(() => {
+        
+        try {
+            // Buscar token de autenticação
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                throw new Error('Usuário não autenticado');
+            }
+            
+            // Criar pagamento PIX
+            const response = await fetch('/api/payments/create-pix', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    amount: total,
+                    description: `${quantity} tokens CallX`,
+                    quantity: quantity
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('✅ [TOKENS] Pagamento PIX criado:', result.data);
+                
+                // Atualizar modal
+                modalQuantity.textContent = quantity;
+                modalTotal.textContent = formatBrazilianCurrency(total);
+                pixCode.value = result.data.pixCode || 'Código PIX não disponível';
+                
+                // Gerar QR Code
+                if (typeof QRCode !== 'undefined' && result.data.pixQrCode) {
+                    qrCodeContainer.innerHTML = '';
+                    QRCode.toCanvas(result.data.pixQrCode, qrCodeContainer, {
+                        width: 200,
+                        height: 200,
+                        margin: 2
+                    });
+                    console.log('✅ [TOKENS] QR Code gerado com sucesso');
+                } else {
+                    qrCodeContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #ef4444;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>Erro ao gerar QR Code</p>
+                            <small>Use o código PIX abaixo</small>
+                        </div>
+                    `;
+                    console.error('❌ [TOKENS] QR Code não pôde ser gerado');
+                }
+                
+                // Mostrar modal
+                pixModal.style.display = 'flex';
+                
+                // Iniciar verificação de pagamento
+                if (result.data.transactionId) {
+                    startPaymentCheck(result.data.transactionId);
+                }
+                
+            } else {
+                throw new Error(result.error || 'Erro ao criar pagamento');
+            }
+            
+        } catch (error) {
+            console.error('❌ [TOKENS] Erro ao gerar PIX:', error);
+            alert('Erro ao gerar QR Code PIX: ' + error.message);
+        } finally {
+            // Restaurar botão
             this.innerHTML = originalText;
             this.disabled = false;
-        }, 1000);
+        }
     });
 });
