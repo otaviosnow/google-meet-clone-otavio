@@ -96,9 +96,21 @@ async function createPixPayment(client, amount, description, customerData = {}) 
         };
 
         console.log('🔄 Criando pagamento PIX...');
-        const transaction = await client.transactions.create(paymentData);
+        console.log('📊 Dados do pagamento:', JSON.stringify(paymentData, null, 2));
         
-        console.log('✅ Pagamento PIX criado:', transaction.id);
+        try {
+            const transaction = await client.transactions.create(paymentData);
+            console.log('✅ Pagamento PIX criado:', transaction.id);
+        } catch (error) {
+            console.error('❌ Erro detalhado do Pagar.me:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data,
+                errors: error.response?.errors
+            });
+            throw error;
+        }
         
         return {
             success: true,

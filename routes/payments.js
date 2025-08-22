@@ -81,10 +81,25 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('❌ Erro ao criar pagamento PIX:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Erro interno do servidor'
-        });
+        
+        // Verificar se é erro do Pagar.me
+        if (error.message && error.message.includes('Pagar.me API error')) {
+            console.error('🔍 Detalhes do erro Pagar.me:', {
+                response: error.response,
+                errors: error.response?.errors,
+                status: error.response?.status
+            });
+            
+            res.status(500).json({
+                success: false,
+                error: `Erro do Pagar.me: ${error.response?.status || 'Desconhecido'} - ${error.response?.errors?.[0]?.message || error.message}`
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: 'Erro interno do servidor: ' + error.message
+            });
+        }
     }
 });
 
