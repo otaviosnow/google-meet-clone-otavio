@@ -7,7 +7,7 @@ const MERCADOPAGO_CONFIG = {
     accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || 'TEST-...',
     
     // Ambiente (sandbox ou produção)
-    environment: process.env.MERCADOPAGO_ENVIRONMENT || 'sandbox',
+    environment: process.env.MERCADOPAGO_ENVIRONMENT || 'production',
     
     // Configurações da empresa
     company: {
