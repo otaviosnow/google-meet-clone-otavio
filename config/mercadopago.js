@@ -75,9 +75,7 @@ async function createPixPayment(amount, description, customerData = {}) {
                 }
             },
             notification_url: MERCADOPAGO_CONFIG.payment.webhookUrl,
-            external_reference: customerData.id || `order_${Date.now()}`,
-            expires: true,
-            expiration_date_to: new Date(Date.now() + (MERCADOPAGO_CONFIG.payment.pixExpiration * 1000)).toISOString()
+            external_reference: customerData.id || `order_${Date.now()}`
         };
 
         console.log('🔄 Criando pagamento PIX...');
