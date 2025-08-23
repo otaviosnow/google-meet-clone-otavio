@@ -104,7 +104,8 @@ async function createPixPayment(quantity, amount) {
 // Carregar pagamento existente
 async function loadExistingPayment(transactionId) {
     try {
-        const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+        // Primeiro, tentar buscar dados completos do pagamento
+        const response = await fetch(`/api/payments/payment/${transactionId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }

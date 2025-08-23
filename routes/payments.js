@@ -182,22 +182,67 @@ router.post('/webhook', async (req, res) => {
     }
 });
 
+// Buscar dados completos do pagamento (incluindo QR Code)
+router.get('/payment/:transactionId', authenticateToken, async (req, res) => {
+    try {
+        const { transactionId } = req.params;
+        console.log('🔍 Buscando dados completos do pagamento:', transactionId);
+
+        // Inicializar cliente Mercado Pago
+        const client = await getMercadoPagoClient();
+        
+        // Buscar pagamento no Mercado Pago
+        const payment = await client.payment.get(transactionId);
+        
+        if (payment && payment.body) {
+            const paymentData = payment.body;
+            
+            // Extrair dados do PIX
+            const pixData = paymentData.point_of_interaction?.transaction_data;
+            
+            res.json({
+                success: true,
+                data: {
+                    transactionId: transactionId,
+                    status: paymentData.status,
+                    amount: paymentData.transaction_amount,
+                    pixQrCode: pixData?.qr_code,
+                    pixQrCodeUrl: pixData?.qr_code_base64,
+                    externalReference: paymentData.external_reference
+                },
+                message: 'Dados do pagamento recuperados com sucesso'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                message: 'Pagamento não encontrado'
+            });
+        }
+    } catch (error) {
+        console.error('❌ Erro ao buscar dados do pagamento:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
 // Rota de teste para verificar configuração
 router.get('/test', async (req, res) => {
     try {
-        const client = await getPagarmeClient();
+        const client = await getMercadoPagoClient();
         
         res.json({
             success: true,
-            message: 'Pagar.me configurado corretamente',
-            environment: process.env.PAGARME_ENVIRONMENT || 'sandbox'
+            message: 'Mercado Pago configurado corretamente',
+            environment: process.env.MERCADOPAGO_ENVIRONMENT || 'production'
         });
 
     } catch (error) {
         console.error('❌ Erro no teste:', error);
         res.status(500).json({
             success: false,
-            error: 'Erro na configuração do Pagar.me'
+            error: 'Erro na configuração do Mercado Pago'
         });
     }
 });
