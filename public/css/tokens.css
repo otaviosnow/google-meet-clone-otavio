@@ -288,73 +288,7 @@
     font-size: 20px;
 }
 
-/* SOLUÇÃO DEFINITIVA PARA OPERA - MODAL PIX */
-.pix-modal {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    z-index: 9999 !important;
-    backdrop-filter: blur(10px) !important;
-}
-
-.pix-modal-content {
-    background: rgba(15, 23, 42, 0.95) !important;
-    border-radius: 24px !important;
-    padding: 32px !important;
-    width: 90vw !important;
-    max-width: 1200px !important;
-    min-width: 1000px !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
-    position: relative !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-    max-height: 90vh !important;
-    overflow: visible !important;
-}
-
-.pix-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.pix-modal-header h3 {
-    color: #e8eaed;
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    color: #9ca3af;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.close-modal:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
-
+/* PIX PAYMENT PAGE STYLES */
 .expiration-counter {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.3);
@@ -380,34 +314,35 @@
     color: #6c757d;
 }
 
-/* LAYOUT HORIZONTAL FORÇADO - SOLUÇÃO DEFINITIVA */
+/* LAYOUT HORIZONTAL PARA PIX PAYMENT */
 .pix-layout {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 40px !important;
-    width: 100% !important;
-    height: auto !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    width: 100%;
+    height: auto;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 30px;
 }
 
 .pix-info-column {
-    flex: 1 !important;
-    min-width: 0 !important;
-    max-width: 50% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px !important;
+    flex: 1;
+    min-width: 0;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .pix-qr-column {
-    flex: 1 !important;
-    min-width: 0 !important;
-    max-width: 50% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
+    flex: 1;
+    min-width: 0;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .pix-info {
@@ -487,35 +422,6 @@
 
 .copy-btn:active {
     transform: scale(0.95);
-}
-
-.pix-instructions {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.pix-instructions h4 {
-    color: #e8eaed;
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 16px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pix-instructions ol {
-    color: #9ca3af;
-    margin: 0;
-    padding-left: 20px;
-}
-
-.pix-instructions li {
-    margin-bottom: 8px;
-    font-size: 14px;
-    line-height: 1.5;
 }
 
 .pix-qr-container {
@@ -624,7 +530,7 @@
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
-/* RESPONSIVIDADE APENAS PARA MOBILE REAL */
+/* RESPONSIVIDADE */
 @media (max-width: 768px) {
     .tokens-content {
         padding: 20px 16px;
@@ -660,25 +566,14 @@
         font-size: 16px;
     }
     
-    .pix-modal-content {
-        width: 95vw !important;
-        min-width: auto !important;
-        padding: 20px !important;
-        margin: 10px !important;
-    }
-    
     .pix-layout {
-        flex-direction: column !important;
-        gap: 20px !important;
+        flex-direction: column;
+        gap: 20px;
     }
     
     .pix-info-column,
     .pix-qr-column {
-        max-width: 100% !important;
-    }
-    
-    .pix-modal-header h3 {
-        font-size: 20px;
+        max-width: 100%;
     }
     
     .qr-code-container {
