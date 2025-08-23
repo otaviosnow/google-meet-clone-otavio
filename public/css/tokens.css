@@ -384,12 +384,11 @@ body .pix-modal .pix-modal-content {
     color: #6c757d;
 }
 
-/* Layout responsivo do modal - ESPECIFICIDADE MÁXIMA PARA OPERA */
+/* Layout responsivo do modal - CSS GRID GARANTIDO PARA OPERA */
 body .pix-modal .pix-modal-content .pix-layout {
-    display: flex !important;
-    flex-direction: row !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 30px !important;
-    align-items: flex-start !important;
     width: 100% !important;
     max-width: 100% !important;
     min-height: auto !important;
@@ -397,26 +396,18 @@ body .pix-modal .pix-modal-content .pix-layout {
 }
 
 body .pix-modal .pix-modal-content .pix-layout .pix-info-column {
-    flex: 1 !important;
-    min-width: 0 !important;
-    max-width: 50% !important;
-    width: 50% !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 20px !important;
-    float: left !important;
+    min-width: 0 !important;
 }
 
 body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
-    flex: 1 !important;
-    min-width: 0 !important;
-    max-width: 50% !important;
-    width: 50% !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    float: right !important;
+    min-width: 0 !important;
 }
 
 /* Coluna de informações */
@@ -653,22 +644,12 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
-/* CSS específico para Opera */
+/* CSS específico para Opera - GRID GARANTIDO */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
-    .pix-layout {
-        display: flex !important;
-        flex-direction: row !important;
+    body .pix-modal .pix-modal-content .pix-layout {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         gap: 30px !important;
-    }
-    
-    .pix-info-column {
-        width: 50% !important;
-        max-width: 50% !important;
-    }
-    
-    .pix-qr-column {
-        width: 50% !important;
-        max-width: 50% !important;
     }
 }
 
@@ -709,8 +690,8 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
     }
     
     .pix-layout {
-        display: flex !important;
-        flex-direction: column !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
         gap: 20px;
     }
     
