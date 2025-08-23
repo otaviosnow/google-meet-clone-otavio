@@ -64,7 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!expirationCounter || !countdownTime) return;
         
         expirationCounter.style.display = 'flex';
-        qrExpirationTime = new Date(expirationTime);
+        
+        // Se não tiver tempo de expiração, usar 30 minutos padrão
+        if (!expirationTime) {
+            qrExpirationTime = new Date(Date.now() + (30 * 60 * 1000)); // 30 minutos
+        } else {
+            qrExpirationTime = new Date(expirationTime);
+        }
         
         function updateCountdown() {
             const now = new Date();
