@@ -1,6 +1,7 @@
 const express = require('express');
 const { processWebhook, checkPaymentStatus, initializeMercadoPago } = require('../config/mercadopago');
 const User = require('../models/User');
+const mercadopago = require('mercadopago');
 
 const router = express.Router();
 
@@ -22,10 +23,42 @@ router.post('/mercadopago', async (req, res) => {
             if (result.success) {
                 console.log('✅ Webhook processado com sucesso:', result);
                 
-                // Aqui você pode adicionar lógica para:
-                // - Creditar tokens ao usuário
-                // - Enviar email de confirmação
-                // - Atualizar status do pagamento
+                // Verificar se o pagamento foi aprovado
+                const paymentStatus = await checkPaymentStatus(paymentId);
+                
+                if (paymentStatus.success && paymentStatus.status === 'approved') {
+                    console.log('💰 Pagamento aprovado! Creditando tokens...');
+                    
+                    // Buscar o pagamento original para pegar os dados
+                    const payment = await mercadopago.payment.get(paymentId);
+                    const externalReference = payment.body.external_reference;
+                    const amount = payment.body.transaction_amount;
+                    
+                    console.log('📊 Dados do pagamento:', {
+                        externalReference,
+                        amount,
+                        status: paymentStatus.status
+                    });
+                    
+                    // Calcular tokens (R$ 2,00 por token)
+                    const tokensToAdd = Math.floor(amount / 2);
+                    
+                    // Buscar usuário pelo external_reference (que deve ser o ID do usuário)
+                    const user = await User.findById(externalReference);
+                    
+                    if (user) {
+                        // Adicionar tokens
+                        user.visionTokens += tokensToAdd;
+                        await user.save();
+                        
+                        console.log(`✅ Tokens creditados: ${user.email} +${tokensToAdd} tokens (R$ ${amount})`);
+                        console.log(`🎫 Total de tokens: ${user.visionTokens}`);
+                    } else {
+                        console.error('❌ Usuário não encontrado:', externalReference);
+                    }
+                } else {
+                    console.log('⚠️ Pagamento não aprovado ainda:', paymentStatus.status);
+                }
                 
                 res.status(200).json({ success: true, message: 'Webhook processado' });
             } else {
