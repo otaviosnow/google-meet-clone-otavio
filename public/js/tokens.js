@@ -198,6 +198,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Usuário não autenticado');
             }
 
+            console.log('🔄 [TOKENS] Iniciando criação do PIX...');
+            console.log('📊 [TOKENS] Dados:', { quantity, amount: quantity * TOKEN_PRICE });
+            console.log('🔑 [TOKENS] Token:', authToken ? 'Presente' : 'Ausente');
+            
             // Chamar API para criar PIX
             const response = await fetch('/api/payments/create-pix', {
                 method: 'POST',
@@ -211,7 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
 
+            console.log('📡 [TOKENS] Response status:', response.status);
             const result = await response.json();
+            console.log('📄 [TOKENS] Response data:', result);
 
             if (response.ok && result.success) {
                 console.log('✅ [TOKENS] PIX criado com sucesso:', result);
