@@ -307,18 +307,20 @@
 }
 
 .pix-modal-content {
-    background: rgba(15, 23, 42, 0.95);
-    border-radius: 24px;
-    padding: 32px;
-    max-width: 900px;
-    width: 90%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-radius: 24px !important;
+    padding: 32px !important;
+    max-width: 900px !important;
+    width: 90% !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: auto !important;
+    height: auto !important;
 }
 
 .pix-modal-header {
@@ -382,33 +384,39 @@
     color: #6c757d;
 }
 
-/* Layout responsivo do modal */
+/* Layout responsivo do modal - FORÇADO PARA OPERA */
 .pix-layout {
     display: flex !important;
     flex-direction: row !important;
-    gap: 30px;
-    align-items: flex-start;
-    width: 100%;
-    max-width: 100%;
+    gap: 30px !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
 }
 
 .pix-info-column {
     flex: 1 !important;
-    min-width: 0;
-    max-width: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    min-width: 0 !important;
+    max-width: 50% !important;
+    width: 50% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    float: left !important;
 }
 
 .pix-qr-column {
     flex: 1 !important;
-    min-width: 0;
-    max-width: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    min-width: 0 !important;
+    max-width: 50% !important;
+    width: 50% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    float: right !important;
 }
 
 /* Coluna de informações */
@@ -643,6 +651,25 @@
 .btn-success:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+/* CSS específico para Opera */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .pix-layout {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 30px !important;
+    }
+    
+    .pix-info-column {
+        width: 50% !important;
+        max-width: 50% !important;
+    }
+    
+    .pix-qr-column {
+        width: 50% !important;
+        max-width: 50% !important;
+    }
 }
 
 /* Responsividade */
