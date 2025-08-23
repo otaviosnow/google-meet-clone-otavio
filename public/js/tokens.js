@@ -29,6 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const TOKEN_PRICE = 2.00; // R$ 2,00 por token
     const MIN_QUANTITY = 5;
+    let paymentCheckInterval = null;
+    let countdownInterval = null;
+    let qrExpirationTime = null;
 
     // Função para atualizar o valor total
     function updateTotal() {
@@ -51,6 +54,93 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para formatar número brasileiro
     function formatBrazilianCurrency(value) {
         return value.toFixed(2).replace('.', ',');
+    }
+
+    // Função para iniciar contador de expiração
+    function startExpirationCountdown(expirationTime) {
+        const expirationCounter = document.getElementById('expirationCounter');
+        const countdownTime = document.getElementById('countdownTime');
+        
+        if (!expirationCounter || !countdownTime) return;
+        
+        expirationCounter.style.display = 'flex';
+        qrExpirationTime = new Date(expirationTime);
+        
+        function updateCountdown() {
+            const now = new Date();
+            const timeLeft = qrExpirationTime - now;
+            
+            if (timeLeft <= 0) {
+                // QR Code expirou
+                countdownTime.textContent = 'EXPIRADO';
+                expirationCounter.className = 'expiration-counter expired';
+                expirationCounter.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>QR Code expirou. Gere um novo para continuar.</span>
+                `;
+                clearInterval(countdownInterval);
+                return;
+            }
+            
+            // Calcular minutos e segundos
+            const minutes = Math.floor(timeLeft / 60000);
+            const seconds = Math.floor((timeLeft % 60000) / 1000);
+            
+            // Atualizar display
+            countdownTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Mudar cor quando estiver próximo de expirar (menos de 5 minutos)
+            if (timeLeft < 300000) { // 5 minutos
+                expirationCounter.className = 'expiration-counter warning';
+            }
+        }
+        
+        // Atualizar imediatamente e depois a cada segundo
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // Função para parar contador de expiração
+    function stopExpirationCountdown() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        
+        const expirationCounter = document.getElementById('expirationCounter');
+        if (expirationCounter) {
+            expirationCounter.style.display = 'none';
+        }
+    }
+
+    // Função para mostrar modal de sucesso
+    function showSuccessModal(tokensAdded, totalTokens) {
+        const successModal = document.getElementById('successModal');
+        const successTokens = document.getElementById('successTokens');
+        const successTotal = document.getElementById('successTotal');
+        const backToDashboard = document.getElementById('backToDashboard');
+        
+        if (successModal && successTokens && successTotal) {
+            successTokens.textContent = tokensAdded;
+            successTotal.textContent = totalTokens;
+            
+            // Event listener para voltar ao dashboard
+            if (backToDashboard) {
+                backToDashboard.onclick = function() {
+                    window.location.href = '/';
+                };
+            }
+            
+            successModal.style.display = 'flex';
+        }
+    }
+
+    // Função para fechar modal de sucesso
+    function closeSuccessModal() {
+        const successModal = document.getElementById('successModal');
+        if (successModal) {
+            successModal.style.display = 'none';
+        }
     }
 
     // Event listeners para os botões de quantidade
@@ -349,25 +439,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const result = await response.json();
 
-                if (result.success && result.data.status === 'paid') {
+                if (result.success && result.data.status === 'approved') {
                     // Pagamento confirmado
                     clearInterval(checkInterval);
+                    stopExpirationCountdown();
                     
-                    // Mostrar sucesso
-                    qrCodeContainer.innerHTML = `
-                        <div style="text-align: center; padding: 40px; color: #22c55e;">
-                            <i class="fas fa-check-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
-                            <p style="color: #22c55e; font-weight: 600;">Pagamento Confirmado!</p>
-                            <small style="color: #9ca3af;">Tokens creditados automaticamente</small>
-                        </div>
-                    `;
-
-                    // Fechar modal após 3 segundos
+                    // Calcular tokens adicionados
+                    const quantity = parseInt(document.getElementById('modalQuantity').textContent) || 0;
+                    
+                    // Mostrar modal de sucesso
+                    showSuccessModal(quantity, 'Verificando...');
+                    
+                    // Fechar modal PIX
+                    pixModal.style.display = 'none';
+                    
+                    // Atualizar tokens no dashboard (opcional)
                     setTimeout(() => {
-                        pixModal.style.display = 'none';
-                        // Recarregar página para atualizar tokens
-                        window.location.reload();
-                    }, 3000);
+                        window.location.href = '/';
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('Erro ao verificar status:', error);
@@ -385,12 +474,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners para o modal PIX
     closePixModal.addEventListener('click', function() {
         pixModal.style.display = 'none';
+        stopExpirationCountdown();
     });
 
     // Fechar modal ao clicar fora
     pixModal.addEventListener('click', function(e) {
         if (e.target === this) {
             this.style.display = 'none';
+            stopExpirationCountdown();
         }
     });
 
@@ -512,6 +603,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Mostrar modal
                 pixModal.style.display = 'flex';
+                
+                // Iniciar contador de expiração (se disponível)
+                if (result.data?.pixExpiration) {
+                    console.log('⏰ [TOKENS] Iniciando contador de expiração:', result.data.pixExpiration);
+                    startExpirationCountdown(result.data.pixExpiration);
+                }
                 
                 // Iniciar verificação de pagamento
                 if (result.data.transactionId) {
