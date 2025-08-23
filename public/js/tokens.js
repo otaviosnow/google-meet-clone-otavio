@@ -524,9 +524,16 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTotal();
     updateButtonStates();
 
+    // Prevenir submissão automática do formulário
+    tokensForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('🚫 [TOKENS] Submissão do formulário prevenida');
+    });
+
     // Gerar QR Code PIX
     generatePixBtn.addEventListener('click', async function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         console.log('🔍 [TOKENS] Gerando QR Code PIX...');
         
