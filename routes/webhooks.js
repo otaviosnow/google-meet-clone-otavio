@@ -1,5 +1,5 @@
 const express = require('express');
-const { processWebhook } = require('../config/mercadopago');
+const { processWebhook, checkPaymentStatus, initializeMercadoPago } = require('../config/mercadopago');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -49,14 +49,27 @@ router.get('/tokens/transactions/:transactionId', async (req, res) => {
         
         console.log('🔍 Verificando status do pagamento:', transactionId);
         
-        // Aqui você pode implementar a verificação do status
-        // Por enquanto, retornamos um status mock
-        res.json({
-            success: true,
-            transactionId: transactionId,
-            status: 'pending',
-            message: 'Pagamento em processamento'
-        });
+        // Inicializar cliente Mercado Pago
+        const client = await initializeMercadoPago();
+        
+        // Verificar status real no Mercado Pago
+        const paymentStatus = await checkPaymentStatus(transactionId);
+        
+        if (paymentStatus.success) {
+            res.json({
+                success: true,
+                transactionId: transactionId,
+                status: paymentStatus.status,
+                statusDetail: paymentStatus.statusDetail,
+                amount: paymentStatus.amount,
+                message: 'Status do pagamento consultado com sucesso'
+            });
+        } else {
+            res.status(404).json({ 
+                success: false, 
+                message: 'Transação não encontrada ou erro ao verificar' 
+            });
+        }
         
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
