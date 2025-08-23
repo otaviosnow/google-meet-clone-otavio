@@ -198,32 +198,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Usuário não autenticado');
             }
 
-            // Chamar API para criar compra de tokens
-            const response = await fetch('/api/tokens/purchase', {
+            // Chamar API para criar PIX
+            const response = await fetch('/api/payments/create-pix', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    tokens: quantity,
-                    paymentMethod: 'pix'
+                    quantity: quantity,
+                    amount: quantity * TOKEN_PRICE
                 })
             });
 
             const result = await response.json();
 
-            if (response.ok) {
+            if (response.ok && result.success) {
+                console.log('✅ [TOKENS] PIX criado com sucesso:', result);
+                
                 // Exibir QR Code
-                qrCodeContainer.innerHTML = `
-                    <img src="${result.pixData.qrCode}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
-                `;
+                if (result.data.pixQrCodeUrl) {
+                    qrCodeContainer.innerHTML = `
+                        <img src="data:image/png;base64,${result.data.pixQrCodeUrl}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
+                    `;
+                } else if (result.data.pixQrCode) {
+                    qrCodeContainer.innerHTML = `
+                        <img src="${result.data.pixQrCode}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
+                    `;
+                }
                 
                 // Preencher código PIX
-                pixCode.value = result.pixData.code;
+                pixCode.value = result.data.pixQrCode || 'Código PIX não disponível';
                 
                 // Iniciar verificação de pagamento
-                startPaymentCheck(result.transaction.id);
+                startPaymentCheck(result.data.transactionId);
             } else {
                 throw new Error(result.error || 'Erro ao gerar PIX');
             }
