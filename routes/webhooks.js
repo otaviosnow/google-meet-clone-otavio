@@ -44,7 +44,7 @@ router.post('/mercadopago', async (req, res) => {
 });
 
 // Rota para verificar status do pagamento
-router.get('/tokens/transactions/:transactionId', async (req, res) => {
+router.get('/transactions/:transactionId', async (req, res) => {
     try {
         const { transactionId } = req.params;
         
