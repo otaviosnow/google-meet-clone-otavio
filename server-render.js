@@ -163,6 +163,7 @@ const paymentRoutes = require('./routes/payments');
 const analyticsRoutes = require('./routes/analytics');
 const tokensRoutes = require('./routes/tokens');
 const integrationRoutes = require('./routes/integration');
+const webhookRoutes = require('./routes/webhooks');
 const { runCompleteCleanup } = require('./utils/cleanupExpiredMeetings');
 
 // ===== FUNÇÕES DE AUTENTICAÇÃO =====
@@ -200,9 +201,9 @@ const authenticateToken = (req, res, next) => {
 
     app.use('/api/admin', adminRoutes);
     app.use('/api/payments', paymentRoutes);
-    app.use('/api/webhooks', paymentRoutes); // Webhooks do Pagar.me
+    app.use('/api/webhooks', webhookRoutes); // Webhooks do Mercado Pago
     app.use('/api/analytics', analyticsRoutes);
-    app.use('/api/tokens', tokensRoutes);
+    app.use('/api/tokens', webhookRoutes); // Rota para verificar transações
 app.use('/api/integration', integrationRoutes);
 
     // ===== ROTAS DE PÁGINAS =====
