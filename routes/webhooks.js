@@ -9,14 +9,15 @@ router.post('/mercadopago', async (req, res) => {
     try {
         console.log('📥 Webhook Mercado Pago recebido:', req.body);
         
-        const { type, data } = req.body;
+        // Mercado Pago envia { resource: 'id', topic: 'payment' }
+        const { resource, topic } = req.body;
         
-        if (type === 'payment') {
-            const paymentId = data.id;
+        if (topic === 'payment') {
+            const paymentId = resource;
             console.log('💰 Processando pagamento:', paymentId);
             
             // Processar webhook
-            const result = processWebhook(req.body);
+            const result = processWebhook({ type: 'payment', data: { id: paymentId } });
             
             if (result.success) {
                 console.log('✅ Webhook processado com sucesso:', result);
@@ -32,7 +33,7 @@ router.post('/mercadopago', async (req, res) => {
                 res.status(400).json({ success: false, error: result.error });
             }
         } else {
-            console.log('⚠️ Tipo de webhook não suportado:', type);
+            console.log('⚠️ Tipo de webhook não suportado:', topic);
             res.status(200).json({ success: true, message: 'Webhook ignorado' });
         }
         
