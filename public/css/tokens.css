@@ -647,10 +647,52 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
 
 /* CSS específico para Opera - GRID GARANTIDO */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
+    /* DESABILITAR RESPONSIVIDADE NO OPERA */
+    .pix-layout {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 30px !important;
+    }
+    
+    .pix-info-column,
+    .pix-qr-column {
+        max-width: none !important;
+        width: auto !important;
+    }
+    
+    .pix-modal-content {
+        padding: 32px !important;
+        margin: 20px !important;
+        max-width: 95% !important;
+    }
+    
+    .pix-modal-header h3 {
+        font-size: 24px !important;
+    }
+    
+    .qr-code-container {
+        padding: 20px !important;
+    }
+    
+    .pix-code-input {
+        flex-direction: row !important;
+    }
+    
+    .copy-btn {
+        width: auto !important;
+        margin-top: 0 !important;
+    }
+    
+    .success-modal-content {
+        padding: 40px !important;
+    }
     body .pix-modal .pix-modal-content {
         max-width: 1200px !important;
         width: 95% !important;
         min-width: 900px !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
     
     body .pix-modal .pix-modal-content .pix-layout {
@@ -658,6 +700,22 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
         grid-template-columns: 1fr 1fr !important;
         gap: 30px !important;
         min-height: 400px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Forçar layout desktop no Opera */
+    body .pix-modal .pix-modal-content .pix-info-column,
+    body .pix-modal .pix-modal-content .pix-qr-column {
+        max-width: none !important;
+        width: auto !important;
+        flex: 1 !important;
+    }
+    
+    /* Garantir que o modal não seja tratado como mobile */
+    body .pix-modal .pix-modal-content {
+        transform: none !important;
+        scale: 1 !important;
     }
 }
 
