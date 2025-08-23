@@ -154,20 +154,17 @@
     text-align: center;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    /* Remover setas padrão do navegador */
     -webkit-appearance: none;
     -moz-appearance: textfield;
     appearance: textfield;
 }
 
-/* Remover setas padrão para Firefox */
 .quantity-input input::-webkit-outer-spin-button,
 .quantity-input input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-/* Remover setas padrão para outros navegadores */
 .quantity-input input[type=number]::-webkit-inner-spin-button,
 .quantity-input input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
@@ -291,37 +288,36 @@
     font-size: 20px;
 }
 
-/* Modal do PIX - ESPECIFICIDADE MÁXIMA */
-body .pix-modal {
+/* SOLUÇÃO DEFINITIVA PARA OPERA - MODAL PIX */
+.pix-modal {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100vw !important;
+    height: 100vh !important;
     background: rgba(0, 0, 0, 0.8) !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    z-index: 1000 !important;
+    z-index: 9999 !important;
     backdrop-filter: blur(10px) !important;
 }
 
-body .pix-modal .pix-modal-content {
+.pix-modal-content {
     background: rgba(15, 23, 42, 0.95) !important;
     border-radius: 24px !important;
     padding: 32px !important;
+    width: 90vw !important;
     max-width: 1200px !important;
-    width: 95% !important;
-    min-width: 900px !important;
+    min-width: 1000px !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
     position: relative !important;
     display: flex !important;
     flex-direction: column !important;
-    min-height: auto !important;
     height: auto !important;
+    max-height: 90vh !important;
+    overflow: visible !important;
 }
 
 .pix-modal-header {
@@ -359,7 +355,6 @@ body .pix-modal .pix-modal-content {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* Contador de expiração */
 .expiration-counter {
     background: rgba(255, 193, 7, 0.1);
     border: 1px solid rgba(255, 193, 7, 0.3);
@@ -385,39 +380,34 @@ body .pix-modal .pix-modal-content {
     color: #6c757d;
 }
 
-/* Layout responsivo do modal - CSS GRID GARANTIDO PARA OPERA */
-body .pix-modal .pix-modal-content .pix-layout {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 30px !important;
+/* LAYOUT HORIZONTAL FORÇADO - SOLUÇÃO DEFINITIVA */
+.pix-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 40px !important;
     width: 100% !important;
-    max-width: 100% !important;
-    min-height: auto !important;
     height: auto !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
 }
 
-body .pix-modal .pix-modal-content .pix-layout .pix-info-column {
+.pix-info-column {
+    flex: 1 !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 20px !important;
-    min-width: 0 !important;
 }
 
-body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
+.pix-qr-column {
+    flex: 1 !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    min-width: 0 !important;
-}
-
-/* Coluna de informações */
-.pix-info-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex: 1;
-    min-width: 0;
 }
 
 .pix-info {
@@ -528,16 +518,6 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
     line-height: 1.5;
 }
 
-/* Coluna do QR Code */
-.pix-qr-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    flex: 1;
-    min-width: 0;
-}
-
 .pix-qr-container {
     text-align: center;
     width: 100%;
@@ -564,7 +544,6 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
     margin: 0;
 }
 
-/* Modal de sucesso */
 .success-modal {
     position: fixed;
     top: 0;
@@ -645,81 +624,7 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
 }
 
-/* CSS específico para Opera - GRID GARANTIDO */
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    /* DESABILITAR RESPONSIVIDADE NO OPERA */
-    .pix-layout {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 30px !important;
-    }
-    
-    .pix-info-column,
-    .pix-qr-column {
-        max-width: none !important;
-        width: auto !important;
-    }
-    
-    .pix-modal-content {
-        padding: 32px !important;
-        margin: 20px !important;
-        max-width: 95% !important;
-    }
-    
-    .pix-modal-header h3 {
-        font-size: 24px !important;
-    }
-    
-    .qr-code-container {
-        padding: 20px !important;
-    }
-    
-    .pix-code-input {
-        flex-direction: row !important;
-    }
-    
-    .copy-btn {
-        width: auto !important;
-        margin-top: 0 !important;
-    }
-    
-    .success-modal-content {
-        padding: 40px !important;
-    }
-    body .pix-modal .pix-modal-content {
-        max-width: 1200px !important;
-        width: 95% !important;
-        min-width: 900px !important;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-    }
-    
-    body .pix-modal .pix-modal-content .pix-layout {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 30px !important;
-        min-height: 400px !important;
-        height: auto !important;
-        overflow: visible !important;
-    }
-    
-    /* Forçar layout desktop no Opera */
-    body .pix-modal .pix-modal-content .pix-info-column,
-    body .pix-modal .pix-modal-content .pix-qr-column {
-        max-width: none !important;
-        width: auto !important;
-        flex: 1 !important;
-    }
-    
-    /* Garantir que o modal não seja tratado como mobile */
-    body .pix-modal .pix-modal-content {
-        transform: none !important;
-        scale: 1 !important;
-    }
-}
-
-/* Responsividade */
+/* RESPONSIVIDADE APENAS PARA MOBILE REAL */
 @media (max-width: 768px) {
     .tokens-content {
         padding: 20px 16px;
@@ -755,21 +660,21 @@ body .pix-modal .pix-modal-content .pix-layout .pix-qr-column {
         font-size: 16px;
     }
     
+    .pix-modal-content {
+        width: 95vw !important;
+        min-width: auto !important;
+        padding: 20px !important;
+        margin: 10px !important;
+    }
+    
     .pix-layout {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 20px;
+        flex-direction: column !important;
+        gap: 20px !important;
     }
     
     .pix-info-column,
     .pix-qr-column {
         max-width: 100% !important;
-    }
-    
-    .pix-modal-content {
-        padding: 24px;
-        margin: 20px;
-        max-width: 95%;
     }
     
     .pix-modal-header h3 {
