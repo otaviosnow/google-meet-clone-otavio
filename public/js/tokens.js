@@ -221,23 +221,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok && result.success) {
                 console.log('✅ [TOKENS] PIX criado com sucesso:', result);
+                console.log('🔍 [TOKENS] Dados do PIX:', {
+                    pixQrCodeUrl: result.data?.pixQrCodeUrl,
+                    pixQrCode: result.data?.pixQrCode,
+                    transactionId: result.data?.transactionId
+                });
                 
                 // Exibir QR Code
-                if (result.data.pixQrCodeUrl) {
+                if (result.data?.pixQrCodeUrl) {
+                    console.log('🖼️ [TOKENS] Usando pixQrCodeUrl (base64)');
                     qrCodeContainer.innerHTML = `
                         <img src="data:image/png;base64,${result.data.pixQrCodeUrl}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
                     `;
-                } else if (result.data.pixQrCode) {
+                } else if (result.data?.pixQrCode) {
+                    console.log('🖼️ [TOKENS] Usando pixQrCode (URL)');
                     qrCodeContainer.innerHTML = `
                         <img src="${result.data.pixQrCode}" alt="QR Code PIX" style="max-width: 200px; height: auto;">
+                    `;
+                } else {
+                    console.error('❌ [TOKENS] Nenhum QR Code encontrado nos dados');
+                    qrCodeContainer.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #f59e0b;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>QR Code não disponível</p>
+                            <p style="font-size: 14px; margin-top: 8px;">Dados: ${JSON.stringify(result.data)}</p>
+                        </div>
                     `;
                 }
                 
                 // Preencher código PIX
-                pixCode.value = result.data.pixQrCode || 'Código PIX não disponível';
+                const pixCodeValue = result.data?.pixQrCode || 'Código PIX não disponível';
+                console.log('📝 [TOKENS] Código PIX:', pixCodeValue);
+                pixCode.value = pixCodeValue;
                 
                 // Iniciar verificação de pagamento
-                startPaymentCheck(result.data.transactionId);
+                if (result.data?.transactionId) {
+                    console.log('🔄 [TOKENS] Iniciando verificação para:', result.data.transactionId);
+                    startPaymentCheck(result.data.transactionId);
+                } else {
+                    console.error('❌ [TOKENS] TransactionId não encontrado');
+                }
             } else {
                 throw new Error(result.error || 'Erro ao gerar PIX');
             }
