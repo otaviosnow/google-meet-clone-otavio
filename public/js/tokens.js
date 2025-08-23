@@ -610,11 +610,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar modal
                 pixModal.style.display = 'flex';
                 
-                // Iniciar contador de expiração (se disponível)
-                if (result.data?.pixExpiration) {
-                    console.log('⏰ [TOKENS] Iniciando contador de expiração:', result.data.pixExpiration);
-                    startExpirationCountdown(result.data.pixExpiration);
-                }
+                // Iniciar contador de expiração (forçar 30 minutos)
+                console.log('⏰ [TOKENS] Iniciando contador de expiração (30 minutos)');
+                startExpirationCountdown(null); // Força usar 30 minutos padrão
                 
                 // Iniciar verificação de pagamento
                 if (result.data.transactionId) {
