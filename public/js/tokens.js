@@ -363,9 +363,8 @@ function generatePixQRCode(qrCodeData) {
     console.log('🔍 [QR] ===== VERIFICANDO BIBLIOTECA QR CODE =====');
     console.log('🔍 [QR] typeof QRCode:', typeof QRCode);
     console.log('🔍 [QR] QRCode disponível?', typeof QRCode !== 'undefined');
-    console.log('🔍 [QR] QRCode é função?', typeof QRCode === 'function');
-    console.log('🔍 [QR] QRCode.CorrectLevel existe?', typeof QRCode.CorrectLevel !== 'undefined');
-    console.log('🔍 [QR] QRCode.CorrectLevel:', QRCode.CorrectLevel);
+    console.log('🔍 [QR] QRCode.toCanvas existe?', typeof QRCode.toCanvas === 'function');
+    console.log('🔍 [QR] QRCode.toCanvas:', QRCode.toCanvas);
     
     if (typeof QRCode === 'undefined') {
         console.error('❌ [QR] Biblioteca QR Code não carregada');
@@ -373,38 +372,70 @@ function generatePixQRCode(qrCodeData) {
         return;
     }
     
+    if (typeof QRCode.toCanvas !== 'function') {
+        console.error('❌ [QR] QRCode.toCanvas não é uma função');
+        console.log('🔍 [QR] Métodos disponíveis em QRCode:', Object.getOwnPropertyNames(QRCode));
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: QRCode.toCanvas não disponível</p>';
+        return;
+    }
+    
     try {
-        console.log('🔍 [QR] ===== USANDO API CORRETA DA BIBLIOTECA LOCAL =====');
+        console.log('🔍 [QR] ===== CRIANDO CANVAS =====');
         
-        // Preparar opções para a biblioteca local
+        // Criar canvas
+        const canvas = document.createElement('canvas');
+        console.log('🔍 [QR] Canvas criado:', canvas);
+        console.log('🔍 [QR] Canvas width:', canvas.width);
+        console.log('🔍 [QR] Canvas height:', canvas.height);
+        
+        // Adicionar canvas ao container
+        console.log('🔍 [QR] Adicionando canvas ao container...');
+        qrCodeContainer.appendChild(canvas);
+        console.log('✅ [QR] Canvas adicionado ao container');
+        console.log('🔍 [QR] Container após adicionar canvas:', qrCodeContainer.innerHTML);
+        
+        // Preparar opções
         const options = {
-            text: qrCodeData,
             width: 200,
-            height: 200,
-            colorDark: '#000000',
-            colorLight: '#FFFFFF',
-            correctLevel: QRCode.CorrectLevel.H
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
         };
         console.log('🔍 [QR] Opções preparadas:', options);
         
-        console.log('🔍 [QR] ===== CHAMANDO new QRCode() =====');
-        console.log('🔍 [QR] Container:', qrCodeContainer);
-        console.log('🔍 [QR] Opções:', options);
+        console.log('🔍 [QR] ===== CHAMANDO QRCode.toCanvas =====');
+        console.log('🔍 [QR] Parâmetros:', {
+            canvas: canvas,
+            text: qrCodeData,
+            options: options
+        });
         
-        // Gerar QR Code usando a API correta da biblioteca local
-        new QRCode(qrCodeContainer, options);
+        // Gerar QR Code
+        QRCode.toCanvas(canvas, qrCodeData, options, function (error) {
+            console.log('🔍 [QR] ===== CALLBACK EXECUTADO =====');
+            console.log('🔍 [QR] Error recebido:', error);
+            console.log('🔍 [QR] Error é null?', error === null);
+            console.log('🔍 [QR] Error é undefined?', error === undefined);
+            
+            if (error) {
+                console.error('❌ [QR] Erro no callback:', error);
+                console.error('❌ [QR] Tipo do erro:', typeof error);
+                console.error('❌ [QR] Mensagem do erro:', error.message);
+                console.error('❌ [QR] Stack trace do erro:', error.stack);
+                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code: ' + error.message + '</p>';
+            } else {
+                console.log('✅ [QR] QR Code gerado com sucesso no callback');
+                console.log('🔍 [QR] Canvas após geração:', canvas);
+                console.log('🔍 [QR] Canvas width após geração:', canvas.width);
+                console.log('🔍 [QR] Canvas height após geração:', canvas.height);
+                console.log('🔍 [QR] Container final:', qrCodeContainer.innerHTML);
+            }
+        });
         
-        console.log('✅ [QR] QR Code gerado com sucesso usando new QRCode()');
-        console.log('🔍 [QR] Container após geração:', qrCodeContainer.innerHTML);
-        
-        // Verificar se o QR Code foi realmente gerado
-        const qrImage = qrCodeContainer.querySelector('img');
-        if (qrImage) {
-            console.log('✅ [QR] Imagem do QR Code encontrada:', qrImage);
-            console.log('✅ [QR] Src da imagem:', qrImage.src);
-        } else {
-            console.warn('⚠️ [QR] Imagem do QR Code não encontrada no container');
-        }
+        console.log('🔍 [QR] ===== QRCode.toCanvas CHAMADO =====');
+        console.log('🔍 [QR] Função executada, aguardando callback...');
         
     } catch (error) {
         console.error('❌ [QR] ===== ERRO NO TRY/CATCH =====');
