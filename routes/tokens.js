@@ -154,6 +154,34 @@ router.get('/transactions', authenticateToken, async (req, res) => {
     }
 });
 
+// GET /api/tokens/transactions/:transactionId - Buscar transação específica
+router.get('/transactions/:transactionId', authenticateToken, async (req, res) => {
+    try {
+        const { transactionId } = req.params;
+        console.log('🔍 [TOKENS] Buscando transação:', transactionId);
+        
+        const transaction = await Transaction.findOne({ 
+            _id: transactionId,
+            user: req.user._id 
+        });
+
+        if (!transaction) {
+            return res.status(404).json({
+                error: 'Transação não encontrada'
+            });
+        }
+
+        res.json({
+            transaction: transaction.toPublicJSON()
+        });
+    } catch (error) {
+        console.error('❌ [TOKENS] Erro ao buscar transação:', error);
+        res.status(500).json({
+            error: 'Erro interno do servidor'
+        });
+    }
+});
+
 // POST /api/tokens/webhook - Webhook do Pagar.me
 router.post('/webhook', async (req, res) => {
     try {

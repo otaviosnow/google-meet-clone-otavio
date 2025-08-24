@@ -154,23 +154,17 @@ function generateQRCode(qrCodeData) {
     }
 
     try {
-        // Gerar QR Code usando QRCode.toCanvas
-        QRCode.toCanvas(qrCodeContainer, qrCodeData, {
+        // Gerar QR Code usando qrcodejs
+        new QRCode(qrCodeContainer, {
+            text: qrCodeData,
             width: 200,
             height: 200,
-            color: {
-                dark: '#000000',
-                light: '#FFFFFF'
-            },
-            errorCorrectionLevel: 'H'
-        }, function (error) {
-            if (error) {
-                console.error('❌ Erro ao gerar QR Code:', error);
-                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
-            } else {
-                console.log('✅ QR Code gerado com sucesso');
-            }
+            colorDark: '#000000',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.H
         });
+        
+        console.log('✅ QR Code gerado com sucesso');
     } catch (error) {
         console.error('❌ Erro ao gerar QR Code:', error);
         qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
