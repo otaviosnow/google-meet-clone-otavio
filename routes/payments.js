@@ -62,14 +62,15 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             });
         }
 
-        // Salvar transação no banco de dados
+        // Salvar transação no banco de dados usando o ID do Mercado Pago
         const transaction = new Transaction({
+            _id: paymentResult.transactionId, // Usar o ID do Mercado Pago como nosso ID
             user: user._id,
             amount: amount,
             tokens: quantity,
             paymentMethod: 'pix',
             status: 'pending',
-            pagarmeId: paymentResult.transactionId, // Usando o ID do Mercado Pago
+            pagarmeId: paymentResult.transactionId,
             pixCode: paymentResult.pixQrCode,
             pixQrCode: paymentResult.pixQrCodeUrl,
             expiresAt: paymentResult.pixExpiration
@@ -78,14 +79,13 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
         await transaction.save();
         
         console.log(`💰 Pagamento PIX criado para ${user.email}: ${paymentResult.transactionId}`);
-        console.log(`💾 Transação salva no banco: ${transaction._id}`);
+        console.log(`💾 Transação salva no banco com ID: ${transaction._id}`);
 
         res.json({
             success: true,
             message: 'Pagamento PIX criado com sucesso',
             data: {
-                transactionId: transaction._id, // Usando o ID do nosso banco
-                mercadopagoId: paymentResult.transactionId, // ID do Mercado Pago
+                transactionId: paymentResult.transactionId, // Usar o mesmo ID do Mercado Pago
                 pixQrCode: paymentResult.pixQrCode,
                 pixQrCodeUrl: paymentResult.pixQrCodeUrl,
                 pixExpiration: paymentResult.pixExpiration,
