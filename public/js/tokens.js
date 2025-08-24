@@ -64,17 +64,28 @@ function initializeTokensPage() {
     }
 
     // Event listeners para os botões de quantidade
+    console.log('🔍 [TOKENS] ===== CONFIGURANDO BOTÕES DE QUANTIDADE =====');
+    console.log('🔍 [TOKENS] increaseBtn encontrado:', !!increaseBtn);
+    console.log('🔍 [TOKENS] decreaseBtn encontrado:', !!decreaseBtn);
+    console.log('🔍 [TOKENS] tokenQuantity encontrado:', !!tokenQuantity);
+    
     if (increaseBtn) {
+        console.log('🔍 [TOKENS] Adicionando event listener ao botão aumentar...');
         increaseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🔺 Botão aumentar clicado');
+            console.log('🔺 [TOKENS] Botão aumentar clicado!');
+            console.log('🔍 [TOKENS] Valor atual antes:', tokenQuantity.value);
             
             const currentValue = parseInt(tokenQuantity.value) || 0;
             const newValue = currentValue + 1;
             tokenQuantity.value = newValue;
             
-            console.log('🔺 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
+            console.log('🔺 [TOKENS] Valor alterado:', { 
+                current: currentValue, 
+                new: newValue,
+                inputValue: tokenQuantity.value 
+            });
             
             updateTotal();
             updateButtonStates();
@@ -84,24 +95,34 @@ function initializeTokensPage() {
             setTimeout(() => {
                 this.style.transform = '';
             }, 150);
+            
+            console.log('✅ [TOKENS] Botão aumentar processado com sucesso');
         });
-        console.log('✅ [TOKENS] Event listener do botão aumentar adicionado');
+        console.log('✅ [TOKENS] Event listener do botão aumentar adicionado com sucesso');
     } else {
         console.error('❌ [TOKENS] Botão increaseBtn não encontrado');
     }
 
     if (decreaseBtn) {
+        console.log('🔍 [TOKENS] Adicionando event listener ao botão diminuir...');
         decreaseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🔻 Botão diminuir clicado');
+            console.log('🔻 [TOKENS] Botão diminuir clicado!');
+            console.log('🔍 [TOKENS] Valor atual antes:', tokenQuantity.value);
             
             const currentValue = parseInt(tokenQuantity.value) || 0;
+            console.log('🔍 [TOKENS] Verificando se pode diminuir:', { current: currentValue, min: MIN_QUANTITY });
+            
             if (currentValue > MIN_QUANTITY) {
                 const newValue = currentValue - 1;
                 tokenQuantity.value = newValue;
                 
-                console.log('🔻 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
+                console.log('🔻 [TOKENS] Valor alterado:', { 
+                    current: currentValue, 
+                    new: newValue,
+                    inputValue: tokenQuantity.value 
+                });
                 
                 updateTotal();
                 updateButtonStates();
@@ -111,11 +132,13 @@ function initializeTokensPage() {
                 setTimeout(() => {
                     this.style.transform = '';
                 }, 150);
+                
+                console.log('✅ [TOKENS] Botão diminuir processado com sucesso');
             } else {
                 console.log('🔻 [TOKENS] Valor mínimo atingido, não pode diminuir');
             }
         });
-        console.log('✅ [TOKENS] Event listener do botão diminuir adicionado');
+        console.log('✅ [TOKENS] Event listener do botão diminuir adicionado com sucesso');
     } else {
         console.error('❌ [TOKENS] Botão decreaseBtn não encontrado');
     }
@@ -247,7 +270,15 @@ function initializeTokensPage() {
     // Inicializar valor total e estados dos botões
     updateTotal();
     updateButtonStates();
-});
+    
+    console.log('✅ [TOKENS] Página inicializada com sucesso');
+    console.log('🔍 [TOKENS] Estado final:', {
+        quantity: tokenQuantity.value,
+        total: totalValue.textContent,
+        increaseBtnEnabled: !increaseBtn.disabled,
+        decreaseBtnEnabled: !decreaseBtn.disabled
+    });
+}
 
 // ===== FUNÇÕES DO MODAL PIX =====
 
