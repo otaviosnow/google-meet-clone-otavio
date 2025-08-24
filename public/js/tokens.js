@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token');
     if (!token) {
         console.error('❌ [TOKENS] Usuário não logado');
-        window.location.href = '/login.html';
+        window.location.href = '/';
         return;
     }
     
