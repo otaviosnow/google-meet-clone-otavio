@@ -346,7 +346,10 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
   try {
     const { date, grossRevenue, chipCost, additionalCost, adsCost, notes } = req.body;
     
-    console.log('📅 [ENTRADA] Data:', date);
+    console.log('📅 [ENTRADA] Data recebida:', date);
+    console.log('📅 [ENTRADA] Data como Date:', new Date(date));
+    console.log('📅 [ENTRADA] Data ISO:', new Date(date).toISOString());
+    console.log('📅 [ENTRADA] Data local:', new Date(date).toLocaleDateString('pt-BR'));
     console.log('💰 [ENTRADA] Valores:', {
       grossRevenue,
       chipCost,
@@ -356,9 +359,14 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     });
     
     // Verificar se já existe entrada para esta data
+    const searchDate = new Date(date);
+    console.log('🔍 [ENTRADA] Procurando entrada existente para data:', searchDate);
+    console.log('🔍 [ENTRADA] Data de busca ISO:', searchDate.toISOString());
+    console.log('🔍 [ENTRADA] Data de busca local:', searchDate.toLocaleDateString('pt-BR'));
+    
     const existingEntry = await FinancialEntry.findOne({
       user: req.user._id,
-      date: new Date(date)
+      date: searchDate
     });
     
     if (existingEntry) {
