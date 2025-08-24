@@ -203,7 +203,7 @@ const authenticateToken = (req, res, next) => {
     app.use('/api/payments', paymentRoutes);
     app.use('/api/webhooks', webhookRoutes); // Webhooks do Mercado Pago
     app.use('/api/analytics', analyticsRoutes);
-    app.use('/api/tokens', webhookRoutes); // Rota para verificar transações
+    app.use('/api/tokens', tokensRoutes); // Rota para tokens e transações
 app.use('/api/integration', integrationRoutes);
 
     // ===== ROTAS DE PÁGINAS =====
@@ -456,7 +456,7 @@ app.get('/test-auth', (req, res) => {
                 environment: process.env.NODE_ENV
             }
         });
-    });
+});
 
 // Tratamento de erros
 app.use((err, req, res, next) => {
