@@ -162,12 +162,19 @@ router.get('/transactions/:transactionId', authenticateToken, async (req, res) =
         console.log('🔍 [TOKENS] User ID:', req.user._id);
         console.log('🔍 [TOKENS] Params:', req.params);
         
+        console.log('🔍 [TOKENS] Buscando transação com ID:', transactionId);
+        console.log('🔍 [TOKENS] User ID:', req.user._id);
+        
+        // Primeiro, verificar se a transação existe (sem filtro de usuário)
+        const allTransactions = await Transaction.find({ _id: transactionId });
+        console.log('🔍 [TOKENS] Todas as transações com este ID:', allTransactions);
+        
         const transaction = await Transaction.findOne({ 
             _id: transactionId,
             user: req.user._id 
         });
 
-        console.log('🔍 [TOKENS] Transação encontrada:', transaction);
+        console.log('🔍 [TOKENS] Transação encontrada para o usuário:', transaction);
 
         if (!transaction) {
             console.log('❌ [TOKENS] Transação não encontrada');
