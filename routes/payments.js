@@ -2,6 +2,7 @@ const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
 const { initializeMercadoPago, createPixPayment, checkPaymentStatus, processWebhook } = require('../config/mercadopago');
 const User = require('../models/User');
+const Transaction = require('../models/Transaction');
 
 const router = express.Router();
 
@@ -61,16 +62,30 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             });
         }
 
-        // Salvar informações do pagamento no usuário (opcional)
-        // Você pode criar um modelo Payment se quiser rastrear pagamentos
+        // Salvar transação no banco de dados
+        const transaction = new Transaction({
+            user: user._id,
+            amount: amount,
+            tokens: quantity,
+            paymentMethod: 'pix',
+            status: 'pending',
+            pagarmeId: paymentResult.transactionId, // Usando o ID do Mercado Pago
+            pixCode: paymentResult.pixQrCode,
+            pixQrCode: paymentResult.pixQrCodeUrl,
+            expiresAt: paymentResult.pixExpiration
+        });
+
+        await transaction.save();
         
         console.log(`💰 Pagamento PIX criado para ${user.email}: ${paymentResult.transactionId}`);
+        console.log(`💾 Transação salva no banco: ${transaction._id}`);
 
         res.json({
             success: true,
             message: 'Pagamento PIX criado com sucesso',
             data: {
-                transactionId: paymentResult.transactionId,
+                transactionId: transaction._id, // Usando o ID do nosso banco
+                mercadopagoId: paymentResult.transactionId, // ID do Mercado Pago
                 pixQrCode: paymentResult.pixQrCode,
                 pixQrCodeUrl: paymentResult.pixQrCodeUrl,
                 pixExpiration: paymentResult.pixExpiration,

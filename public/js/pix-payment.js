@@ -170,27 +170,18 @@ function generateQRCode(qrCodeData) {
         // Limpar container primeiro
         qrCodeContainer.innerHTML = '';
         
-        // Gerar QR Code usando QRCode.toCanvas
-        QRCode.toCanvas(qrCodeContainer, qrCodeData, {
+        // Gerar QR Code usando qrcodejs
+        new QRCode(qrCodeContainer, {
+            text: qrCodeData,
             width: 200,
             height: 200,
-            color: {
-                dark: '#000000',
-                light: '#FFFFFF'
-            },
-            errorCorrectionLevel: 'H'
-        }, function (error) {
-            if (error) {
-                console.error('❌ Erro ao gerar QR Code:', error);
-                console.error('❌ [QR] Stack trace:', error.stack);
-                console.error('❌ [QR] Tipo de erro:', error.name);
-                console.error('❌ [QR] Mensagem:', error.message);
-                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
-            } else {
-                console.log('✅ QR Code gerado com sucesso');
-                console.log('🔍 [QR] Container após geração:', qrCodeContainer.innerHTML);
-            }
+            colorDark: '#000000',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.H
         });
+        
+        console.log('✅ QR Code gerado com sucesso');
+        console.log('🔍 [QR] Container após geração:', qrCodeContainer.innerHTML);
     } catch (error) {
         console.error('❌ Erro ao gerar QR Code:', error);
         console.error('❌ [QR] Stack trace:', error.stack);
