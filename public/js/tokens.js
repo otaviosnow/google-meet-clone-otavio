@@ -197,12 +197,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok && result.success) {
                     console.log('✅ [TOKENS] PIX criado com sucesso:', result);
                     
-                    // REDIRECIONAR para página de pagamento
-                    const transactionId = result.data?.transactionId || result.transactionId;
-                    const paymentUrl = `/pix-payment.html?quantity=${quantity}&transactionId=${transactionId}`;
-                    
-                    console.log('🔄 [TOKENS] Redirecionando para:', paymentUrl);
-                    window.location.href = paymentUrl;
+                    // Mostrar modal PIX
+                    showPixModal(result.data);
                     
                 } else {
                     throw new Error(result.error || 'Erro ao criar pagamento');
@@ -222,4 +218,221 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar valor total e estados dos botões
     updateTotal();
     updateButtonStates();
+});
+
+// ===== FUNÇÕES DO MODAL PIX =====
+
+// Variáveis globais para o modal
+let paymentCheckInterval;
+let countdownInterval;
+let qrExpirationTime = 30 * 60 * 1000; // 30 minutos
+
+// Mostrar modal PIX
+function showPixModal(paymentData) {
+    console.log('🔍 [MODAL] Mostrando modal PIX:', paymentData);
+    
+    // Preencher dados do modal
+    modalQuantity.textContent = `${paymentData.quantity} tokens`;
+    modalTotal.textContent = paymentData.amount.toFixed(2).replace('.', ',');
+    pixCode.value = paymentData.pixQrCode || '';
+    
+    // Gerar QR Code
+    generatePixQRCode(paymentData.pixQrCodeUrl || paymentData.pixQrCode);
+    
+    // Iniciar contador de expiração
+    startExpirationCountdown();
+    
+    // Iniciar verificação de status
+    startPaymentCheck(paymentData.transactionId);
+    
+    // Mostrar modal
+    pixModal.style.display = 'flex';
+}
+
+// Fechar modal PIX
+function closePixModal() {
+    console.log('🔍 [MODAL] Fechando modal PIX');
+    
+    // Parar verificações
+    stopPaymentCheck();
+    stopExpirationCountdown();
+    
+    // Esconder modal
+    pixModal.style.display = 'none';
+    
+    // Limpar dados
+    qrCodeContainer.innerHTML = '';
+    pixCode.value = '';
+}
+
+// Gerar QR Code
+function generatePixQRCode(qrCodeData) {
+    console.log('🔍 [QR] Gerando QR Code:', qrCodeData);
+    
+    if (!qrCodeData) {
+        console.error('❌ Dados do QR Code não fornecidos');
+        return;
+    }
+    
+    // Limpar container
+    qrCodeContainer.innerHTML = '';
+    
+    // Verificar se a biblioteca QR Code está disponível
+    if (typeof QRCode === 'undefined') {
+        console.error('❌ Biblioteca QR Code não carregada');
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregada</p>';
+        return;
+    }
+    
+    try {
+        // Gerar QR Code
+        new QRCode(qrCodeContainer, {
+            text: qrCodeData,
+            width: 200,
+            height: 200,
+            colorDark: '#000000',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        console.log('✅ QR Code gerado com sucesso');
+    } catch (error) {
+        console.error('❌ Erro ao gerar QR Code:', error);
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
+    }
+}
+
+// Iniciar contador de expiração
+function startExpirationCountdown() {
+    const startTime = Date.now();
+    const endTime = startTime + qrExpirationTime;
+    
+    countdownInterval = setInterval(() => {
+        const now = Date.now();
+        const timeLeft = endTime - now;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            countdownTime.textContent = '00:00';
+            expirationCounter.classList.add('expired');
+            expirationCounter.innerHTML = '<i class="fas fa-exclamation-triangle"></i> QR Code expirado';
+            return;
+        }
+        
+        const minutes = Math.floor(timeLeft / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+        countdownTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // Aviso quando faltar 5 minutos
+        if (timeLeft <= 5 * 60 * 1000) {
+            expirationCounter.classList.add('warning');
+        }
+    }, 1000);
+}
+
+// Parar contador de expiração
+function stopExpirationCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+}
+
+// Iniciar verificação de status do pagamento
+function startPaymentCheck(transactionId) {
+    console.log('🔍 [PAYMENT] Iniciando verificação para:', transactionId);
+    
+    paymentCheckInterval = setInterval(async () => {
+        try {
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('📊 [PAYMENT] Status:', result);
+                
+                if (result.transaction && result.transaction.status === 'paid') {
+                    console.log('✅ [PAYMENT] Pagamento confirmado!');
+                    stopPaymentCheck();
+                    stopExpirationCountdown();
+                    showPaymentSuccess(result.transaction);
+                }
+            }
+        } catch (error) {
+            console.error('❌ [PAYMENT] Erro ao verificar status:', error);
+        }
+    }, 5000); // Verificar a cada 5 segundos
+}
+
+// Parar verificação de status
+function stopPaymentCheck() {
+    if (paymentCheckInterval) {
+        clearInterval(paymentCheckInterval);
+        paymentCheckInterval = null;
+    }
+}
+
+// Mostrar sucesso do pagamento
+function showPaymentSuccess(transaction) {
+    console.log('🎉 [SUCCESS] Mostrando sucesso:', transaction);
+    
+    // Preencher dados de sucesso
+    successTokens.textContent = transaction.tokens;
+    successTotal.textContent = transaction.tokens;
+    
+    // Esconder modal PIX e mostrar sucesso
+    pixModal.style.display = 'none';
+    successModal.style.display = 'flex';
+}
+
+// Fechar modal de sucesso
+function closeSuccessModal() {
+    successModal.style.display = 'none';
+    window.location.href = '/'; // Voltar ao dashboard
+}
+
+// Event listeners para os modais
+document.addEventListener('DOMContentLoaded', function() {
+    // Copiar código PIX
+    const copyPixCodeBtn = document.getElementById('copyPixCode');
+    if (copyPixCodeBtn) {
+        copyPixCodeBtn.addEventListener('click', function() {
+            pixCode.select();
+            pixCode.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                this.style.background = 'rgba(16, 185, 129, 0.2)';
+                this.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                this.style.color = '#10b981';
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-copy"></i>';
+                    this.style.background = 'rgba(59, 130, 246, 0.2)';
+                    this.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                    this.style.color = '#3b82f6';
+                }, 2000);
+            } catch (err) {
+                console.error('❌ Erro ao copiar:', err);
+            }
+        });
+    }
+    
+    // Voltar ao dashboard
+    const backToDashboardBtn = document.getElementById('backToDashboard');
+    if (backToDashboardBtn) {
+        backToDashboardBtn.addEventListener('click', closeSuccessModal);
+    }
+    
+    // Fechar modal ao clicar fora
+    pixModal.addEventListener('click', function(e) {
+        if (e.target === pixModal) {
+            closePixModal();
+        }
+    });
 });

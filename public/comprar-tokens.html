@@ -63,6 +63,90 @@
         </main>
     </div>
 
+    <!-- Modal PIX -->
+    <div id="pixModal" class="pix-modal" style="display: none;">
+        <div class="pix-modal-content">
+            <div class="pix-modal-header">
+                <h3>Pagamento PIX</h3>
+                <button class="close-modal" onclick="closePixModal()">&times;</button>
+            </div>
+            
+            <!-- Contador de expiração -->
+            <div class="expiration-counter" id="expirationCounter">
+                <i class="fas fa-clock"></i>
+                <span>QR Code expira em: <strong id="countdownTime">--:--</strong></span>
+            </div>
+            
+            <div class="pix-modal-body">
+                <div class="pix-layout">
+                    <!-- Coluna esquerda: Informações -->
+                    <div class="pix-info-column">
+                        <div class="pix-instructions">
+                            <h4>Como pagar:</h4>
+                            <ol>
+                                <li>Abra o app do seu banco</li>
+                                <li>Escolha a opção PIX</li>
+                                <li>Escaneie o QR Code ou cole o código</li>
+                                <li>Confirme o pagamento</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="pix-details">
+                            <div class="detail-item">
+                                <span class="label">Quantidade:</span>
+                                <span class="value" id="modalQuantity">0 tokens</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Valor Total:</span>
+                                <span class="value">R$ <span id="modalTotal">0,00</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="pix-code-section">
+                            <h4>Código PIX:</h4>
+                            <div class="pix-code-container">
+                                <input type="text" id="pixCode" readonly placeholder="Código PIX será gerado aqui...">
+                                <button type="button" id="copyPixCode" class="copy-btn">
+                                    <i class="fas fa-copy"></i>
+                                    Copiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coluna direita: QR Code -->
+                    <div class="pix-qr-column">
+                        <div class="qr-code-container">
+                            <h4>QR Code PIX</h4>
+                            <div id="qrCodeContainer">
+                                <!-- QR Code será gerado aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de sucesso -->
+    <div id="successModal" class="success-modal" style="display: none;">
+        <div class="success-modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Pagamento Confirmado!</h3>
+            <p>Seus tokens foram creditados com sucesso.</p>
+            <div class="success-details">
+                <p><strong>Tokens adicionados:</strong> <span id="successTokens">0</span></p>
+                <p><strong>Total de tokens:</strong> <span id="successTotal">0</span></p>
+            </div>
+            <button class="success-btn" id="backToDashboard">
+                <i class="fas fa-home"></i>
+                Voltar ao Dashboard
+            </button>
+        </div>
+    </div>
+
     <script src="js/qrcode.min.js"></script>
     <script>
         // Verificar se a biblioteca QR Code carregou
