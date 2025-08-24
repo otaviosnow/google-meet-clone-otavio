@@ -70,13 +70,13 @@ router.post('/mercadopago', async (req, res) => {
       // Creditar tokens ao usuário
       const user = await User.findById(transaction.user);
       if (user) {
-        user.tokens += transaction.tokens;
+        user.visionTokens += transaction.tokens;
         await user.save();
         
         console.log('✅ [WEBHOOK] Tokens creditados:', {
           userId: user._id,
           tokensAdicionados: transaction.tokens,
-          tokensTotal: user.tokens
+          tokensTotal: user.visionTokens
         });
       } else {
         console.error('❌ [WEBHOOK] Usuário não encontrado:', transaction.user);

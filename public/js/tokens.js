@@ -579,6 +579,12 @@ function showPaymentSuccess(transaction) {
     // Esconder modal PIX e mostrar sucesso
     pixModal.style.display = 'none';
     successModal.style.display = 'flex';
+    
+    console.log('✅ [SUCCESS] Modal de sucesso exibido');
+    console.log('🔍 [SUCCESS] Dados exibidos:', {
+        tokensAdicionados: transaction.tokens,
+        totalExibido: transaction.tokens
+    });
 }
 
 // Fechar modal de sucesso
