@@ -53,6 +53,22 @@ router.post('/mercadopago', async (req, res) => {
                         
                         console.log(`✅ Tokens creditados: ${user.email} +${tokensToAdd} tokens (R$ ${amount})`);
                         console.log(`🎫 Total de tokens: ${user.visionTokens}`);
+                        
+                        // Atualizar status da transação no banco
+                        const Transaction = require('../models/Transaction');
+                        const transaction = await Transaction.findOne({ 
+                            pagarmeId: paymentId,
+                            user: user._id 
+                        });
+                        
+                        if (transaction) {
+                            transaction.status = 'paid';
+                            transaction.paidAt = new Date();
+                            await transaction.save();
+                            console.log(`✅ Transação ${transaction._id} atualizada para PAID`);
+                        } else {
+                            console.log(`⚠️ Transação não encontrada para paymentId: ${paymentId}`);
+                        }
                     } else {
                         console.error('❌ Usuário não encontrado:', externalReference);
                     }
