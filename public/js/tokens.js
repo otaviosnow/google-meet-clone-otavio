@@ -356,51 +356,17 @@ function generatePixQRCode(qrCodeData) {
         return;
     }
     
-    // Função para aguardar biblioteca QR Code
-    function waitForQRCode(callback, maxAttempts = 10) {
-        let attempts = 0;
-        
-        function checkQRCode() {
-            attempts++;
-            console.log(`🔍 [QR] Tentativa ${attempts} de verificar QRCode`);
-            console.log('🔍 [QR] typeof QRCode:', typeof QRCode);
-            
-            if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
-                console.log('✅ [QR] Biblioteca QR Code carregada na tentativa', attempts);
-                callback();
-            } else if (attempts >= maxAttempts) {
-                console.error('❌ [QR] Biblioteca QR Code não carregou após', maxAttempts, 'tentativas');
-                qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregou</p>';
-            } else {
-                console.log(`🔍 [QR] Aguardando 500ms antes da próxima tentativa...`);
-                setTimeout(checkQRCode, 500);
-            }
-        }
-        
-        checkQRCode();
-    }
-    
     // Verificar biblioteca QR Code
     console.log('🔍 [QR] ===== VERIFICANDO BIBLIOTECA QR CODE =====');
     console.log('🔍 [QR] typeof QRCode:', typeof QRCode);
     console.log('🔍 [QR] QRCode disponível?', typeof QRCode !== 'undefined');
     console.log('🔍 [QR] QRCode.toCanvas existe?', typeof QRCode.toCanvas === 'function');
-    console.log('🔍 [QR] QRCode.toCanvas:', QRCode.toCanvas);
     
     if (typeof QRCode === 'undefined') {
-        console.log('🔍 [QR] Biblioteca QR Code não carregada, aguardando...');
-        waitForQRCode(function() {
-            generateQRCodeInternal(qrCodeData, qrCodeContainer);
-        });
+        console.error('❌ [QR] Biblioteca QR Code não carregada');
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregada</p>';
         return;
     }
-    
-    // Se já está carregada, gerar diretamente
-    generateQRCodeInternal(qrCodeData, qrCodeContainer);
-}
-
-// Função interna para gerar QR Code (chamada após biblioteca carregar)
-function generateQRCodeInternal(qrCodeData, qrCodeContainer) {
     
     if (typeof QRCode.toCanvas !== 'function') {
         console.error('❌ [QR] QRCode.toCanvas não é uma função');

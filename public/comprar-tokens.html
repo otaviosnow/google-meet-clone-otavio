@@ -144,28 +144,79 @@
         </div>
     </div>
 
-    <!-- QR Code Library -->
-    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- QR Code Library - Carregamento Síncrono com Fallbacks -->
     <script>
-        // Aguardar carregamento da biblioteca
-        window.addEventListener('load', function() {
-            if (typeof QRCode === 'undefined') {
-                console.error('❌ QR Code library não carregou');
-                // Tentar carregar novamente
+        // Função para carregar biblioteca QR Code com múltiplos fallbacks
+        function loadQRCodeLibrary() {
+            const cdnUrls = [
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+                'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+                'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.js'
+            ];
+            
+            let currentIndex = 0;
+            
+            function tryLoadCDN() {
+                if (currentIndex >= cdnUrls.length) {
+                    console.error('❌ Todas as CDNs falharam ao carregar QR Code library');
+                    return;
+                }
+                
+                const url = cdnUrls[currentIndex];
+                console.log(`🔍 [QR] Tentando carregar QR Code library de: ${url}`);
+                
                 const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                script.src = url;
+                script.async = false; // Carregamento síncrono
+                
                 script.onload = function() {
-                    console.log('✅ QR Code library carregada na segunda tentativa');
+                    console.log(`✅ [QR] QR Code library carregada com sucesso de: ${url}`);
+                    // Verificar se realmente carregou
+                    if (typeof QRCode !== 'undefined') {
+                        console.log('✅ [QR] QRCode está disponível:', typeof QRCode);
+                        console.log('✅ [QR] QRCode.toCanvas está disponível:', typeof QRCode.toCanvas);
+                        // Carregar script principal após biblioteca estar pronta
+                        loadMainScript();
+                    } else {
+                        console.error('❌ [QR] QRCode não está disponível após carregamento');
+                        currentIndex++;
+                        tryLoadCDN();
+                    }
                 };
+                
                 script.onerror = function() {
-                    console.error('❌ Falha ao carregar QR Code library');
+                    console.error(`❌ [QR] Falha ao carregar de: ${url}`);
+                    currentIndex++;
+                    tryLoadCDN();
                 };
+                
                 document.head.appendChild(script);
-            } else {
-                console.log('✅ QR Code library carregada com sucesso');
             }
-        });
+            
+            // Iniciar carregamento
+            tryLoadCDN();
+        }
+        
+        // Função para carregar script principal
+        function loadMainScript() {
+            const script = document.createElement('script');
+            script.src = 'js/tokens.js?v=2.4';
+            script.onload = function() {
+                console.log('✅ [MAIN] Script principal carregado');
+            };
+            script.onerror = function() {
+                console.error('❌ [MAIN] Falha ao carregar script principal');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Iniciar carregamento quando DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadQRCodeLibrary);
+        } else {
+            loadQRCodeLibrary();
+        }
     </script>
-    <script src="js/tokens.js?v=2.3"></script>
 </body>
 </html>
