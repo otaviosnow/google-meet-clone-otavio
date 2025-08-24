@@ -167,9 +167,18 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             
             console.log('🔍 [TOKENS] Gerando QR Code PIX...');
+            console.log('🔍 [TOKENS] Elementos do modal:', {
+                pixModal: !!pixModal,
+                modalQuantity: !!modalQuantity,
+                modalTotal: !!modalTotal,
+                pixCode: !!pixCode,
+                qrCodeContainer: !!qrCodeContainer
+            });
             
             const quantity = parseInt(tokenQuantity.value) || 0;
             const total = quantity * TOKEN_PRICE;
+            
+            console.log('🔍 [TOKENS] Dados da compra:', { quantity, total });
             
             if (quantity < MIN_QUANTITY) {
                 alert(`Quantidade mínima é ${MIN_QUANTITY} tokens`);
@@ -184,9 +193,13 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 // Buscar token de autenticação
                 const authToken = localStorage.getItem('authToken');
+                console.log('🔍 [TOKENS] Auth token:', authToken ? 'PRESENTE' : 'AUSENTE');
+                
                 if (!authToken) {
                     throw new Error('Usuário não autenticado');
                 }
+                
+                console.log('📡 [TOKENS] Fazendo requisição para /api/payments/create-pix');
                 
                 // Criar pagamento PIX
                 const response = await fetch('/api/payments/create-pix', {
@@ -203,6 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 console.log('📡 [TOKENS] Response status:', response.status);
+                console.log('📡 [TOKENS] Response ok:', response.ok);
+                
                 const result = await response.json();
                 console.log('📄 [TOKENS] Response data:', result);
                 
@@ -212,14 +227,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('🔍 [TOKENS] TransactionId:', result.data.transactionId);
                     
                     // Mostrar modal PIX
+                    console.log('🔍 [TOKENS] Chamando showPixModal...');
                     showPixModal(result.data);
                     
                 } else {
+                    console.error('❌ [TOKENS] Erro na resposta:', result);
                     throw new Error(result.error || 'Erro ao criar pagamento');
                 }
                 
             } catch (error) {
                 console.error('❌ [TOKENS] Erro ao gerar PIX:', error);
+                console.error('❌ [TOKENS] Stack trace:', error.stack);
                 alert('Erro ao gerar QR Code PIX: ' + error.message);
                 
                 // Restaurar botão
@@ -244,23 +262,57 @@ let qrExpirationTime = 30 * 60 * 1000; // 30 minutos
 // Mostrar modal PIX
 function showPixModal(paymentData) {
     console.log('🔍 [MODAL] Mostrando modal PIX:', paymentData);
+    console.log('🔍 [MODAL] Elementos do modal:', {
+        pixModal: !!pixModal,
+        modalQuantity: !!modalQuantity,
+        modalTotal: !!modalTotal,
+        pixCode: !!pixCode,
+        qrCodeContainer: !!qrCodeContainer
+    });
+    
+    if (!pixModal) {
+        console.error('❌ [MODAL] Elemento pixModal não encontrado!');
+        return;
+    }
     
     // Preencher dados do modal
-    modalQuantity.textContent = `${paymentData.quantity} tokens`;
-    modalTotal.textContent = paymentData.amount.toFixed(2).replace('.', ',');
-    pixCode.value = paymentData.pixQrCode || '';
+    if (modalQuantity) {
+        modalQuantity.textContent = `${paymentData.quantity} tokens`;
+        console.log('✅ [MODAL] Quantidade definida:', `${paymentData.quantity} tokens`);
+    } else {
+        console.error('❌ [MODAL] Elemento modalQuantity não encontrado!');
+    }
+    
+    if (modalTotal) {
+        modalTotal.textContent = paymentData.amount.toFixed(2).replace('.', ',');
+        console.log('✅ [MODAL] Total definido:', paymentData.amount.toFixed(2).replace('.', ','));
+    } else {
+        console.error('❌ [MODAL] Elemento modalTotal não encontrado!');
+    }
+    
+    if (pixCode) {
+        pixCode.value = paymentData.pixQrCode || '';
+        console.log('✅ [MODAL] PIX Code definido:', paymentData.pixQrCode ? 'PRESENTE' : 'AUSENTE');
+    } else {
+        console.error('❌ [MODAL] Elemento pixCode não encontrado!');
+    }
     
     // Gerar QR Code
+    console.log('🔍 [MODAL] Gerando QR Code...');
     generatePixQRCode(paymentData.pixQrCodeUrl || paymentData.pixQrCode);
     
     // Iniciar contador de expiração
+    console.log('🔍 [MODAL] Iniciando contador de expiração...');
     startExpirationCountdown();
     
     // Iniciar verificação de status
+    console.log('🔍 [MODAL] Iniciando verificação de status...');
     startPaymentCheck(paymentData.transactionId);
     
     // Mostrar modal
+    console.log('🔍 [MODAL] Exibindo modal...');
     pixModal.style.display = 'flex';
+    console.log('✅ [MODAL] Modal exibido com sucesso!');
 }
 
 // Fechar modal PIX
@@ -282,6 +334,8 @@ function closePixModal() {
 // Gerar QR Code
 function generatePixQRCode(qrCodeData) {
     console.log('🔍 [QR] Gerando QR Code:', qrCodeData);
+    console.log('🔍 [QR] Tipo dos dados:', typeof qrCodeData);
+    console.log('🔍 [QR] Tamanho dos dados:', qrCodeData ? qrCodeData.length : 'N/A');
     
     if (!qrCodeData) {
         console.error('❌ Dados do QR Code não fornecidos');
@@ -289,9 +343,19 @@ function generatePixQRCode(qrCodeData) {
     }
     
     // Limpar container
-    qrCodeContainer.innerHTML = '';
+    if (qrCodeContainer) {
+        qrCodeContainer.innerHTML = '';
+        console.log('✅ [QR] Container limpo');
+    } else {
+        console.error('❌ [QR] Elemento qrCodeContainer não encontrado!');
+        return;
+    }
     
     // Verificar se a biblioteca QR Code está disponível
+    console.log('🔍 [QR] Verificando biblioteca QR Code...');
+    console.log('🔍 [QR] typeof QRCode:', typeof QRCode);
+    console.log('🔍 [QR] QRCode disponível:', typeof QRCode !== 'undefined');
+    
     if (typeof QRCode === 'undefined') {
         console.error('❌ Biblioteca QR Code não carregada');
         qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregada</p>';
@@ -299,6 +363,7 @@ function generatePixQRCode(qrCodeData) {
     }
     
     try {
+        console.log('🔍 [QR] Criando QR Code...');
         // Gerar QR Code
         new QRCode(qrCodeContainer, {
             text: qrCodeData,
@@ -310,9 +375,11 @@ function generatePixQRCode(qrCodeData) {
         });
         
         console.log('✅ QR Code gerado com sucesso');
+        console.log('🔍 [QR] Conteúdo do container após geração:', qrCodeContainer.innerHTML);
     } catch (error) {
         console.error('❌ Erro ao gerar QR Code:', error);
-        qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
+        console.error('❌ Stack trace:', error.stack);
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code: ' + error.message + '</p>';
     }
 }
 
