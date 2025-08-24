@@ -1,5 +1,5 @@
 // Tokens Page JavaScript
-document.addEventListener('DOMContentLoaded', function() {
+function initializeTokensPage() {
     console.log('🚀 [TOKENS] Iniciando página de tokens');
     
     const tokenQuantity = document.getElementById('tokenQuantity');
@@ -443,6 +443,13 @@ function generatePixQRCode(qrCodeData) {
     }
     
     console.log('🔍 [QR] ===== FIM DA FUNÇÃO generatePixQRCode =====');
+}
+
+// Inicializar página quando DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTokensPage);
+} else {
+    initializeTokensPage();
 }
 
 // Iniciar contador de expiração
