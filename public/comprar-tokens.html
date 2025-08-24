@@ -149,10 +149,10 @@
         // Função para carregar biblioteca QR Code com múltiplos fallbacks
         function loadQRCodeLibrary() {
             const cdnUrls = [
-                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
-                'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-                'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.js'
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.tosjis.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.1/qrcode.tosjis.min.js'
             ];
             
             let currentIndex = 0;
@@ -164,7 +164,7 @@
                 }
                 
                 const url = cdnUrls[currentIndex];
-                console.log(`🔍 [QR] Tentando carregar QR Code library de: ${url}`);
+                console.log(`🔍 [QR] Tentativa ${currentIndex + 1}/4: Carregando de: ${url}`);
                 
                 const script = document.createElement('script');
                 script.src = url;
@@ -201,7 +201,7 @@
         // Função para carregar script principal
         function loadMainScript() {
             const script = document.createElement('script');
-            script.src = 'js/tokens.js?v=2.4';
+            script.src = 'js/tokens.js?v=2.5';
             script.onload = function() {
                 console.log('✅ [MAIN] Script principal carregado');
             };
