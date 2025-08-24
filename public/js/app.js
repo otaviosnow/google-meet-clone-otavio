@@ -168,8 +168,8 @@ async function checkAuth() {
                 window.location.href = '/dashboard';
             } else if (window.location.pathname === '/dashboard') {
                 // Se já estiver na URL do dashboard, apenas mostrar o dashboard
-                showDashboard();
-                loadUserData();
+            showDashboard();
+            loadUserData();
             } else if (window.location.pathname === '/integration') {
                 // Se estiver na URL de integração, mostrar dashboard com aba de integração ativa
                 showDashboard();
@@ -720,24 +720,24 @@ async function handleForgotPassword(e) {
             
             // Mostrar notificações com delay para garantir que sejam exibidas
             setTimeout(() => {
-                showNotification(result.message, 'success');
+            showNotification(result.message, 'success');
                 
-                // Em produção, o usuário receberia um email
-                // Por enquanto, vamos mostrar o token para teste
-                if (result.resetToken) {
+            // Em produção, o usuário receberia um email
+            // Por enquanto, vamos mostrar o token para teste
+            if (result.resetToken) {
                     setTimeout(() => {
-                        showNotification(`Token para teste: ${result.resetToken}`, 'info');
+                showNotification(`Token para teste: ${result.resetToken}`, 'info');
                     }, 500);
                     
                     setTimeout(() => {
                         showNotification('Em produção, este token seria enviado por email', 'info');
                     }, 1000);
-                }
+            }
             }, 100);
             
             // Voltar para o login após 5 segundos (tempo suficiente para ler as notificações)
             setTimeout(() => {
-                hideAuthModal();
+            hideAuthModal();
                 showAuthModal('login');
             }, 5000);
             
@@ -815,8 +815,8 @@ async function handleResetPassword(e) {
             
             // Voltar para o login após 2 segundos
             setTimeout(() => {
-                hideAuthModal();
-                showAuthModal('login');
+            hideAuthModal();
+            showAuthModal('login');
             }, 2000);
             
         } else {
@@ -1884,7 +1884,7 @@ function renderVideos(videos) {
             <div class="video-thumbnail">
                 <div class="video-preview-container">
                     <video src="${videoUrl}" preload="metadata" muted class="video-preview">
-                        <i class="fas fa-play" style="font-size: 32px;"></i>
+                <i class="fas fa-play" style="font-size: 32px;"></i>
                     </video>
                     <div class="video-preview-overlay">
                         <i class="fas fa-play"></i>
@@ -2052,10 +2052,10 @@ async function handleAddVideo(e) {
         console.log('✅ [VIDEO] Upload bem-sucedido:', result);
         
         hideUploadProgress();
-        hideModal(addVideoModal);
-        addVideoForm.reset();
-        loadVideos();
-        showNotification('Vídeo adicionado com sucesso!', 'success');
+            hideModal(addVideoModal);
+            addVideoForm.reset();
+            loadVideos();
+            showNotification('Vídeo adicionado com sucesso!', 'success');
         
     } catch (error) {
         console.error('❌ [VIDEO] Erro ao adicionar vídeo:', error);
@@ -2421,7 +2421,7 @@ async function handleCreateMeeting(e) {
     
     try {
         // Salvar reunião no banco de dados
-        const data = {
+    const data = {
             title: title,
             videoId: videoId,
             meetingId: meetingId,
@@ -2464,8 +2464,8 @@ async function handleCreateMeeting(e) {
                 if (shouldBuy) {
                     showTokenPurchaseModal();
                 }
-            } else {
-                showNotification(result.error, 'error');
+        } else {
+            showNotification(result.error, 'error');
             }
         }
     } catch (error) {
@@ -2607,7 +2607,7 @@ async function loadProfileStats() {
             }
             
             // Carregar tokens comprados
-            const tokensResponse = await fetch(`${API_BASE_URL}/api/tokens/transactions`, {
+            const tokensResponse = await fetch(`${API_BASE_URL}/tokens/transactions`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -2736,7 +2736,7 @@ function removeNotification(notification) {
         }
         // Remover da lista de notificações ativas
         activeNotifications = activeNotifications.filter(n => n !== notification);
-    }, 300);
+        }, 300);
 }
 
 // Estilos de animação já estão no CSS principal
