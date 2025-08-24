@@ -2607,7 +2607,7 @@ async function loadProfileStats() {
             }
             
             // Carregar tokens comprados
-            const tokensResponse = await fetch(`${API_BASE_URL}/tokens/transactions`, {
+            const tokensResponse = await fetch(`${API_BASE_URL}/api/tokens/transactions`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
