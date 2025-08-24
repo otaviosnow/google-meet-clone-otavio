@@ -24,8 +24,8 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Quantidade de tokens inválida' });
     }
     
-    // Calcular valor (R$ 1,00 por token)
-    const amountInReais = tokens;
+    // Calcular valor (R$ 2,00 por token)
+    const amountInReais = tokens * 2;
     const amountInCents = Math.round(amountInReais * 100);
     
     console.log('🔍 [PAYMENT] Valor calculado:', {
