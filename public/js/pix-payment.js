@@ -154,23 +154,23 @@ function generateQRCode(qrCodeData) {
     }
 
     try {
-        // Gerar QR Code usando a biblioteca local que funcionava
-        const qr = new QRCode({
-            text: qrCodeData,
+        // Gerar QR Code usando QRCode.toCanvas
+        QRCode.toCanvas(qrCodeContainer, qrCodeData, {
             width: 200,
             height: 200,
-            colorDark: '#000000',
-            colorLight: '#FFFFFF',
-            correctLevel: QRCode.CorrectLevel.H
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            },
+            errorCorrectionLevel: 'H'
+        }, function (error) {
+            if (error) {
+                console.error('❌ Erro ao gerar QR Code:', error);
+                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
+            } else {
+                console.log('✅ QR Code gerado com sucesso');
+            }
         });
-        
-        qr.makeCode(qrCodeData);
-        const canvas = qr.createImgTag(4, 4);
-        
-        qrCodeContainer.innerHTML = '';
-        qrCodeContainer.appendChild(canvas);
-        
-        console.log('✅ QR Code gerado com sucesso');
     } catch (error) {
         console.error('❌ Erro ao gerar QR Code:', error);
         qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
