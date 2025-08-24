@@ -21,6 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const TOKEN_PRICE = 2.00; // R$ 2,00 por token
     const MIN_QUANTITY = 5;
 
+    // Elementos do modal PIX
+    const pixModal = document.getElementById('pixModal');
+    const modalQuantity = document.getElementById('modalQuantity');
+    const modalTotal = document.getElementById('modalTotal');
+    const pixCode = document.getElementById('pixCode');
+    const qrCodeContainer = document.getElementById('qrCodeContainer');
+    const successModal = document.getElementById('successModal');
+    const successTokens = document.getElementById('successTokens');
+    const successTotal = document.getElementById('successTotal');
+    const countdownTime = document.getElementById('countdownTime');
+    const expirationCounter = document.getElementById('expirationCounter');
+
     // Função para atualizar o valor total
     function updateTotal() {
         const quantity = parseInt(tokenQuantity.value) || 0;
