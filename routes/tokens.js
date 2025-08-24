@@ -144,7 +144,15 @@ router.get('/transactions', authenticateToken, async (req, res) => {
             .limit(20);
 
         res.json({
-            transactions: transactions.map(t => t.toPublicJSON())
+            transactions: transactions.map(t => ({
+                id: t._id,
+                mercadopagoId: t.mercadopagoId,
+                tokens: t.tokens,
+                amount: t.amount,
+                status: t.status,
+                createdAt: t.createdAt,
+                paidAt: t.paidAt
+            }))
         });
     } catch (error) {
         console.error('❌ [TOKENS] Erro ao listar transações:', error);
@@ -201,7 +209,16 @@ router.get('/transactions/:transactionId', authenticateToken, async (req, res) =
         }
 
         const result = {
-            transaction: transaction.toPublicJSON()
+            transaction: {
+                id: transaction._id,
+                mercadopagoId: transaction.mercadopagoId,
+                tokens: transaction.tokens,
+                amount: transaction.amount,
+                status: transaction.status,
+                pix: transaction.pix,
+                createdAt: transaction.createdAt,
+                paidAt: transaction.paidAt
+            }
         };
         
         console.log('✅ [TOKENS] Retornando transação:', result);
