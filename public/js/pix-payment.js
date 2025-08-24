@@ -154,8 +154,8 @@ function generateQRCode(qrCodeData) {
     }
 
     try {
-        // Gerar QR Code usando qrcodejs
-        const qr = new QRCode(qrCodeContainer, {
+        // Gerar QR Code usando a biblioteca local que funcionava
+        const qr = new QRCode({
             text: qrCodeData,
             width: 200,
             height: 200,
@@ -163,6 +163,12 @@ function generateQRCode(qrCodeData) {
             colorLight: '#FFFFFF',
             correctLevel: QRCode.CorrectLevel.H
         });
+        
+        qr.makeCode(qrCodeData);
+        const canvas = qr.createImgTag(4, 4);
+        
+        qrCodeContainer.innerHTML = '';
+        qrCodeContainer.appendChild(canvas);
         
         console.log('✅ QR Code gerado com sucesso');
     } catch (error) {
