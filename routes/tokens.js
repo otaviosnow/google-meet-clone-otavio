@@ -169,10 +169,27 @@ router.get('/transactions/:transactionId', authenticateToken, async (req, res) =
         const allTransactions = await Transaction.find({ _id: transactionId });
         console.log('🔍 [TOKENS] Todas as transações com este ID:', allTransactions);
         
-        const transaction = await Transaction.findOne({ 
-            _id: transactionId,
-            user: req.user._id 
-        });
+        // Primeiro buscar por _id
+        let transaction = await Transaction.findById(transactionId);
+        
+        // Se não encontrar, buscar por pagarmeId
+        if (!transaction) {
+            transaction = await Transaction.findOne({ 
+                pagarmeId: transactionId,
+                user: req.user._id 
+            });
+        }
+        
+        // Se ainda não encontrar, buscar por qualquer campo que contenha o ID
+        if (!transaction) {
+            transaction = await Transaction.findOne({ 
+                $or: [
+                    { _id: transactionId },
+                    { pagarmeId: transactionId }
+                ],
+                user: req.user._id 
+            });
+        }
 
         console.log('🔍 [TOKENS] Transação encontrada para o usuário:', transaction);
 
