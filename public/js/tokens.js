@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const TOKEN_PRICE = 2.00; // R$ 2,00 por token
-    const MIN_QUANTITY = 1;
+    const MIN_QUANTITY = 5;
 
     // Elementos do modal PIX
     const pixModal = document.getElementById('pixModal');
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🔍 [TOKENS] Dados da compra:', { quantity, total });
             
             if (quantity < MIN_QUANTITY) {
-                alert(`Quantidade mínima é ${MIN_QUANTITY} token`);
+                alert(`Quantidade mínima é ${MIN_QUANTITY} tokens`);
                 return;
             }
             

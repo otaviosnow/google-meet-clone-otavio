@@ -27,14 +27,14 @@
                 <div class="tokens-info">
                     <p><i class="fas fa-key"></i> 1 token = 1 reunião</p>
                     <p><i class="fas fa-dollar-sign"></i> Valor unitário: R$ 2,00</p>
-                    <p><i class="fas fa-shopping-cart"></i> Compra mínima: 1 token</p>
+                    <p><i class="fas fa-shopping-cart"></i> Compra mínima: 5 tokens</p>
                 </div>
 
                 <form class="tokens-form" id="tokensForm">
                     <div class="form-group">
                         <label for="tokenQuantity">Quantidade de Tokens</label>
                         <div class="quantity-input">
-                            <input type="number" id="tokenQuantity" name="quantity" min="1" value="1" step="1">
+                            <input type="number" id="tokenQuantity" name="quantity" min="5" value="5" step="1">
                             <div class="quantity-controls">
                                 <button type="button" class="quantity-btn" id="increaseBtn">
                                     <i class="fas fa-chevron-up"></i>
@@ -48,7 +48,7 @@
 
                     <div class="total-section">
                         <span class="total-label">Valor total:</span>
-                        <span class="total-value" id="totalValue">R$ 2,00</span>
+                        <span class="total-value" id="totalValue">R$ 10,00</span>
                     </div>
 
                     <button type="submit" class="btn btn-pix" id="generatePixBtn">
@@ -145,7 +145,15 @@
     </div>
 
     <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script src="js/tokens.js?v=2.1"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script>
+        // Verificar se a biblioteca QR Code carregou
+        if (typeof QRCode === 'undefined') {
+            console.error('❌ QR Code library não carregou');
+        } else {
+            console.log('✅ QR Code library carregada com sucesso');
+        }
+    </script>
+    <script src="js/tokens.js?v=2.2"></script>
 </body>
 </html>
