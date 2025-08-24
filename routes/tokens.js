@@ -159,23 +159,32 @@ router.get('/transactions/:transactionId', authenticateToken, async (req, res) =
     try {
         const { transactionId } = req.params;
         console.log('🔍 [TOKENS] Buscando transação:', transactionId);
+        console.log('🔍 [TOKENS] User ID:', req.user._id);
+        console.log('🔍 [TOKENS] Params:', req.params);
         
         const transaction = await Transaction.findOne({ 
             _id: transactionId,
             user: req.user._id 
         });
 
+        console.log('🔍 [TOKENS] Transação encontrada:', transaction);
+
         if (!transaction) {
+            console.log('❌ [TOKENS] Transação não encontrada');
             return res.status(404).json({
                 error: 'Transação não encontrada'
             });
         }
 
-        res.json({
+        const result = {
             transaction: transaction.toPublicJSON()
-        });
+        };
+        
+        console.log('✅ [TOKENS] Retornando transação:', result);
+        res.json(result);
     } catch (error) {
         console.error('❌ [TOKENS] Erro ao buscar transação:', error);
+        console.error('❌ [TOKENS] Stack trace:', error.stack);
         res.status(500).json({
             error: 'Erro interno do servidor'
         });

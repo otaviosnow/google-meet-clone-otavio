@@ -116,14 +116,22 @@ async function loadExistingPayment(transactionId) {
         }
 
         const result = await response.json();
-        console.log('✅ Pagamento carregado:', result);
+        console.log('✅ [LOAD] Pagamento carregado:', result);
+        console.log('🔍 [LOAD] Result.success:', result.success);
+        console.log('🔍 [LOAD] Result.data:', result.data);
+        console.log('🔍 [LOAD] Result.data.pixQrCodeUrl:', result.data?.pixQrCodeUrl);
+        console.log('🔍 [LOAD] Result.data.pixQrCode:', result.data?.pixQrCode);
 
         if (result.success && result.data) {
             // Gerar QR Code
-            generateQRCode(result.data.pixQrCodeUrl || result.data.pixQrCode);
+            const qrData = result.data.pixQrCodeUrl || result.data.pixQrCode;
+            console.log('🔍 [LOAD] Dados para QR Code:', qrData);
+            generateQRCode(qrData);
             
             // Preencher código PIX
-            pixCodeInput.value = result.data.pixQrCode || result.data.pixQrCodeUrl || '';
+            const pixData = result.data.pixQrCode || result.data.pixQrCodeUrl || '';
+            console.log('🔍 [LOAD] Dados para código PIX:', pixData);
+            pixCodeInput.value = pixData;
         } else {
             throw new Error(result.message || 'Erro ao carregar pagamento');
         }
@@ -154,8 +162,14 @@ function generateQRCode(qrCodeData) {
     }
 
     try {
+        console.log('🔍 [QR] Iniciando geração do QR Code...');
+        console.log('🔍 [QR] Dados do QR Code:', qrCodeData);
+        console.log('🔍 [QR] Container:', qrCodeContainer);
+        console.log('🔍 [QR] Biblioteca QRCode disponível:', typeof QRCode);
+        console.log('🔍 [QR] QRCode.CorrectLevel:', QRCode.CorrectLevel);
+        
         // Gerar QR Code usando qrcodejs
-        new QRCode(qrCodeContainer, {
+        const qr = new QRCode(qrCodeContainer, {
             text: qrCodeData,
             width: 200,
             height: 200,
@@ -165,8 +179,13 @@ function generateQRCode(qrCodeData) {
         });
         
         console.log('✅ QR Code gerado com sucesso');
+        console.log('🔍 [QR] Objeto QR criado:', qr);
+        console.log('🔍 [QR] Container após geração:', qrCodeContainer.innerHTML);
     } catch (error) {
         console.error('❌ Erro ao gerar QR Code:', error);
+        console.error('❌ [QR] Stack trace:', error.stack);
+        console.error('❌ [QR] Tipo de erro:', error.name);
+        console.error('❌ [QR] Mensagem:', error.message);
         qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
     }
 }
@@ -214,11 +233,13 @@ function startPaymentStatusCheck(transactionId) {
         return;
     }
 
-    console.log('🔄 Iniciando verificação de status para:', transactionId);
+    console.log('🔄 [STATUS] Iniciando verificação de status para:', transactionId);
+    console.log('🔄 [STATUS] URL da requisição:', `/api/tokens/transactions/${transactionId}`);
 
     paymentCheckInterval = setInterval(async () => {
         try {
-                    const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+            console.log('🔄 [STATUS] Verificando status...');
+            const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
