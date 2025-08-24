@@ -107,7 +107,7 @@ async function loadExistingPayment(transactionId) {
         // Primeiro, tentar buscar dados completos do pagamento
         const response = await fetch(`/api/payments/payment/${transactionId}`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             }
         });
 
@@ -224,11 +224,11 @@ function startPaymentStatusCheck(transactionId) {
 
     paymentCheckInterval = setInterval(async () => {
         try {
-            const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
+                    const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
