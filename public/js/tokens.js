@@ -590,7 +590,7 @@ function showPaymentSuccess(transaction) {
 // Fechar modal de sucesso
 function closeSuccessModal() {
     successModal.style.display = 'none';
-    window.location.href = '/'; // Voltar ao dashboard
+    window.location.href = '/dashboard.html'; // Voltar ao dashboard
 }
 
 // Event listeners para os modais
