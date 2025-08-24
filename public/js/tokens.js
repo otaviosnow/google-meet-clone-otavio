@@ -1,597 +1,410 @@
-// Tokens Page JavaScript
+// Variáveis globais
+let selectedTokens = 0;
+let selectedPrice = 0;
+let currentTransaction = null;
+let countdownInterval = null;
+
+// Elementos DOM
+const tokenOptions = document.querySelectorAll('.token-option');
+const selectedAmount = document.getElementById('selectedAmount');
+const selectedPriceElement = document.getElementById('selectedPrice');
+const generatePixBtn = document.getElementById('generatePixBtn');
+
+// Modais
+const pixModal = document.getElementById('pixModal');
+const successModal = document.getElementById('successModal');
+const closeButtons = document.querySelectorAll('.close');
+
+// Elementos do modal PIX
+const modalQuantity = document.getElementById('modalQuantity');
+const modalTotal = document.getElementById('modalTotal');
+const countdownTime = document.getElementById('countdownTime');
+const qrCodeContainer = document.getElementById('qrCodeContainer');
+const pixCode = document.getElementById('pixCode');
+const copyPixBtn = document.getElementById('copyPixBtn');
+
+// Elementos do modal de sucesso
+const successTokens = document.getElementById('successTokens');
+const successTotal = document.getElementById('successTotal');
+const backToMenuBtn = document.getElementById('backToMenuBtn');
+
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 [TOKENS] Iniciando página de tokens');
+    console.log('🚀 [TOKENS] Página carregada');
     
-    const tokenQuantity = document.getElementById('tokenQuantity');
-    const totalValue = document.getElementById('totalValue');
-    const increaseBtn = document.getElementById('increaseBtn');
-    const decreaseBtn = document.getElementById('decreaseBtn');
-    const tokensForm = document.getElementById('tokensForm');
-    const generatePixBtn = document.getElementById('generatePixBtn');
+    // Verificar se o usuário está logado
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('❌ [TOKENS] Usuário não logado');
+        window.location.href = '/login.html';
+        return;
+    }
     
-    console.log('🔍 [TOKENS] Elementos encontrados:', {
-        tokenQuantity: !!tokenQuantity,
-        totalValue: !!totalValue,
-        increaseBtn: !!increaseBtn,
-        decreaseBtn: !!decreaseBtn,
-        tokensForm: !!tokensForm,
-        generatePixBtn: !!generatePixBtn
-    });
-
-    const TOKEN_PRICE = 2.00; // R$ 2,00 por token
-    const MIN_QUANTITY = 5;
-
-    // Elementos do modal PIX
-    const pixModal = document.getElementById('pixModal');
-    const modalQuantity = document.getElementById('modalQuantity');
-    const modalTotal = document.getElementById('modalTotal');
-    const pixCode = document.getElementById('pixCode');
-    const qrCodeContainer = document.getElementById('qrCodeContainer');
-    const successModal = document.getElementById('successModal');
-    const successTokens = document.getElementById('successTokens');
-    const successTotal = document.getElementById('successTotal');
-    const countdownTime = document.getElementById('countdownTime');
-    const expirationCounter = document.getElementById('expirationCounter');
-
-    // Função para atualizar o valor total
-    function updateTotal() {
-        const quantity = parseInt(tokenQuantity.value) || 0;
-        const total = quantity * TOKEN_PRICE;
-        const formattedTotal = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        
-        if (totalValue) {
-            totalValue.textContent = formattedTotal;
-            console.log('💰 [TOKENS] Valor total atualizado:', {
-                quantity: quantity,
-                total: total,
-                formatted: formattedTotal
-            });
-        } else {
-            console.error('❌ [TOKENS] Elemento totalValue não encontrado');
-        }
-    }
-
-    // Função para atualizar estados dos botões
-    function updateButtonStates() {
-        const currentValue = parseInt(tokenQuantity.value) || 0;
-        
-        // Desabilitar botão de diminuir se estiver no mínimo
-        if (currentValue <= MIN_QUANTITY) {
-            decreaseBtn.disabled = true;
-        } else {
-            decreaseBtn.disabled = false;
-        }
-    }
-
-    // Event listeners para os botões de quantidade
-    if (increaseBtn) {
-        increaseBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔺 Botão aumentar clicado');
-            
-            const currentValue = parseInt(tokenQuantity.value) || 0;
-            const newValue = currentValue + 1;
-            tokenQuantity.value = newValue;
-            
-            console.log('🔺 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
-            
-            updateTotal();
-            updateButtonStates();
-            
-            // Feedback visual
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-        });
-        console.log('✅ [TOKENS] Event listener do botão aumentar adicionado');
-    } else {
-        console.error('❌ [TOKENS] Botão increaseBtn não encontrado');
-    }
-
-    if (decreaseBtn) {
-        decreaseBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔻 Botão diminuir clicado');
-            
-            const currentValue = parseInt(tokenQuantity.value) || 0;
-            if (currentValue > MIN_QUANTITY) {
-                const newValue = currentValue - 1;
-                tokenQuantity.value = newValue;
-                
-                console.log('🔻 [TOKENS] Valor alterado:', { current: currentValue, new: newValue });
-                
-                updateTotal();
-                updateButtonStates();
-                
-                // Feedback visual
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            } else {
-                console.log('🔻 [TOKENS] Valor mínimo atingido, não pode diminuir');
-            }
-        });
-        console.log('✅ [TOKENS] Event listener do botão diminuir adicionado');
-    } else {
-        console.error('❌ [TOKENS] Botão decreaseBtn não encontrado');
-    }
-
-    // Event listener para mudança no input
-    if (tokenQuantity) {
-        tokenQuantity.addEventListener('input', function() {
-            console.log('📝 [TOKENS] Input alterado:', this.value);
-            let value = parseInt(this.value) || 0;
-            
-            // Garantir valor mínimo
-            if (value < MIN_QUANTITY) {
-                value = MIN_QUANTITY;
-                this.value = value;
-            }
-            
-            updateTotal();
-            updateButtonStates();
-        });
-
-        // Event listener para mudança no input (evento change)
-        tokenQuantity.addEventListener('change', function() {
-            console.log('🔄 [TOKENS] Input mudou:', this.value);
-            let value = parseInt(this.value) || 0;
-            
-            // Garantir valor mínimo
-            if (value < MIN_QUANTITY) {
-                value = MIN_QUANTITY;
-                this.value = value;
-            }
-            
-            updateTotal();
-            updateButtonStates();
-        });
-    }
-
-    // Prevenir submissão automática do formulário
-    if (tokensForm) {
-        tokensForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('🚫 [TOKENS] Submissão do formulário prevenida');
-        });
-    }
-
-    // Gerar QR Code PIX - REDIRECIONAMENTO
-    if (generatePixBtn) {
-        generatePixBtn.addEventListener('click', async function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            console.log('🔍 [TOKENS] Gerando QR Code PIX...');
-            console.log('🔍 [TOKENS] Elementos do modal:', {
-                pixModal: !!pixModal,
-                modalQuantity: !!modalQuantity,
-                modalTotal: !!modalTotal,
-                pixCode: !!pixCode,
-                qrCodeContainer: !!qrCodeContainer
-            });
-            
-            const quantity = parseInt(tokenQuantity.value) || 0;
-            const total = quantity * TOKEN_PRICE;
-            
-            console.log('🔍 [TOKENS] Dados da compra:', { quantity, total });
-            
-            if (quantity < MIN_QUANTITY) {
-                alert(`Quantidade mínima é ${MIN_QUANTITY} tokens`);
-                return;
-            }
-            
-            // Mostrar loading
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
-            this.disabled = true;
-            
-            try {
-                // Buscar token de autenticação
-                const authToken = localStorage.getItem('authToken');
-                console.log('🔍 [TOKENS] Auth token:', authToken ? 'PRESENTE' : 'AUSENTE');
-                
-                if (!authToken) {
-                    throw new Error('Usuário não autenticado');
-                }
-                
-                console.log('📡 [TOKENS] Fazendo requisição para /api/payments/create-pix');
-                
-                // Criar pagamento PIX
-                const response = await fetch('/api/payments/create-pix', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({
-                        amount: total,
-                        description: `${quantity} tokens CallX`,
-                        quantity: quantity
-                    })
-                });
-                
-                console.log('📡 [TOKENS] Response status:', response.status);
-                console.log('📡 [TOKENS] Response ok:', response.ok);
-                
-                const result = await response.json();
-                console.log('📄 [TOKENS] Response data:', result);
-                
-                if (response.ok && result.success) {
-                    console.log('✅ [TOKENS] PIX criado com sucesso:', result);
-                    console.log('🔍 [TOKENS] Dados do resultado:', result.data);
-                    console.log('🔍 [TOKENS] TransactionId:', result.data.transactionId);
-                    
-                    // Mostrar modal PIX
-                    console.log('🔍 [TOKENS] Chamando showPixModal...');
-                    showPixModal(result.data);
-                    
-                } else {
-                    console.error('❌ [TOKENS] Erro na resposta:', result);
-                    throw new Error(result.error || 'Erro ao criar pagamento');
-                }
-                
-            } catch (error) {
-                console.error('❌ [TOKENS] Erro ao gerar PIX:', error);
-                console.error('❌ [TOKENS] Stack trace:', error.stack);
-                alert('Erro ao gerar QR Code PIX: ' + error.message);
-                
-                // Restaurar botão
-                this.innerHTML = originalText;
-                this.disabled = false;
-            }
-        });
-    }
-
-    // Inicializar valor total e estados dos botões
-    updateTotal();
-    updateButtonStates();
+    console.log('✅ [TOKENS] Usuário logado');
+    initializeEventListeners();
 });
 
-// ===== FUNÇÕES DO MODAL PIX =====
-
-// Variáveis globais para o modal
-let paymentCheckInterval;
-let countdownInterval;
-let qrExpirationTime = 30 * 60 * 1000; // 30 minutos
-
-// Mostrar modal PIX
-function showPixModal(paymentData) {
-    console.log('🔍 [MODAL] Mostrando modal PIX:', paymentData);
-    console.log('🔍 [MODAL] Elementos do modal:', {
-        pixModal: !!pixModal,
-        modalQuantity: !!modalQuantity,
-        modalTotal: !!modalTotal,
-        pixCode: !!pixCode,
-        qrCodeContainer: !!qrCodeContainer
+// Inicializar event listeners
+function initializeEventListeners() {
+    console.log('🔍 [TOKENS] Inicializando event listeners');
+    
+    // Seleção de tokens
+    tokenOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const tokens = parseInt(this.dataset.tokens);
+            selectTokens(tokens);
+        });
     });
     
-    if (!pixModal) {
-        console.error('❌ [MODAL] Elemento pixModal não encontrado!');
-        return;
-    }
+    // Botão gerar PIX
+    generatePixBtn.addEventListener('click', generatePixPayment);
     
-    // Preencher dados do modal
-    if (modalQuantity) {
-        modalQuantity.textContent = `${paymentData.quantity} tokens`;
-        console.log('✅ [MODAL] Quantidade definida:', `${paymentData.quantity} tokens`);
-    } else {
-        console.error('❌ [MODAL] Elemento modalQuantity não encontrado!');
-    }
+    // Fechar modais
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            closeModal(modal);
+        });
+    });
     
-    if (modalTotal) {
-        modalTotal.textContent = paymentData.amount.toFixed(2).replace('.', ',');
-        console.log('✅ [MODAL] Total definido:', paymentData.amount.toFixed(2).replace('.', ','));
-    } else {
-        console.error('❌ [MODAL] Elemento modalTotal não encontrado!');
-    }
+    // Clicar fora do modal para fechar
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target);
+        }
+    });
     
-    if (pixCode) {
-        pixCode.value = paymentData.pixQrCode || '';
-        console.log('✅ [MODAL] PIX Code definido:', paymentData.pixQrCode ? 'PRESENTE' : 'AUSENTE');
-    } else {
-        console.error('❌ [MODAL] Elemento pixCode não encontrado!');
-    }
+    // Copiar código PIX
+    copyPixBtn.addEventListener('click', copyPixCode);
     
-    // Gerar QR Code
-    console.log('🔍 [MODAL] Gerando QR Code...');
-    generatePixQRCode(paymentData.pixQrCodeUrl || paymentData.pixQrCode);
+    // Voltar ao menu
+    backToMenuBtn.addEventListener('click', function() {
+        window.location.href = '/';
+    });
     
-    // Iniciar contador de expiração
-    console.log('🔍 [MODAL] Iniciando contador de expiração...');
-    startExpirationCountdown();
-    
-    // Iniciar verificação de status
-    console.log('🔍 [MODAL] Iniciando verificação de status...');
-    startPaymentCheck(paymentData.transactionId);
-    
-    // Mostrar modal
-    console.log('🔍 [MODAL] Exibindo modal...');
-    pixModal.style.display = 'flex';
-    console.log('✅ [MODAL] Modal exibido com sucesso!');
+    console.log('✅ [TOKENS] Event listeners inicializados');
 }
 
-// Fechar modal PIX
-function closePixModal() {
-    console.log('🔍 [MODAL] Fechando modal PIX');
+// Selecionar quantidade de tokens
+function selectTokens(tokens) {
+    console.log('🔍 [TOKENS] Selecionando tokens:', tokens);
     
-    // Parar verificações
-    stopPaymentCheck();
-    stopExpirationCountdown();
+    // Remover seleção anterior
+    tokenOptions.forEach(option => {
+        option.classList.remove('selected');
+    });
     
-    // Esconder modal
-    pixModal.style.display = 'none';
+    // Selecionar nova opção
+    const selectedOption = document.querySelector(`[data-tokens="${tokens}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('selected');
+    }
     
-    // Limpar dados
-    qrCodeContainer.innerHTML = '';
-    pixCode.value = '';
+    // Atualizar valores
+    selectedTokens = tokens;
+    selectedPrice = tokens; // R$ 1,00 por token
+    
+    // Atualizar interface
+    selectedAmount.textContent = tokens;
+    selectedPriceElement.textContent = selectedPrice.toFixed(2).replace('.', ',');
+    
+    // Habilitar botão
+    generatePixBtn.disabled = false;
+    
+    console.log('✅ [TOKENS] Tokens selecionados:', {
+        tokens: selectedTokens,
+        price: selectedPrice
+    });
 }
 
-// Gerar QR Code
-function generatePixQRCode(qrCodeData) {
-    console.log('🔍 [QR] ===== INICIANDO GERAÇÃO DO QR CODE =====');
-    console.log('🔍 [QR] Dados recebidos:', qrCodeData);
-    console.log('🔍 [QR] Tipo dos dados:', typeof qrCodeData);
-    console.log('🔍 [QR] Tamanho dos dados:', qrCodeData ? qrCodeData.length : 'N/A');
-    console.log('🔍 [QR] Dados são string válida?', typeof qrCodeData === 'string' && qrCodeData.length > 0);
+// Gerar pagamento PIX
+async function generatePixPayment() {
+    console.log('🔍 [TOKENS] ===== INICIANDO GERAÇÃO DE PIX =====');
+    console.log('🔍 [TOKENS] Tokens:', selectedTokens);
+    console.log('🔍 [TOKENS] Preço:', selectedPrice);
     
-    if (!qrCodeData) {
-        console.error('❌ [QR] Dados do QR Code não fornecidos');
-        return;
-    }
-    
-    // Verificar container
-    console.log('🔍 [QR] Verificando container...');
-    console.log('🔍 [QR] qrCodeContainer existe?', !!qrCodeContainer);
-    console.log('🔍 [QR] qrCodeContainer:', qrCodeContainer);
-    
-    if (qrCodeContainer) {
-        console.log('🔍 [QR] Limpando container...');
-        qrCodeContainer.innerHTML = '';
-        console.log('✅ [QR] Container limpo');
-        console.log('🔍 [QR] Container após limpeza:', qrCodeContainer.innerHTML);
-    } else {
-        console.error('❌ [QR] Elemento qrCodeContainer não encontrado!');
-        return;
-    }
-    
-    // Verificar biblioteca QR Code
-    console.log('🔍 [QR] ===== VERIFICANDO BIBLIOTECA QR CODE =====');
-    console.log('🔍 [QR] typeof QRCode:', typeof QRCode);
-    console.log('🔍 [QR] QRCode disponível?', typeof QRCode !== 'undefined');
-    console.log('🔍 [QR] QRCode.toCanvas existe?', typeof QRCode.toCanvas === 'function');
-    console.log('🔍 [QR] QRCode.toCanvas:', QRCode.toCanvas);
-    
-    if (typeof QRCode === 'undefined') {
-        console.error('❌ [QR] Biblioteca QR Code não carregada');
-        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregada</p>';
-        return;
-    }
-    
-    if (typeof QRCode.toCanvas !== 'function') {
-        console.error('❌ [QR] QRCode.toCanvas não é uma função');
-        console.log('🔍 [QR] Métodos disponíveis em QRCode:', Object.getOwnPropertyNames(QRCode));
-        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: QRCode.toCanvas não disponível</p>';
+    if (selectedTokens === 0) {
+        console.error('❌ [TOKENS] Nenhum token selecionado');
+        alert('Selecione uma quantidade de tokens');
         return;
     }
     
     try {
-        console.log('🔍 [QR] ===== CRIANDO CANVAS =====');
+        // Desabilitar botão
+        generatePixBtn.disabled = true;
+        generatePixBtn.textContent = 'Gerando...';
         
+        // Fazer requisição para criar PIX
+        const response = await fetch('/api/payments/create-pix', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                tokens: selectedTokens
+            })
+        });
+        
+        console.log('🔍 [TOKENS] Resposta do servidor:', response.status);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao gerar PIX');
+        }
+        
+        const data = await response.json();
+        console.log('✅ [TOKENS] PIX criado com sucesso:', {
+            transactionId: data.transactionId,
+            qrCodeLength: data.qrCode ? data.qrCode.length : 0
+        });
+        
+        // Salvar dados da transação
+        currentTransaction = data;
+        
+        // Mostrar modal PIX
+        showPixModal(data);
+        
+        // Iniciar verificação de pagamento
+        startPaymentCheck(data.transactionId);
+        
+    } catch (error) {
+        console.error('❌ [TOKENS] Erro ao gerar PIX:', error);
+        alert(`Erro ao gerar PIX: ${error.message}`);
+        
+        // Reabilitar botão
+        generatePixBtn.disabled = false;
+        generatePixBtn.textContent = 'Gerar QR Code PIX';
+    }
+}
+
+// Mostrar modal PIX
+function showPixModal(data) {
+    console.log('🔍 [TOKENS] ===== MOSTRANDO MODAL PIX =====');
+    console.log('🔍 [TOKENS] Dados recebidos:', data);
+    
+    // Atualizar informações do modal
+    modalQuantity.textContent = data.tokens;
+    modalTotal.textContent = data.amount.toFixed(2).replace('.', ',');
+    
+    // Gerar QR Code
+    generateQRCode(data.qrCode);
+    
+    // Mostrar código PIX
+    pixCode.textContent = data.qrCode;
+    
+    // Iniciar contador
+    startCountdown(data.expiresAt);
+    
+    // Mostrar modal
+    pixModal.style.display = 'block';
+    
+    console.log('✅ [TOKENS] Modal PIX exibido');
+}
+
+// Gerar QR Code
+function generateQRCode(qrCodeData) {
+    console.log('🔍 [TOKENS] ===== GERANDO QR CODE =====');
+    console.log('🔍 [TOKENS] Dados QR:', qrCodeData ? qrCodeData.substring(0, 50) + '...' : 'N/A');
+    
+    // Limpar container
+    qrCodeContainer.innerHTML = '';
+    
+    // Verificar se a biblioteca QR Code está disponível
+    if (typeof QRCode === 'undefined') {
+        console.error('❌ [TOKENS] Biblioteca QR Code não carregada');
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro: Biblioteca QR Code não carregada</p>';
+        return;
+    }
+    
+    try {
         // Criar canvas
         const canvas = document.createElement('canvas');
-        console.log('🔍 [QR] Canvas criado:', canvas);
-        console.log('🔍 [QR] Canvas width:', canvas.width);
-        console.log('🔍 [QR] Canvas height:', canvas.height);
-        
-        // Adicionar canvas ao container
-        console.log('🔍 [QR] Adicionando canvas ao container...');
         qrCodeContainer.appendChild(canvas);
-        console.log('✅ [QR] Canvas adicionado ao container');
-        console.log('🔍 [QR] Container após adicionar canvas:', qrCodeContainer.innerHTML);
         
-        // Preparar opções
-        const options = {
+        // Gerar QR Code
+        QRCode.toCanvas(canvas, qrCodeData, {
             width: 200,
             margin: 2,
             color: {
                 dark: '#000000',
                 light: '#FFFFFF'
             }
-        };
-        console.log('🔍 [QR] Opções preparadas:', options);
-        
-        console.log('🔍 [QR] ===== CHAMANDO QRCode.toCanvas =====');
-        console.log('🔍 [QR] Parâmetros:', {
-            canvas: canvas,
-            text: qrCodeData,
-            options: options
-        });
-        
-        // Gerar QR Code
-        QRCode.toCanvas(canvas, qrCodeData, options, function (error) {
-            console.log('🔍 [QR] ===== CALLBACK EXECUTADO =====');
-            console.log('🔍 [QR] Error recebido:', error);
-            console.log('🔍 [QR] Error é null?', error === null);
-            console.log('🔍 [QR] Error é undefined?', error === undefined);
-            
+        }, function(error) {
             if (error) {
-                console.error('❌ [QR] Erro no callback:', error);
-                console.error('❌ [QR] Tipo do erro:', typeof error);
-                console.error('❌ [QR] Mensagem do erro:', error.message);
-                console.error('❌ [QR] Stack trace do erro:', error.stack);
-                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code: ' + error.message + '</p>';
+                console.error('❌ [TOKENS] Erro ao gerar QR Code:', error);
+                qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
             } else {
-                console.log('✅ [QR] QR Code gerado com sucesso no callback');
-                console.log('🔍 [QR] Canvas após geração:', canvas);
-                console.log('🔍 [QR] Canvas width após geração:', canvas.width);
-                console.log('🔍 [QR] Canvas height após geração:', canvas.height);
-                console.log('🔍 [QR] Container final:', qrCodeContainer.innerHTML);
+                console.log('✅ [TOKENS] QR Code gerado com sucesso');
             }
         });
         
-        console.log('🔍 [QR] ===== QRCode.toCanvas CHAMADO =====');
-        console.log('🔍 [QR] Função executada, aguardando callback...');
-        
     } catch (error) {
-        console.error('❌ [QR] ===== ERRO NO TRY/CATCH =====');
-        console.error('❌ [QR] Erro capturado:', error);
-        console.error('❌ [QR] Tipo do erro:', typeof error);
-        console.error('❌ [QR] Mensagem do erro:', error.message);
-        console.error('❌ [QR] Stack trace completo:', error.stack);
-        qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code: ' + error.message + '</p>';
+        console.error('❌ [TOKENS] Erro no try/catch:', error);
+        qrCodeContainer.innerHTML = '<p style="color: red;">Erro ao gerar QR Code</p>';
     }
-    
-    console.log('🔍 [QR] ===== FIM DA FUNÇÃO generatePixQRCode =====');
 }
 
-// Iniciar contador de expiração
-function startExpirationCountdown() {
-    const startTime = Date.now();
-    const endTime = startTime + qrExpirationTime;
+// Iniciar contador
+function startCountdown(expiresAt) {
+    console.log('🔍 [TOKENS] ===== INICIANDO CONTADOR =====');
+    console.log('🔍 [TOKENS] Expira em:', expiresAt);
     
-    countdownInterval = setInterval(() => {
-        const now = Date.now();
-        const timeLeft = endTime - now;
+    // Limpar intervalo anterior
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+    
+    const updateCountdown = () => {
+        const now = new Date().getTime();
+        const expiry = new Date(expiresAt).getTime();
+        const timeLeft = expiry - now;
         
         if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
             countdownTime.textContent = '00:00';
-            expirationCounter.classList.add('expired');
-            expirationCounter.innerHTML = '<i class="fas fa-exclamation-triangle"></i> QR Code expirado';
+            clearInterval(countdownInterval);
+            console.log('⚠️ [TOKENS] QR Code expirado');
             return;
         }
         
-        const minutes = Math.floor(timeLeft / 60000);
-        const seconds = Math.floor((timeLeft % 60000) / 1000);
-        countdownTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const minutes = Math.floor(timeLeft / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
         
-        // Aviso quando faltar 5 minutos
-        if (timeLeft <= 5 * 60 * 1000) {
-            expirationCounter.classList.add('warning');
-        }
-    }, 1000);
-}
-
-// Parar contador de expiração
-function stopExpirationCountdown() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-    }
-}
-
-// Iniciar verificação de status do pagamento
-function startPaymentCheck(transactionId) {
-    console.log('🔍 [PAYMENT] Iniciando verificação para:', transactionId);
-    console.log('🔍 [PAYMENT] URL da requisição:', `/api/tokens/transactions/${transactionId}`);
+        countdownTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
     
-    paymentCheckInterval = setInterval(async () => {
+    // Atualizar imediatamente
+    updateCountdown();
+    
+    // Atualizar a cada segundo
+    countdownInterval = setInterval(updateCountdown, 1000);
+    
+    console.log('✅ [TOKENS] Contador iniciado');
+}
+
+// Iniciar verificação de pagamento
+function startPaymentCheck(transactionId) {
+    console.log('🔍 [TOKENS] ===== INICIANDO VERIFICAÇÃO DE PAGAMENTO =====');
+    console.log('🔍 [TOKENS] Transaction ID:', transactionId);
+    
+    const checkPayment = async () => {
         try {
-            console.log('🔄 [PAYMENT] Verificando status...');
-            const authToken = localStorage.getItem('authToken');
-            console.log('🔍 [PAYMENT] Auth token:', authToken ? 'PRESENTE' : 'AUSENTE');
-            
-            const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
+            const response = await fetch(`/api/payments/status/${transactionId}`, {
                 headers: {
-                    'Authorization': `Bearer ${authToken}`
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
             
-            console.log('🔍 [PAYMENT] Response status:', response.status);
-            console.log('🔍 [PAYMENT] Response ok:', response.ok);
-            
             if (response.ok) {
-                const result = await response.json();
-                console.log('📊 [PAYMENT] Status completo:', result);
-                console.log('🔍 [PAYMENT] Transaction encontrada:', result.transaction ? 'SIM' : 'NÃO');
-                console.log('🔍 [PAYMENT] Status da transação:', result.transaction?.status);
+                const data = await response.json();
+                console.log('🔍 [TOKENS] Status do pagamento:', data.status);
                 
-                if (result.transaction && result.transaction.status === 'paid') {
-                    console.log('✅ [PAYMENT] Pagamento confirmado!');
-                    stopPaymentCheck();
-                    stopExpirationCountdown();
-                    showPaymentSuccess(result.transaction);
+                if (data.status === 'approved') {
+                    console.log('✅ [TOKENS] Pagamento aprovado!');
+                    showSuccessModal(data);
+                    return true; // Parar verificação
                 }
-            } else {
-                console.error('❌ [PAYMENT] Response não ok:', response.status, response.statusText);
             }
-        } catch (error) {
-            console.error('❌ [PAYMENT] Erro ao verificar status:', error);
-            console.error('❌ [PAYMENT] Stack trace:', error.stack);
-        }
-    }, 5000); // Verificar a cada 5 segundos
-}
-
-// Parar verificação de status
-function stopPaymentCheck() {
-    if (paymentCheckInterval) {
-        clearInterval(paymentCheckInterval);
-        paymentCheckInterval = null;
-    }
-}
-
-// Mostrar sucesso do pagamento
-function showPaymentSuccess(transaction) {
-    console.log('🎉 [SUCCESS] Mostrando sucesso:', transaction);
-    
-    // Preencher dados de sucesso
-    successTokens.textContent = transaction.tokens;
-    successTotal.textContent = transaction.tokens;
-    
-    // Esconder modal PIX e mostrar sucesso
-    pixModal.style.display = 'none';
-    successModal.style.display = 'flex';
-}
-
-// Fechar modal de sucesso
-function closeSuccessModal() {
-    successModal.style.display = 'none';
-    window.location.href = '/'; // Voltar ao dashboard
-}
-
-// Event listeners para os modais
-document.addEventListener('DOMContentLoaded', function() {
-    // Copiar código PIX
-    const copyPixCodeBtn = document.getElementById('copyPixCode');
-    if (copyPixCodeBtn) {
-        copyPixCodeBtn.addEventListener('click', function() {
-            pixCode.select();
-            pixCode.setSelectionRange(0, 99999);
             
-            try {
-                document.execCommand('copy');
-                this.innerHTML = '<i class="fas fa-check"></i>';
-                this.style.background = 'rgba(16, 185, 129, 0.2)';
-                this.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-                this.style.color = '#10b981';
-                
-                setTimeout(() => {
-                    this.innerHTML = '<i class="fas fa-copy"></i>';
-                    this.style.background = 'rgba(59, 130, 246, 0.2)';
-                    this.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-                    this.style.color = '#3b82f6';
-                }, 2000);
-            } catch (err) {
-                console.error('❌ Erro ao copiar:', err);
-            }
-        });
-    }
-    
-    // Voltar ao dashboard
-    const backToDashboardBtn = document.getElementById('backToDashboard');
-    if (backToDashboardBtn) {
-        backToDashboardBtn.addEventListener('click', closeSuccessModal);
-    }
-    
-    // Fechar modal ao clicar fora
-    pixModal.addEventListener('click', function(e) {
-        if (e.target === pixModal) {
-            closePixModal();
+            return false; // Continuar verificando
+            
+        } catch (error) {
+            console.error('❌ [TOKENS] Erro ao verificar pagamento:', error);
+            return false;
         }
-    });
-});
+    };
+    
+    // Verificar a cada 3 segundos
+    const checkInterval = setInterval(async () => {
+        const isApproved = await checkPayment();
+        if (isApproved) {
+            clearInterval(checkInterval);
+        }
+    }, 3000);
+    
+    console.log('✅ [TOKENS] Verificação de pagamento iniciada');
+}
+
+// Mostrar modal de sucesso
+function showSuccessModal(data) {
+    console.log('🔍 [TOKENS] ===== MOSTRANDO MODAL DE SUCESSO =====');
+    console.log('🔍 [TOKENS] Dados:', data);
+    
+    // Atualizar informações
+    successTokens.textContent = data.tokens;
+    successTotal.textContent = data.amount.toFixed(2).replace('.', ',');
+    
+    // Fechar modal PIX
+    closeModal(pixModal);
+    
+    // Mostrar modal de sucesso
+    successModal.style.display = 'block';
+    
+    console.log('✅ [TOKENS] Modal de sucesso exibido');
+}
+
+// Copiar código PIX
+function copyPixCode() {
+    console.log('🔍 [TOKENS] Copiando código PIX');
+    
+    const textToCopy = pixCode.textContent;
+    
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            console.log('✅ [TOKENS] Código copiado para clipboard');
+            copyPixBtn.textContent = 'Copiado!';
+            setTimeout(() => {
+                copyPixBtn.textContent = 'Copiar Código';
+            }, 2000);
+        }).catch(err => {
+            console.error('❌ [TOKENS] Erro ao copiar:', err);
+            fallbackCopyTextToClipboard(textToCopy);
+        });
+    } else {
+        fallbackCopyTextToClipboard(textToCopy);
+    }
+}
+
+// Fallback para copiar texto
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        console.log('✅ [TOKENS] Código copiado (fallback)');
+        copyPixBtn.textContent = 'Copiado!';
+        setTimeout(() => {
+            copyPixBtn.textContent = 'Copiar Código';
+        }, 2000);
+    } catch (err) {
+        console.error('❌ [TOKENS] Erro no fallback:', err);
+        alert('Erro ao copiar código PIX');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Fechar modal
+function closeModal(modal) {
+    console.log('🔍 [TOKENS] Fechando modal');
+    
+    if (modal) {
+        modal.style.display = 'none';
+        
+        // Limpar contador se for o modal PIX
+        if (modal === pixModal && countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+    }
+    
+    // Reabilitar botão
+    generatePixBtn.disabled = false;
+    generatePixBtn.textContent = 'Gerar QR Code PIX';
+    
+    console.log('✅ [TOKENS] Modal fechado');
+}

@@ -1,280 +1,208 @@
 const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
-const { initializeMercadoPago, createPixPayment, checkPaymentStatus, processWebhook } = require('../config/mercadopago');
-const User = require('../models/User');
+const mercadopago = require('mercadopago');
 const Transaction = require('../models/Transaction');
-
+const User = require('../models/User');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
-// Inicializar cliente Mercado Pago
-let mercadopagoClient = null;
+// Configurar Mercado Pago
+mercadopago.configure({
+  access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
+});
 
-// Função para inicializar o cliente (será chamada quando necessário)
-async function getMercadoPagoClient() {
-    if (!mercadopagoClient) {
-        mercadopagoClient = await initializeMercadoPago();
+// POST /api/payments/create-pix - Criar pagamento PIX
+router.post('/create-pix', auth, async (req, res) => {
+  try {
+    console.log('🔍 [PAYMENT] ===== INICIANDO CRIAÇÃO DE PIX =====');
+    console.log('🔍 [PAYMENT] Usuário:', req.user._id);
+    console.log('🔍 [PAYMENT] Body:', req.body);
+    
+    const { tokens } = req.body;
+    
+    if (!tokens || tokens < 1) {
+      console.error('❌ [PAYMENT] Quantidade de tokens inválida:', tokens);
+      return res.status(400).json({ error: 'Quantidade de tokens inválida' });
     }
-    return mercadopagoClient;
-}
+    
+    // Calcular valor (R$ 1,00 por token)
+    const amountInReais = tokens;
+    const amountInCents = Math.round(amountInReais * 100);
+    
+    console.log('🔍 [PAYMENT] Valor calculado:', {
+      tokens,
+      amountInReais,
+      amountInCents
+    });
+    
+    // Criar pagamento no Mercado Pago
+    const paymentData = {
+      transaction_amount: amountInReais,
+      description: `${tokens} token${tokens > 1 ? 's' : ''} - CallX`,
+      payment_method_id: 'pix',
+      payer: {
+        email: req.user.email,
+        first_name: req.user.name.split(' ')[0] || 'Usuário',
+        last_name: req.user.name.split(' ').slice(1).join(' ') || 'CallX'
+      },
+      notification_url: process.env.WEBHOOK_URL,
+      external_reference: req.user._id.toString()
+    };
+    
+    console.log('🔍 [PAYMENT] Dados do pagamento:', paymentData);
+    
+    const payment = await mercadopago.payment.save(paymentData);
+    
+    console.log('✅ [PAYMENT] Pagamento criado no Mercado Pago:', {
+      id: payment.body.id,
+      status: payment.body.status,
+      status_detail: payment.body.status_detail
+    });
+    
+    // Extrair dados do PIX
+    const pixData = payment.body.point_of_interaction.transaction_data.qr_code;
+    const qrCodeBase64 = payment.body.point_of_interaction.transaction_data.qr_code_base64;
+    
+    console.log('🔍 [PAYMENT] Dados PIX extraídos:', {
+      qrCode: pixData ? pixData.substring(0, 50) + '...' : 'N/A',
+      qrCodeBase64: qrCodeBase64 ? 'Base64 presente' : 'N/A'
+    });
+    
+    // Calcular expiração (30 minutos)
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    
+    // Salvar transação no banco
+    const transaction = new Transaction({
+      mercadopagoId: payment.body.id.toString(),
+      user: req.user._id,
+      tokens: tokens,
+      amount: amountInCents,
+      status: 'pending',
+      pix: {
+        qrCode: pixData,
+        qrCodeBase64: qrCodeBase64,
+        expiresAt: expiresAt
+      }
+    });
+    
+    await transaction.save();
+    
+    console.log('✅ [PAYMENT] Transação salva no banco:', {
+      id: transaction._id,
+      mercadopagoId: transaction.mercadopagoId
+    });
+    
+    // Retornar dados para o frontend
+    const response = {
+      transactionId: transaction._id,
+      mercadopagoId: transaction.mercadopagoId,
+      qrCode: pixData,
+      qrCodeBase64: qrCodeBase64,
+      expiresAt: expiresAt,
+      amount: amountInReais,
+      tokens: tokens
+    };
+    
+    console.log('✅ [PAYMENT] Resposta enviada:', {
+      transactionId: response.transactionId,
+      mercadopagoId: response.mercadopagoId,
+      qrCodeLength: response.qrCode ? response.qrCode.length : 0,
+      qrCodeBase64Length: response.qrCodeBase64 ? response.qrCodeBase64.length : 0
+    });
+    
+    res.json(response);
+    
+  } catch (error) {
+    console.error('❌ [PAYMENT] Erro ao criar PIX:', error);
+    console.error('❌ [PAYMENT] Stack trace:', error.stack);
+    
+    res.status(500).json({ 
+      error: 'Erro ao criar pagamento PIX',
+      details: error.message 
+    });
+  }
+});
 
-// Criar pagamento PIX
-router.post('/create-pix', authenticateToken, async (req, res) => {
-    try {
-        const { quantity, amount } = req.body;
+// GET /api/payments/status/:transactionId - Verificar status do pagamento
+router.get('/status/:transactionId', auth, async (req, res) => {
+  try {
+    console.log('🔍 [STATUS] ===== VERIFICANDO STATUS =====');
+    console.log('🔍 [STATUS] Transaction ID:', req.params.transactionId);
+    console.log('🔍 [STATUS] Usuário:', req.user._id);
+    
+    const transaction = await Transaction.findOne({
+      _id: req.params.transactionId,
+      user: req.user._id
+    });
+    
+    if (!transaction) {
+      console.error('❌ [STATUS] Transação não encontrada');
+      return res.status(404).json({ error: 'Transação não encontrada' });
+    }
+    
+    console.log('🔍 [STATUS] Transação encontrada:', {
+      id: transaction._id,
+      mercadopagoId: transaction.mercadopagoId,
+      status: transaction.status
+    });
+    
+    // Se já está aprovada, retornar
+    if (transaction.status === 'approved') {
+      console.log('✅ [STATUS] Transação já aprovada');
+      return res.json({
+        status: 'approved',
+        transactionId: transaction._id,
+        tokens: transaction.tokens,
+        amount: transaction.amount / 100
+      });
+    }
+    
+    // Verificar no Mercado Pago
+    const payment = await mercadopago.payment.get(transaction.mercadopagoId);
+    
+    console.log('🔍 [STATUS] Status no Mercado Pago:', {
+      id: payment.body.id,
+      status: payment.body.status,
+      status_detail: payment.body.status_detail
+    });
+    
+    // Atualizar status se mudou
+    if (payment.body.status !== transaction.status) {
+      transaction.status = payment.body.status;
+      
+      if (payment.body.status === 'approved') {
+        transaction.paidAt = new Date();
         
-        if (!quantity || !amount) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Quantidade e valor são obrigatórios' 
-            });
-        }
-
-        // Obter dados do usuário
+        // Creditar tokens ao usuário
         const user = await User.findById(req.user._id);
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                error: 'Usuário não encontrado' 
-            });
-        }
-
-        // Inicializar cliente Mercado Pago
-        const client = await getMercadoPagoClient();
+        user.tokens += transaction.tokens;
+        await user.save();
         
-        // Dados do cliente para o Mercado Pago
-        const customerData = {
-            id: user._id.toString(),
-            name: user.name || user.email,
-            email: user.email,
-            document: user.document || '00000000000'
-        };
-
-        // Descrição do pagamento
-        const description = `${quantity} tokens CallX - ${user.email}`;
-
-        // Criar pagamento PIX
-        const paymentResult = await createPixPayment(amount, description, customerData);
-        
-        if (!paymentResult.success) {
-            return res.status(500).json({
-                success: false,
-                error: paymentResult.error
-            });
-        }
-
-        console.log('🔍 [PAYMENTS] Dados para salvar transação:', {
-            transactionId: paymentResult.transactionId,
-            userId: user._id,
-            amount: amount,
-            quantity: quantity,
-            pixCode: paymentResult.pixQrCode,
-            pixQrCodeUrl: paymentResult.pixQrCodeUrl
+        console.log('✅ [STATUS] Tokens creditados:', {
+          userId: user._id,
+          tokensAdicionados: transaction.tokens,
+          tokensTotal: user.tokens
         });
-
-        // Salvar transação no banco de dados usando o ID do Mercado Pago
-        const transaction = new Transaction({
-            _id: paymentResult.transactionId, // Usar o ID do Mercado Pago como nosso ID
-            user: user._id,
-            amount: amount,
-            tokens: quantity,
-            paymentMethod: 'pix',
-            status: 'pending',
-            pagarmeId: paymentResult.transactionId,
-            pixCode: paymentResult.pixQrCode,
-            pixQrCode: paymentResult.pixQrCodeUrl,
-            expiresAt: paymentResult.pixExpiration
-        });
-
-        console.log('🔍 [PAYMENTS] Objeto transaction criado:', transaction);
-
-        await transaction.save();
-        
-        console.log(`💰 [PAYMENTS] Pagamento PIX criado para ${user.email}: ${paymentResult.transactionId}`);
-        console.log(`💾 [PAYMENTS] Transação salva no banco com ID: ${transaction._id}`);
-        
-        // Verificar se foi salva corretamente
-        const savedTransaction = await Transaction.findById(paymentResult.transactionId);
-        console.log('🔍 [PAYMENTS] Transação verificada no banco:', savedTransaction ? 'ENCONTRADA' : 'NÃO ENCONTRADA');
-
-        res.json({
-            success: true,
-            message: 'Pagamento PIX criado com sucesso',
-            data: {
-                transactionId: paymentResult.transactionId, // Usar o mesmo ID do Mercado Pago
-                pixQrCode: paymentResult.pixQrCode,
-                pixQrCodeUrl: paymentResult.pixQrCodeUrl,
-                pixExpiration: paymentResult.pixExpiration,
-                amount: paymentResult.amount,
-                quantity: quantity
-            }
-        });
-
-    } catch (error) {
-        console.error('❌ Erro ao criar pagamento PIX:', error);
-        
-        // Verificar se é erro do Mercado Pago
-        if (error.message && error.message.includes('Mercado Pago API error')) {
-            console.error('🔍 Detalhes do erro Mercado Pago:', {
-                response: error.response,
-                errors: error.response?.errors,
-                status: error.response?.status
-            });
-            
-            res.status(500).json({
-                success: false,
-                error: `Erro do Mercado Pago: ${error.response?.status || 'Desconhecido'} - ${error.response?.errors?.[0]?.message || error.message}`
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                error: 'Erro interno do servidor: ' + error.message
-            });
-        }
+      }
+      
+      await transaction.save();
+      
+      console.log('✅ [STATUS] Status atualizado:', transaction.status);
     }
-});
-
-// Verificar status do pagamento
-router.get('/status/:transactionId', authenticateToken, async (req, res) => {
-    try {
-        const { transactionId } = req.params;
-        
-        if (!transactionId) {
-            return res.status(400).json({
-                success: false,
-                error: 'ID da transação é obrigatório'
-            });
-        }
-
-        // Inicializar cliente Pagar.me
-        const client = await getPagarmeClient();
-        
-        // Verificar status
-        const statusResult = await checkPaymentStatus(client, transactionId);
-        
-        if (!statusResult.success) {
-            return res.status(500).json({
-                success: false,
-                error: statusResult.error
-            });
-        }
-
-        res.json({
-            success: true,
-            data: statusResult
-        });
-
-    } catch (error) {
-        console.error('❌ Erro ao verificar status:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Erro interno do servidor'
-        });
-    }
-});
-
-// Webhook do Pagar.me (não requer autenticação)
-router.post('/webhook', async (req, res) => {
-    try {
-        const payload = req.body;
-        
-        console.log('📥 Webhook Pagar.me recebido:', {
-            type: payload.type,
-            transactionId: payload.current_transaction?.id
-        });
-
-        // Processar webhook
-        const webhookResult = processWebhook(payload);
-        
-        if (webhookResult.success && payload.current_transaction?.status === 'paid') {
-            // Pagamento confirmado - creditar tokens ao usuário
-            const customerId = webhookResult.customerId;
-            const amount = webhookResult.amount;
-            
-            // Calcular quantidade de tokens (R$ 2,00 por token)
-            const tokensToAdd = Math.floor(amount / 2);
-            
-            // Encontrar usuário e adicionar tokens
-            const user = await User.findById(customerId);
-            if (user) {
-                user.visionTokens += tokensToAdd;
-                await user.save();
-                
-                console.log(`✅ Tokens creditados: ${user.email} +${tokensToAdd} tokens (R$ ${amount})`);
-            }
-        }
-
-        // Sempre retornar 200 para o Pagar.me
-        res.status(200).json({ received: true });
-
-    } catch (error) {
-        console.error('❌ Erro no webhook:', error);
-        res.status(200).json({ received: true }); // Sempre retornar 200
-    }
-});
-
-// Buscar dados completos do pagamento (incluindo QR Code)
-router.get('/payment/:transactionId', authenticateToken, async (req, res) => {
-    try {
-        const { transactionId } = req.params;
-        console.log('🔍 Buscando dados completos do pagamento:', transactionId);
-
-        // Inicializar cliente Mercado Pago
-        const client = await getMercadoPagoClient();
-        
-        // Buscar pagamento no Mercado Pago
-        const payment = await client.payment.get(transactionId);
-        
-        if (payment && payment.body) {
-            const paymentData = payment.body;
-            
-            // Extrair dados do PIX
-            const pixData = paymentData.point_of_interaction?.transaction_data;
-            
-            res.json({
-                success: true,
-                data: {
-                    transactionId: transactionId,
-                    status: paymentData.status,
-                    amount: paymentData.transaction_amount,
-                    pixQrCode: pixData?.qr_code,
-                    pixQrCodeUrl: pixData?.qr_code_base64,
-                    externalReference: paymentData.external_reference
-                },
-                message: 'Dados do pagamento recuperados com sucesso'
-            });
-        } else {
-            res.status(404).json({
-                success: false,
-                message: 'Pagamento não encontrado'
-            });
-        }
-    } catch (error) {
-        console.error('❌ Erro ao buscar dados do pagamento:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erro interno do servidor'
-        });
-    }
-});
-
-// Rota de teste para verificar configuração
-router.get('/test', async (req, res) => {
-    try {
-        const client = await getMercadoPagoClient();
-        
-        res.json({
-            success: true,
-            message: 'Mercado Pago configurado corretamente',
-            environment: process.env.MERCADOPAGO_ENVIRONMENT || 'production'
-        });
-
-    } catch (error) {
-        console.error('❌ Erro no teste:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Erro na configuração do Mercado Pago'
-        });
-    }
+    
+    res.json({
+      status: transaction.status,
+      transactionId: transaction._id,
+      tokens: transaction.tokens,
+      amount: transaction.amount / 100
+    });
+    
+  } catch (error) {
+    console.error('❌ [STATUS] Erro ao verificar status:', error);
+    res.status(500).json({ 
+      error: 'Erro ao verificar status do pagamento',
+      details: error.message 
+    });
+  }
 });
 
 module.exports = router;

@@ -4,158 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprar Tokens - CallX</title>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="tokens-container">
-        <!-- Header com navegação -->
-        <header class="tokens-header">
-            <a href="/" class="back-link">
-                <i class="fas fa-arrow-left"></i>
-                Voltar para o Dashboard
-            </a>
+    <div class="container">
+        <header>
+            <h1>💎 Comprar Tokens</h1>
+            <p>Adicione tokens à sua conta para criar mais chamadas</p>
         </header>
 
-        <!-- Conteúdo principal -->
-        <main class="tokens-content">
-            <div class="tokens-card">
-                <h1 class="tokens-title">Comprar Tokens</h1>
-                
-                <div class="tokens-info">
-                    <p><i class="fas fa-key"></i> 1 token = 1 reunião</p>
-                    <p><i class="fas fa-dollar-sign"></i> Valor unitário: R$ 2,00</p>
-                    <p><i class="fas fa-shopping-cart"></i> Compra mínima: 5 tokens (R$ 10,00)</p>
+        <div class="token-selection">
+            <h2>Selecione a quantidade:</h2>
+            
+            <div class="token-options">
+                <div class="token-option" data-tokens="1">
+                    <div class="token-amount">1</div>
+                    <div class="token-label">Token</div>
+                    <div class="token-price">R$ 1,00</div>
                 </div>
-
-                <form class="tokens-form" id="tokensForm">
-                    <div class="form-group">
-                        <label for="tokenQuantity">Quantidade de Tokens</label>
-                        <div class="quantity-input">
-                            <input type="number" id="tokenQuantity" name="quantity" min="5" value="5" step="1">
-                            <div class="quantity-controls">
-                                <button type="button" class="quantity-btn" id="increaseBtn">
-                                    <i class="fas fa-chevron-up"></i>
-                                </button>
-                                <button type="button" class="quantity-btn" id="decreaseBtn">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="total-section">
-                        <span class="total-label">Valor total:</span>
-                        <span class="total-value" id="totalValue">R$ 10,00</span>
-                    </div>
-
-                    <button type="submit" class="btn btn-pix" id="generatePixBtn">
-                        <i class="fas fa-qrcode"></i>
-                        Gerar QR Code PIX (Mercado Pago)
-                    </button>
-                </form>
-
-
-                </form>
+                
+                <div class="token-option" data-tokens="5">
+                    <div class="token-amount">5</div>
+                    <div class="token-label">Tokens</div>
+                    <div class="token-price">R$ 5,00</div>
+                </div>
+                
+                <div class="token-option" data-tokens="10">
+                    <div class="token-amount">10</div>
+                    <div class="token-label">Tokens</div>
+                    <div class="token-price">R$ 10,00</div>
+                </div>
+                
+                <div class="token-option" data-tokens="20">
+                    <div class="token-amount">20</div>
+                    <div class="token-label">Tokens</div>
+                    <div class="token-price">R$ 20,00</div>
+                </div>
             </div>
-        </main>
-    </div>
 
-    <!-- Modal PIX -->
-    <div id="pixModal" class="pix-modal" style="display: none;">
-        <div class="pix-modal-content">
-            <div class="pix-modal-header">
-                <h3>Pagamento PIX</h3>
-                <button class="close-modal" onclick="closePixModal()">&times;</button>
+            <div class="selected-info">
+                <div class="selected-tokens">
+                    <span id="selectedAmount">0</span> tokens selecionados
+                </div>
+                <div class="selected-price">
+                    Total: R$ <span id="selectedPrice">0,00</span>
+                </div>
             </div>
-            
-            <!-- Contador de expiração -->
-            <div class="expiration-counter" id="expirationCounter">
-                <i class="fas fa-clock"></i>
-                <span>QR Code expira em: <strong id="countdownTime">--:--</strong></span>
-            </div>
-            
-            <div class="pix-modal-body">
-                <div class="pix-layout">
-                    <!-- Coluna esquerda: Informações -->
-                    <div class="pix-info-column">
-                        <div class="pix-instructions">
-                            <h4>Como pagar:</h4>
-                            <ol>
-                                <li>Abra o app do seu banco</li>
-                                <li>Escolha a opção PIX</li>
-                                <li>Escaneie o QR Code ou cole o código</li>
-                                <li>Confirme o pagamento</li>
-                            </ol>
-                        </div>
-                        
+
+            <button id="generatePixBtn" class="generate-btn" disabled>
+                Gerar QR Code PIX
+            </button>
+        </div>
+
+        <!-- Modal PIX -->
+        <div id="pixModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Pagamento PIX</h3>
+                    <span class="close">&times;</span>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="pix-info">
                         <div class="pix-details">
                             <div class="detail-item">
                                 <span class="label">Quantidade:</span>
-                                <span class="value" id="modalQuantity">0 tokens</span>
+                                <span id="modalQuantity">0</span> tokens
                             </div>
                             <div class="detail-item">
-                                <span class="label">Valor Total:</span>
-                                <span class="value">R$ <span id="modalTotal">0,00</span></span>
+                                <span class="label">Valor:</span>
+                                R$ <span id="modalTotal">0,00</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Expira em:</span>
+                                <span id="countdownTime">30:00</span>
                             </div>
                         </div>
                         
-                        <div class="pix-code-section">
-                            <h4>Código PIX:</h4>
-                            <div class="pix-code-container">
-                                <input type="text" id="pixCode" readonly placeholder="Código PIX será gerado aqui...">
-                                <button type="button" id="copyPixCode" class="copy-btn">
-                                    <i class="fas fa-copy"></i>
-                                    Copiar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Coluna direita: QR Code -->
-                    <div class="pix-qr-column">
-                        <div class="qr-code-container">
-                            <h4>QR Code PIX</h4>
-                            <div id="qrCodeContainer">
-                                <!-- QR Code será gerado aqui -->
+                        <div class="pix-qr">
+                            <div id="qrCodeContainer"></div>
+                            <div class="pix-code">
+                                <span class="label">Código PIX:</span>
+                                <div id="pixCode" class="code-text"></div>
+                                <button id="copyPixBtn" class="copy-btn">Copiar Código</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal de sucesso -->
-    <div id="successModal" class="success-modal" style="display: none;">
-        <div class="success-modal-content">
-            <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
+        <!-- Modal de Sucesso -->
+        <div id="successModal" class="modal">
+            <div class="modal-content success">
+                <div class="modal-header">
+                    <h3>✅ Pagamento Aprovado!</h3>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="success-message">
+                        <p>Seus <span id="successTokens">0</span> tokens foram creditados com sucesso!</p>
+                        <p>Valor pago: R$ <span id="successTotal">0,00</span></p>
+                    </div>
+                    
+                    <button id="backToMenuBtn" class="back-btn">
+                        Voltar ao Menu Principal
+                    </button>
+                </div>
             </div>
-            <h3>Pagamento Confirmado!</h3>
-            <p>Seus tokens foram creditados com sucesso.</p>
-            <div class="success-details">
-                <p><strong>Tokens adicionados:</strong> <span id="successTokens">0</span></p>
-                <p><strong>Total de tokens:</strong> <span id="successTotal">0</span></p>
-            </div>
-            <button class="success-btn" id="backToDashboard">
-                <i class="fas fa-home"></i>
-                Voltar ao Dashboard
-            </button>
         </div>
     </div>
 
+    <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script>
-        // Verificar se a biblioteca QR Code carregou
-        if (typeof QRCode === 'undefined') {
-            console.error('❌ QR Code library não carregou');
-        } else {
-            console.log('✅ QR Code library carregada com sucesso');
-        }
-    </script>
-    <script src="js/tokens.js?v=1.4&t=20250824"></script>
+    
+    <!-- Main Script -->
+    <script src="js/tokens.js?v=2.0"></script>
 </body>
 </html>
