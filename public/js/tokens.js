@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 [TOKENS] Página carregada');
     
     // Verificar se o usuário está logado
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (!token) {
         console.error('❌ [TOKENS] Usuário não logado');
         window.location.href = '/';
@@ -139,7 +139,7 @@ async function generatePixPayment() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
             },
             body: JSON.stringify({
                 tokens: selectedTokens
@@ -291,7 +291,7 @@ function startPaymentCheck(transactionId) {
         try {
             const response = await fetch(`/api/payments/status/${transactionId}`, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
             
