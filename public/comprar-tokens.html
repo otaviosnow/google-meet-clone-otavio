@@ -145,15 +145,27 @@
     </div>
 
     <!-- QR Code Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        // Verificar se a biblioteca QR Code carregou
-        if (typeof QRCode === 'undefined') {
-            console.error('❌ QR Code library não carregou');
-        } else {
-            console.log('✅ QR Code library carregada com sucesso');
-        }
+        // Aguardar carregamento da biblioteca
+        window.addEventListener('load', function() {
+            if (typeof QRCode === 'undefined') {
+                console.error('❌ QR Code library não carregou');
+                // Tentar carregar novamente
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                script.onload = function() {
+                    console.log('✅ QR Code library carregada na segunda tentativa');
+                };
+                script.onerror = function() {
+                    console.error('❌ Falha ao carregar QR Code library');
+                };
+                document.head.appendChild(script);
+            } else {
+                console.log('✅ QR Code library carregada com sucesso');
+            }
+        });
     </script>
-    <script src="js/tokens.js?v=2.2"></script>
+    <script src="js/tokens.js?v=2.3"></script>
 </body>
 </html>
