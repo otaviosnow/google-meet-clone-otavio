@@ -2,7 +2,7 @@ const express = require('express');
 const mercadopago = require('mercadopago');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
-const auth = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 
 // Configurar Mercado Pago
@@ -11,7 +11,7 @@ mercadopago.configure({
 });
 
 // POST /api/payments/create-pix - Criar pagamento PIX
-router.post('/create-pix', auth, async (req, res) => {
+router.post('/create-pix', authenticateToken, async (req, res) => {
   try {
     console.log('🔍 [PAYMENT] ===== INICIANDO CRIAÇÃO DE PIX =====');
     console.log('🔍 [PAYMENT] Usuário:', req.user._id);
@@ -123,7 +123,7 @@ router.post('/create-pix', auth, async (req, res) => {
 });
 
 // GET /api/payments/status/:transactionId - Verificar status do pagamento
-router.get('/status/:transactionId', auth, async (req, res) => {
+router.get('/status/:transactionId', authenticateToken, async (req, res) => {
   try {
     console.log('🔍 [STATUS] ===== VERIFICANDO STATUS =====');
     console.log('🔍 [STATUS] Transaction ID:', req.params.transactionId);
