@@ -589,7 +589,15 @@ function showPaymentSuccess(transaction) {
 
 // Fechar modal de sucesso
 function closeSuccessModal() {
-    successModal.style.display = 'none';
+    console.log('🔍 [SUCCESS] Função closeSuccessModal chamada');
+    console.log('🔍 [SUCCESS] Elemento successModal:', !!successModal);
+    
+    if (successModal) {
+        successModal.style.display = 'none';
+        console.log('✅ [SUCCESS] Modal fechado');
+    }
+    
+    console.log('🔍 [SUCCESS] Redirecionando para dashboard...');
     window.location.href = '/'; // Voltar ao dashboard
 }
 
