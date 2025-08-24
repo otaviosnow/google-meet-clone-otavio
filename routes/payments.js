@@ -62,6 +62,15 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             });
         }
 
+        console.log('🔍 [PAYMENTS] Dados para salvar transação:', {
+            transactionId: paymentResult.transactionId,
+            userId: user._id,
+            amount: amount,
+            quantity: quantity,
+            pixCode: paymentResult.pixQrCode,
+            pixQrCodeUrl: paymentResult.pixQrCodeUrl
+        });
+
         // Salvar transação no banco de dados usando o ID do Mercado Pago
         const transaction = new Transaction({
             _id: paymentResult.transactionId, // Usar o ID do Mercado Pago como nosso ID
@@ -76,10 +85,16 @@ router.post('/create-pix', authenticateToken, async (req, res) => {
             expiresAt: paymentResult.pixExpiration
         });
 
+        console.log('🔍 [PAYMENTS] Objeto transaction criado:', transaction);
+
         await transaction.save();
         
-        console.log(`💰 Pagamento PIX criado para ${user.email}: ${paymentResult.transactionId}`);
-        console.log(`💾 Transação salva no banco com ID: ${transaction._id}`);
+        console.log(`💰 [PAYMENTS] Pagamento PIX criado para ${user.email}: ${paymentResult.transactionId}`);
+        console.log(`💾 [PAYMENTS] Transação salva no banco com ID: ${transaction._id}`);
+        
+        // Verificar se foi salva corretamente
+        const savedTransaction = await Transaction.findById(paymentResult.transactionId);
+        console.log('🔍 [PAYMENTS] Transação verificada no banco:', savedTransaction ? 'ENCONTRADA' : 'NÃO ENCONTRADA');
 
         res.json({
             success: true,

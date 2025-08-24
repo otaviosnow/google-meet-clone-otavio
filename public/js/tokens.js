@@ -208,6 +208,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (response.ok && result.success) {
                     console.log('✅ [TOKENS] PIX criado com sucesso:', result);
+                    console.log('🔍 [TOKENS] Dados do resultado:', result.data);
+                    console.log('🔍 [TOKENS] TransactionId:', result.data.transactionId);
                     
                     // Mostrar modal PIX
                     showPixModal(result.data);
@@ -353,19 +355,28 @@ function stopExpirationCountdown() {
 // Iniciar verificação de status do pagamento
 function startPaymentCheck(transactionId) {
     console.log('🔍 [PAYMENT] Iniciando verificação para:', transactionId);
+    console.log('🔍 [PAYMENT] URL da requisição:', `/api/tokens/transactions/${transactionId}`);
     
     paymentCheckInterval = setInterval(async () => {
         try {
+            console.log('🔄 [PAYMENT] Verificando status...');
             const authToken = localStorage.getItem('authToken');
+            console.log('🔍 [PAYMENT] Auth token:', authToken ? 'PRESENTE' : 'AUSENTE');
+            
             const response = await fetch(`/api/tokens/transactions/${transactionId}`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
             });
             
+            console.log('🔍 [PAYMENT] Response status:', response.status);
+            console.log('🔍 [PAYMENT] Response ok:', response.ok);
+            
             if (response.ok) {
                 const result = await response.json();
-                console.log('📊 [PAYMENT] Status:', result);
+                console.log('📊 [PAYMENT] Status completo:', result);
+                console.log('🔍 [PAYMENT] Transaction encontrada:', result.transaction ? 'SIM' : 'NÃO');
+                console.log('🔍 [PAYMENT] Status da transação:', result.transaction?.status);
                 
                 if (result.transaction && result.transaction.status === 'paid') {
                     console.log('✅ [PAYMENT] Pagamento confirmado!');
@@ -373,9 +384,12 @@ function startPaymentCheck(transactionId) {
                     stopExpirationCountdown();
                     showPaymentSuccess(result.transaction);
                 }
+            } else {
+                console.error('❌ [PAYMENT] Response não ok:', response.status, response.statusText);
             }
         } catch (error) {
             console.error('❌ [PAYMENT] Erro ao verificar status:', error);
+            console.error('❌ [PAYMENT] Stack trace:', error.stack);
         }
     }, 5000); // Verificar a cada 5 segundos
 }
