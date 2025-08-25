@@ -646,20 +646,22 @@ router.get('/history', authenticateToken, async (req, res) => {
       });
     }
     
-    const response = {
-      entries: entries.map(entry => {
-        // Converter data para fuso horário local (Brasil)
-        const localDate = new Date(entry.date);
-        const year = localDate.getFullYear();
-        const month = String(localDate.getMonth() + 1).padStart(2, '0');
-        const day = String(localDate.getDate()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
-        
-        console.log('📅 [HISTORY] Convertendo data:', {
-          original: entry.date,
-          localDate: localDate,
-          formatted: formattedDate
-        });
+           const response = {
+         entries: entries.map(entry => {
+           // Converter data para fuso horário local (Brasil) - CORRIGIDO
+           const localDate = new Date(entry.date.getTime() + (3 * 60 * 60 * 1000)); // Adicionar 3 horas para compensar UTC-3
+           const year = localDate.getFullYear();
+           const month = String(localDate.getMonth() + 1).padStart(2, '0');
+           const day = String(localDate.getDate()).padStart(2, '0');
+           const formattedDate = `${year}-${month}-${day}`;
+
+           console.log('📅 [HISTORY] Convertendo data (CORRIGIDO):', {
+             original: entry.date,
+             originalISO: entry.date.toISOString(),
+             localDate: localDate,
+             localDateISO: localDate.toISOString(),
+             formatted: formattedDate
+           });
         
         return {
           id: entry._id,
