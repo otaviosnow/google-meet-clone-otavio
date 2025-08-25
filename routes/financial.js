@@ -639,17 +639,32 @@ router.get('/history', authenticateToken, async (req, res) => {
     }
     
     const response = {
-      entries: entries.map(entry => ({
-        id: entry._id,
-        date: entry.date,
-        grossRevenue: entry.grossRevenue,
-        chipCost: entry.chipCost,
-        additionalCost: entry.additionalCost,
-        adsCost: entry.adsCost,
-        totalExpenses: entry.totalExpenses,
-        netProfit: entry.netProfit,
-        notes: entry.notes
-      }))
+      entries: entries.map(entry => {
+        // Converter data para fuso horário local (Brasil)
+        const localDate = new Date(entry.date);
+        const year = localDate.getFullYear();
+        const month = String(localDate.getMonth() + 1).padStart(2, '0');
+        const day = String(localDate.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        console.log('📅 [HISTORY] Convertendo data:', {
+          original: entry.date,
+          localDate: localDate,
+          formatted: formattedDate
+        });
+        
+        return {
+          id: entry._id,
+          date: formattedDate,
+          grossRevenue: entry.grossRevenue,
+          chipCost: entry.chipCost,
+          additionalCost: entry.additionalCost,
+          adsCost: entry.adsCost,
+          totalExpenses: entry.totalExpenses,
+          netProfit: entry.netProfit,
+          notes: entry.notes
+        };
+      })
     };
     
     console.log('📤 [HISTORY] Resposta enviada com', response.entries.length, 'entradas');
