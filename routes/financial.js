@@ -648,8 +648,8 @@ router.get('/history', authenticateToken, async (req, res) => {
     
            const response = {
          entries: entries.map(entry => {
-           // Converter data para fuso horário local (Brasil) - CORRIGIDO
-           const localDate = new Date(entry.date.getTime() + (3 * 60 * 60 * 1000)); // Adicionar 3 horas para compensar UTC-3
+           // Converter data para fuso horário local (Brasil) - CORRIGIDO +24h
+           const localDate = new Date(entry.date.getTime() + (3 * 60 * 60 * 1000) + (24 * 60 * 60 * 1000)); // Adicionar 3 horas + 24 horas
            const year = localDate.getFullYear();
            const month = String(localDate.getMonth() + 1).padStart(2, '0');
            const day = String(localDate.getDate()).padStart(2, '0');
