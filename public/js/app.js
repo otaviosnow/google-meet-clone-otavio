@@ -26,7 +26,19 @@ function getCurrentDateString() {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const result = `${year}-${month}-${day}`;
+    
+    console.log('📅 [DATE] getCurrentDateString chamada:', {
+        now: now,
+        nowISO: now.toISOString(),
+        nowLocal: now.toLocaleDateString('pt-BR'),
+        year: year,
+        month: month,
+        day: day,
+        result: result
+    });
+    
+    return result;
 }
 
 // Função para converter data para formato YYYY-MM-DD (timezone local)
@@ -2830,6 +2842,8 @@ async function addQuickEntry(e) {
     
     // Usar data atual automaticamente
     const today = getCurrentDateString();
+    console.log('📅 [QUICK] Data para entrada rápida:', today);
+    
     const grossRevenue = parseFloat(document.getElementById('quickGrossRevenue').value) || 0;
     const chipCost = parseFloat(document.getElementById('quickChipCost').value) || 0;
     const additionalCost = parseFloat(document.getElementById('quickAdditionalCost').value) || 0;

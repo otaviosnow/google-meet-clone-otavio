@@ -13,11 +13,16 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// ===== CONFIGURAÇÃO DE TIMEZONE =====
+process.env.TZ = 'America/Sao_Paulo'; // Forçar timezone do Brasil
+
 // ===== LOGS INICIAIS =====
 console.log('🚀 VERSÃO COMPLETA - GOOGLE MEET FAKE SAAS');
 console.log('📅 Data/Hora:', new Date().toISOString());
+console.log('📅 Data/Hora Local:', new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
 console.log('📂 Diretório atual:', __dirname);
 console.log('📊 Porta:', PORT);
+console.log('🌍 Timezone:', process.env.TZ);
 
 // Verificar e criar diretório de uploads se necessário
 const fs = require('fs');
