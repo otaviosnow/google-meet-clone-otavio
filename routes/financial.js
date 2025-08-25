@@ -359,7 +359,7 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
     });
     
     // Verificar se já existe entrada para esta data
-    const searchDate = new Date(date);
+    const searchDate = new Date(date + 'T00:00:00.000Z'); // Forçar meia-noite UTC
     console.log('🔍 [ENTRADA] Procurando entrada existente para data:', searchDate);
     console.log('🔍 [ENTRADA] Data de busca ISO:', searchDate.toISOString());
     console.log('🔍 [ENTRADA] Data de busca local:', searchDate.toLocaleDateString('pt-BR'));
@@ -424,10 +424,18 @@ router.post('/entry', authenticateToken, entryValidation, handleValidationErrors
       goalProgress: 0 // Será calculado após salvar
     };
     
-    // Criar nova entrada
+    // Criar nova entrada com data corrigida para fuso horário local
+    const entryDate = new Date(date + 'T00:00:00.000Z'); // Forçar meia-noite UTC
+    console.log('📅 [ENTRADA] Data corrigida para salvamento:', {
+      original: date,
+      entryDate: entryDate,
+      entryDateISO: entryDate.toISOString(),
+      entryDateLocal: entryDate.toLocaleDateString('pt-BR')
+    });
+    
     const entry = new FinancialEntry({
       user: req.user._id,
-      date: new Date(date),
+      date: entryDate,
       grossRevenue: grossRevenue || 0,
       chipCost: chipCost || 0,
       additionalCost: additionalCost || 0,
