@@ -49,7 +49,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 300 * 1024 * 1024, // 300MB - otimizado para vídeos de 250MB
+    fileSize: 1024 * 1024 * 1024, // 1GB - sem limite prático
     files: 3 // Limitar a 3 arquivos por vez
   },
   fileFilter: function (req, file, cb) {
@@ -148,7 +148,7 @@ const handleMulterError = (error, req, res, next) => {
     
     switch (error.code) {
       case 'LIMIT_FILE_SIZE':
-        return res.status(400).json({ error: 'Arquivo muito grande. Máximo 300MB.' });
+        return res.status(400).json({ error: 'Arquivo muito grande. Máximo 1GB.' });
       case 'LIMIT_FILE_COUNT':
         return res.status(400).json({ error: 'Muitos arquivos. Máximo 3 arquivos.' });
       case 'LIMIT_UNEXPECTED_FILE':
@@ -227,7 +227,7 @@ router.get('/upload-info', authenticateToken, async (req, res) => {
     const userVideoCount = await Video.countDocuments({ user: req.user._id });
     
     res.json({
-      maxFileSize: '300MB',
+      maxFileSize: '1GB',
       maxFiles: 3,
       currentVideos: userVideoCount,
       maxVideos: 3,

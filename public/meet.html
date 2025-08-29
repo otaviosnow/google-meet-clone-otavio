@@ -6,7 +6,8 @@
     <title>CALLX</title>
     <link rel="stylesheet" href="/css/meet.css">
     
-    <!-- Proteções contra inspeção -->
+    <!-- Proteções contra inspeção - TEMPORARIAMENTE DESABILITADAS PARA GRAVAÇÃO -->
+    <!-- 
     <style>
         /* Desabilitar seleção de texto */
         * {
@@ -33,6 +34,7 @@
             user-drag: none;
         }
     </style>
+    -->
 </head>
 <body>
     <!-- Tela 1: Nome do Participante -->
@@ -202,58 +204,12 @@
 
     <script src="/js/meet.js"></script>
     
-    <!-- Proteções JavaScript contra inspeção -->
+    <!-- Proteções JavaScript - Apenas clique direito bloqueado -->
     <script>
         // Bloquear clique direito
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
-        });
-        
-        // Bloquear F12
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || 
-                (e.ctrlKey && e.shiftKey && e.key === 'J') || (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-        
-        // Bloquear DevTools (detecção básica)
-        function detectDevTools() {
-            const threshold = 160;
-            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-            
-            if (widthThreshold || heightThreshold) {
-                document.body.innerHTML = '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;"><h1>🚫 Acesso Negado</h1><p>Ferramentas de desenvolvedor não são permitidas.</p></div>';
-            }
-        }
-        
-        // Verificar periodicamente
-        setInterval(detectDevTools, 1000);
-        
-        // Bloquear console
-        console.log = function() {};
-        console.warn = function() {};
-        console.error = function() {};
-        console.info = function() {};
-        
-        // Bloquear alertas de debug
-        window.alert = function() {};
-        
-        // Desabilitar algumas teclas de atalho
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+Shift+C (inspecionar elemento)
-            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-                e.preventDefault();
-                return false;
-            }
-            // Ctrl+Shift+R (recarregar ignorando cache)
-            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
-                e.preventDefault();
-                return false;
-            }
         });
         
         // Bloquear arrastar elementos
