@@ -2425,20 +2425,11 @@ async function handleCreateMeeting(e) {
         title: title
     });
     
-    // Criar link da nossa página de reunião fake
-    const meetingId = generateMeetingId();
-    const meetLink = `${window.location.origin}/meet/${meetingId}?video=${encodeURIComponent(videoUrl)}`;
-    
-    console.log('🔗 Link da reunião criado:', meetLink);
-    
     try {
         // Salvar reunião no banco de dados
-    const data = {
+        const data = {
             title: title,
-            videoId: videoId,
-            meetingId: meetingId,
-            meetLink: meetLink,
-            createdBy: currentUser._id
+            videoId: videoId
         };
         
         const response = await fetch(`${API_BASE_URL}/meetings`, {
@@ -2464,8 +2455,10 @@ async function handleCreateMeeting(e) {
             createMeetingModal.style.display = 'none';
             createMeetingForm.reset();
             
-            // Copiar link para clipboard
-            copyMeetingLink(meetLink);
+            // Copiar link para clipboard usando o link gerado pelo backend
+            if (result.meeting && result.meeting.meetLink) {
+                copyMeetingLink(result.meeting.meetLink);
+            }
             
             // Recarregar reuniões
             loadMeetings();
